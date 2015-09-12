@@ -1,13 +1,11 @@
-#ifndef ABSTRACT_TAPE_INTERFACE_H_
-#define ABSTRACT_TAPE_INTERFACE_H_
+#ifndef ABSTRACT_TAPE_H_
+#define ABSTRACT_TAPE_H_
 
 namespace ReverseAD {
 
 template <typename Type>
-class AbstractTapeInterface {
+class AbstractTape {
  public:  
-  AbstractTapeInterface() {};
-
   // put a Type data to the tape
   virtual void put(Type) = 0;
 
@@ -18,7 +16,7 @@ class AbstractTapeInterface {
   virtual Type get_next_f() = 0;
 
   // The new feature
-  virtual void rewrite_curr_f() = 0;
+  virtual void rewrite_curr_f(Type) = 0;
 
   // reverse sweep
   virtual void init_reverse() = 0;
@@ -29,4 +27,4 @@ class AbstractTapeInterface {
 
 } // namespace ReverseAD
 
-#endif // ABSTRACT_TAPE_INTERFACE_H_
+#endif // ABSTRACT_TAPE_H_
