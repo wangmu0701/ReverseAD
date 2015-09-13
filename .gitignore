@@ -8,6 +8,7 @@
 *.in
 *.bak
 *~
+.libs
 .deps
 Makefile
 Makefile.in

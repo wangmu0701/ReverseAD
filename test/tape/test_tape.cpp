@@ -14,7 +14,7 @@ int main() {
   tape->init_forward();
   while(tape->has_next_f()) {
     if (tape->get_next_f() != i) {TEST_FAIL}
-    std::cout << "forward: " << i << std::endl;
+//    std::cout << "forward: " << i << std::endl;
     i++;
     tape->rewrite_curr_f(i);
   }
@@ -23,10 +23,10 @@ int main() {
   tape->init_reverse();
   while(tape->has_next_r()) {
     if (tape->get_next_r() != i) {TEST_FAIL}
-    std::cout << "reverse: " << i << std::endl;
+//    std::cout << "reverse: " << i << std::endl;
     i--;
   }
 
-  std::cout << "TEST PASS!" << std::endl;
+  std::cout << "TAPE TEST PASS!" << std::endl;
 }
 

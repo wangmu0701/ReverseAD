@@ -14,8 +14,10 @@ AC_PROG_CXX
 AC_CONFIG_FILES(Makefile
                 src/Makefile
                 src/tape/Makefile
+                src/trace/Makefile
                 test/Makefile
                 test/tape/Makefile
+                test/trace/Makefile
 )
 
 AC_OUTPUT
