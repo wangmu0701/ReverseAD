@@ -12,6 +12,7 @@
 .deps
 test_tape
 test_trace
+test_base_adouble
 Makefile
 Makefile.in
 m4/*

@@ -1,8 +1,9 @@
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = tape trace
+SUBDIRS = tape trace core
 
 lib_LTLIBRARIES = libreversead.la
 libreversead_la_LIBADD = tape/libreverseadtape.la
 libreversead_la_LIBADD += trace/libreverseadtrace.la
-libreversead_la_SOURCES = core/reversead.hpp dummy.cpp
+libreversead_la_LIBADD += core/libreverseadcore.la
+libreversead_la_SOURCES = dummy.cpp
