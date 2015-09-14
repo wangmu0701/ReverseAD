@@ -15,24 +15,24 @@ class TrivialTrace : public AbstractTrace {
   ~TrivialTrace();
 
   // Write
-  void putOp(opbyte opcode);
-  void putLoc(locint loc);
-  void putVal(double val);
+  inline void putOp(opbyte opcode);
+  inline void putLoc(locint loc);
+  inline void putVal(double val);
   
   // forward sweep
-  void init_forward();
-  void end_forward();
-  opbyte get_next_op_f();
-  locint get_next_loc_f();
-  double get_next_val_f();
-  void rewrite_curr_loc_f(locint loc);
+  inline void init_forward();
+  inline void end_forward();
+  inline opbyte get_next_op_f();
+  inline locint get_next_loc_f();
+  inline double get_next_val_f();
+  inline void rewrite_curr_loc_f(locint loc);
 
   // reverse sweep
-  void init_reverse();
-  void end_reverse();
-  opbyte get_next_op_r();
-  locint get_next_loc_r();
-  double get_next_val_r();
+  inline void init_reverse();
+  inline void end_reverse();
+  inline opbyte get_next_op_r();
+  inline locint get_next_loc_r();
+  inline double get_next_val_r();
  
  private:
   TrivialTape<opbyte> *op_tape;

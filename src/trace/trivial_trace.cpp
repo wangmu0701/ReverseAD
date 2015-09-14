@@ -18,65 +18,65 @@ TrivialTrace::~TrivialTrace() {
   delete val_tape;
 }
 
-void TrivialTrace::putOp(opbyte opcode) {
+inline void TrivialTrace::putOp(opbyte opcode) {
   op_tape->put(opcode);
 }
-void TrivialTrace::putLoc(locint loc) {
+inline void TrivialTrace::putLoc(locint loc) {
   loc_tape->put(loc);
 }
-void TrivialTrace::putVal(double val) {
+inline void TrivialTrace::putVal(double val) {
   val_tape->put(val);
 }
 
-void TrivialTrace::init_forward() {
+inline void TrivialTrace::init_forward() {
   op_tape->init_forward();
   loc_tape->init_forward();
   val_tape->init_forward();
 }
 
-void TrivialTrace::end_forward() {
+inline void TrivialTrace::end_forward() {
   op_tape->end_forward();
   loc_tape->end_forward();
   val_tape->end_forward();
 }
 
-opbyte TrivialTrace::get_next_op_f() {
+inline opbyte TrivialTrace::get_next_op_f() {
   return op_tape->get_next_f();
 }
 
-void TrivialTrace::rewrite_curr_loc_f(locint loc) {
+inline void TrivialTrace::rewrite_curr_loc_f(locint loc) {
   loc_tape->rewrite_curr_f(loc);
 }
 
-locint TrivialTrace::get_next_loc_f() {
+inline locint TrivialTrace::get_next_loc_f() {
   return loc_tape->get_next_f();
 }
 
-double TrivialTrace::get_next_val_f() {
+inline double TrivialTrace::get_next_val_f() {
   return val_tape->get_next_f();
 }
 
-void TrivialTrace::init_reverse() {
+inline void TrivialTrace::init_reverse() {
   op_tape->init_reverse();
   loc_tape->init_reverse();
   val_tape->init_reverse();
 }
 
-void TrivialTrace::end_reverse() {
+inline void TrivialTrace::end_reverse() {
   op_tape->end_reverse();
   loc_tape->end_reverse();
   val_tape->end_reverse();
 }
 
-opbyte TrivialTrace::get_next_op_r() {
+inline opbyte TrivialTrace::get_next_op_r() {
   return op_tape->get_next_r();
 }
 
-locint TrivialTrace::get_next_loc_r() {
+inline locint TrivialTrace::get_next_loc_r() {
   return loc_tape->get_next_r();
 }
 
-double TrivialTrace::get_next_val_r() {
+inline double TrivialTrace::get_next_val_r() {
   return val_tape->get_next_r();
 }
 
