@@ -1,7 +1,9 @@
 #ifndef TRIVIAL_TAPE_H_
 #define TRIVIAL_TAPE_H_
 
+
 #include <vector>
+#include <iostream>
 #include "abstract_tape.hpp"
 
 #define INITIAL_TAPE_VECTOR_SIZE 65536
@@ -25,6 +27,8 @@ class TrivialTape : public AbstractTape<Type> {
   void end_reverse();
   bool has_next_r();
   Type get_next_r();
+
+  void dump_tape();
 
  private:
   std::vector<Type> data_;
@@ -92,6 +96,14 @@ Type TrivialTape<Type>::get_next_r() {
   return retval;
 }
 
+template <typename Type>
+void TrivialTape<Type>::dump_tape() {
+  std::cout << "[" << data_.size() << "]";
+  for(int i = 0; i < data_.size(); i++) {
+    std::cout << " " << data_[i];
+  }
+  std::cout << std::endl;
+}
 } // namespace ReverseAD
 
 #endif // TRIVIAL_TAPE_H_

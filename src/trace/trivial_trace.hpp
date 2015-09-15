@@ -15,9 +15,9 @@ class TrivialTrace : public AbstractTrace {
   ~TrivialTrace();
 
   // Write
-  inline void putOp(opbyte opcode);
-  inline void putLoc(locint loc);
-  inline void putVal(double val);
+  inline void put_op(opbyte opcode);
+  inline void put_loc(locint loc);
+  inline void put_val(double val);
   
   // forward sweep
   inline void init_forward();
@@ -33,7 +33,10 @@ class TrivialTrace : public AbstractTrace {
   inline opbyte get_next_op_r();
   inline locint get_next_loc_r();
   inline double get_next_val_r();
- 
+
+  // for debug
+  inline void dump_trace();
+   
  private:
   TrivialTape<opbyte> *op_tape;
   TrivialTape<locint> *loc_tape;

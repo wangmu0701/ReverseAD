@@ -13,9 +13,9 @@ int main() {
   locint loc = 0;
   double val = 0.0;
   for (int i=0; i<10; i++) {
-    trace->putOp(op++);
-    trace->putLoc(loc++);
-    trace->putVal(val++);
+    trace->put_op(op++);
+    trace->put_loc(loc++);
+    trace->put_val(val++);
   }
   trace->init_forward();
   op = 0; loc = 0; val = 0.0;

@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "src/core/reversead.hpp"
 #include "src/tape/abstract_tape.hpp"
 #include "src/tape/trivial_tape.hpp"
@@ -18,13 +20,13 @@ TrivialTrace::~TrivialTrace() {
   delete val_tape;
 }
 
-inline void TrivialTrace::putOp(opbyte opcode) {
+inline void TrivialTrace::put_op(opbyte opcode) {
   op_tape->put(opcode);
 }
-inline void TrivialTrace::putLoc(locint loc) {
+inline void TrivialTrace::put_loc(locint loc) {
   loc_tape->put(loc);
 }
-inline void TrivialTrace::putVal(double val) {
+inline void TrivialTrace::put_val(double val) {
   val_tape->put(val);
 }
 
@@ -78,6 +80,15 @@ inline locint TrivialTrace::get_next_loc_r() {
 
 inline double TrivialTrace::get_next_val_r() {
   return val_tape->get_next_r();
+}
+
+inline void TrivialTrace::dump_trace() {
+  std::cout << "Op tape:" << std::endl;
+  op_tape->dump_tape();
+  std::cout << "Loc tape:" << std::endl;
+  loc_tape->dump_tape();
+  std::cout << "Val tape:" << std::endl;
+  val_tape->dump_tape();
 }
 
 } // namespace ReverseAD

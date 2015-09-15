@@ -23,6 +23,9 @@ class AbstractTape {
   virtual void end_reverse() = 0;
   virtual bool has_next_r() = 0;
   virtual Type get_next_r() = 0;  
+  
+  // for debug
+  virtual void dump_tape() = 0;
 };
 
 } // namespace ReverseAD
