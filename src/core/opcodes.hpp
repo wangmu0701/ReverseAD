@@ -4,6 +4,10 @@
 namespace ReverseAD {
 
 enum OPCODES {
+  start_of_tape,
+  end_of_tape,
+  assign_ind,
+  assign_dep,
   assign_a,
   assign_d,
   plus_a_a,

@@ -37,6 +37,17 @@ class BaseActive {
     trace_put(assign_a, this->loc, other.loc);
   }
 
+  BaseActive<Base>& operator <<= (Base val) {
+    this->val = val;
+    trace_put(assign_ind, this->loc, val);
+    return *this;
+  }
+  BaseActive<Base>& operator >>= (Base& val) {
+    val = this->val;
+    trace_put(assign_dep, this->loc, val);
+    return *this;
+  }
+
   // value assignment
   BaseActive<Base>& operator = (Base val) {
     this->val = val;
