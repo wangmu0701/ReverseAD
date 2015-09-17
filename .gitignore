@@ -14,6 +14,7 @@ test_tape
 test_trace
 test_base_adouble
 test_base_function_replay
+test_base_reverse_adjoint
 Makefile
 Makefile.in
 m4/*

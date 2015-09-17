@@ -6,6 +6,7 @@
 #include "src/core/reversead.hpp"
 #include "src/core/opcodes.hpp"
 #include "src/trace/abstract_trace.hpp"
+#include "src/tape/abstract_tape.hpp"
 
 using std::map;
 
@@ -19,6 +20,13 @@ class BaseFunctionReplay {
   }
 
   Base* replay(Base* ind_val, int ind_num, int dep_num) {
+    return replay(ind_val, ind_num, dep_num, nullptr);
+  }
+
+  Base* replay(Base* ind_val, int ind_num, int dep_num, AbstractTape<Base>* tape) {
+    if (tape) {
+      tape->clear();
+    }
     Base* dep_val = new Base[dep_num];
     map<locint, Base> val_map;
     trace->init_forward();
@@ -79,6 +87,7 @@ class BaseFunctionReplay {
           arg2 = get_next_arg();
           res = get_next_res();
           val_map[res] = val_map[arg1] * val_map[arg2];
+          write_intermediate_tape(tape, val_map[arg1], val_map[arg2]);
           break;
         case mult_d_a:
           arg1 = get_next_arg();
@@ -97,7 +106,18 @@ class BaseFunctionReplay {
  private:
   virtual inline locint get_next_res() {return trace->get_next_loc_f();}
   virtual inline locint get_next_arg() {return trace->get_next_loc_f();}
+  virtual inline void write_intermediate_tape(AbstractTape<Base>* tape, const Base& val1) {
+    if (tape) {
+      tape->put(val1);
+    }
+  }
   AbstractTrace* trace;
+  virtual inline void write_intermediate_tape(AbstractTape<Base>* tape, const Base& val1, const Base& val2) {
+    if (tape) {
+      tape->put(val1);
+      tape->put(val2);
+    }
+  }
 };
 
 } // namespace ReverseAD

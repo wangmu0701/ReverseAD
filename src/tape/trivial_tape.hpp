@@ -14,6 +14,8 @@ template <typename Type>
 class TrivialTape : public AbstractTape<Type> {
  public:
   TrivialTape();
+
+  void clear();
   void put(Type data);
   
   void init_forward();
@@ -41,6 +43,10 @@ TrivialTape<Type>::TrivialTape() {
   data_.reserve(INITIAL_TAPE_VECTOR_SIZE);
 }
 
+template <typename Type>
+void TrivialTape<Type>::clear() {
+  data_.clear();
+}
 template <typename Type>
 void TrivialTape<Type>::put(Type data) {
   data_.push_back(data);
@@ -99,7 +105,7 @@ Type TrivialTape<Type>::get_next_r() {
 template <typename Type>
 void TrivialTape<Type>::dump_tape() {
   std::cout << "[" << data_.size() << "]";
-  for(int i = 0; i < data_.size(); i++) {
+  for(size_t i = 0; i < data_.size(); i++) {
     std::cout << " " << data_[i];
   }
   std::cout << std::endl;

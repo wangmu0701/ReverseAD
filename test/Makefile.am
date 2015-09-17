@@ -1,4 +1,4 @@
-SUBDIRS = tape trace core
+SUBDIRS = tape trace core algorithm
 
 test:
 	./tape/test_tape

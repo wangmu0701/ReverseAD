@@ -18,10 +18,12 @@ AC_MSG_RESULT($ac_reversead_cxxflags)
 AC_CONFIG_FILES(Makefile
                 src/Makefile
                 src/core/Makefile
+                src/algorithm/Makefile
                 src/tape/Makefile
                 src/trace/Makefile
                 test/Makefile
                 test/core/Makefile
+                test/algorithm/Makefile
                 test/tape/Makefile
                 test/trace/Makefile
 )
