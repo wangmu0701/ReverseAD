@@ -6,24 +6,34 @@ namespace ReverseAD {
 template <typename LocType, typename Base>
 class AbstractAdjoint {
  public:
-  class iterator {
+  class enumerator {
    public:
-    virtual ~iterator() {};
-    virtual bool reset() = 0;
+    // dummy copy constructor
+    enumerator(const enumerator& other) {
+    }
+    virtual ~enumerator() {};
+    virtual void operator =
+      (const enumerator& other) = 0;
+
+    virtual bool has_next() = 0;
     virtual bool get_next(LocType& x, Base& w) = 0;
-    virtual typename AbstractAdjoint<LocType, Base>::iterator* copy_iter() = 0;
   };
+
+  // modify
+  virtual void increase(LocType x, Base v) = 0;
+  virtual Base&& get_and_erase(LocType x) = 0;
+  virtual Base& operator[] (LocType x) = 0;
+  virtual void erase(LocType x) = 0;
+  // query
+  virtual int get_size() const = 0;
   virtual bool has_live(LocType target) const = 0;
+  virtual void debug() const = 0;
+
+  // serialization
   virtual int byte_size() const = 0;
   virtual void write_to_byte(char* buf) const = 0;
-  virtual void increase(T x, double v) = 0;
-  virtual Base&& get_and_erase(LocType x) = 0;
-  virtual Base&& get(LocType x) = 0; 
-  virtual int get_size() const = 0;
-  virtual void debug() const = 0;
-  virtual typename VectorGraph<LocType, Base>::iterator* get_iterator() = 0;
 };
 
 } // namespace ReverseAD
 
-#endif // ABSTRACT_ADJOINT_H_
+#endif // ABSTRACT_ADJOINT_H_ 

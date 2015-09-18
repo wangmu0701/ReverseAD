@@ -17,6 +17,15 @@ int main() {
   b <<= 2;
   c <<= 3;
   d <<= 4;
+/*
+  d = a+b;
+  d = c+d;
+  adouble x(a+b+c+d);
+  double vx;
+  x >>= vx;
+  ReverseAD::AbstractTrace* trace = ReverseAD::trace_off();
+  std::cout << "x = " << x.getVal() << std::endl;
+*/
   d = d + 4;
   d = 4 + d;  // 12
   adouble x(a+b+c+d); // 18

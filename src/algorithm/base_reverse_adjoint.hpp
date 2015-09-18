@@ -9,6 +9,8 @@
 #include "src/core/opcodes.hpp"
 #include "src/trace/abstract_trace.hpp"
 #include "src/tape/abstract_tape.hpp"
+//#include "src/algorithm/abstract_adjoint.hpp"
+#include "src/algorithm/trivial_adjoint.hpp"
 
 using std::vector;
 using std::map;
@@ -18,7 +20,8 @@ namespace ReverseAD {
 template <typename Base>
 class BaseReverseAdjoint {
  public:
-  typedef map<locint, Base> type_adjoint;
+  //typedef map<locint, Base> type_adjoint;
+  typedef TrivialAdjoint<locint, Base> type_adjoint;
 
   BaseReverseAdjoint(AbstractTrace* trace, AbstractTape<Base>* tape) {
     this->trace = trace;
@@ -70,43 +73,48 @@ class BaseReverseAdjoint {
           res = trace->get_next_loc_r();
           coval = trace->get_next_val_r();
           adjoint_vals[dep_count][res] = adjoint_dep[dep_count];
-          //std::cout << "a[" << res << "] = " << adjoint_val[dep_count][res] << std::endl;
+          std::cout << "a[" << res << "] = " << adjoint_vals[dep_count][res] << std::endl;
           dep_count++; 
           break;
         case assign_d:
           res = trace->get_next_loc_r();
           coval = trace->get_next_val_r();
-          for (type_adjoint adjoint : adjoint_vals) {
+          for (type_adjoint& adjoint : adjoint_vals) {
             adjoint.erase(res);
           }
           break;
         case assign_a:
           res = trace->get_next_loc_r();
           arg1 = trace->get_next_loc_r();
-          for (type_adjoint adjoint : adjoint_vals) {
+          std::cout << "assign_a : " << res << " = " << arg1 << std::endl;
+          for (type_adjoint& adjoint : adjoint_vals) {
             Base w = adjoint[res];
             adjoint.erase(res);
             adjoint[arg1] += w;
-            //std::cout << "w = " << w << std::endl;
-            //std::cout << "a[" << arg1 << "] = " << adjoint_val[i][arg1] << std::endl;
+            std::cout << "res = " << res << " w = " << w << std::endl;
+            std::cout << "a[" << arg1 << "] = " << adjoint[arg1] << std::endl;
           }
           break;
         case plus_a_a:
           res = trace->get_next_loc_r();
           arg2 = trace->get_next_loc_r();
           arg1 = trace->get_next_loc_r();
-          for (type_adjoint adjoint : adjoint_vals) {
+          std::cout << "plus_a_a : " << res << " = " << arg1 << " + " << arg2<< std::endl;
+          for (type_adjoint& adjoint : adjoint_vals) {
             Base w = adjoint[res];
             adjoint.erase(res);
             adjoint[arg1] += w;
             adjoint[arg2] += w;
+            std::cout << "res = " << res << " w = " << w << std::endl;
+            std::cout << "a[" << arg1 << "] = " << adjoint[arg1] << std::endl;
+            std::cout << "a[" << arg2 << "] = " << adjoint[arg2] << std::endl;
           }
           break;
         case plus_d_a:
           res = trace->get_next_loc_r();
           coval = trace->get_next_val_r();
           arg1 = trace->get_next_loc_r();
-          for (type_adjoint adjoint : adjoint_vals) {
+          for (type_adjoint& adjoint : adjoint_vals) {
             Base w = adjoint[res];
             adjoint.erase(res);
             adjoint[arg1] += w;
@@ -118,7 +126,7 @@ class BaseReverseAdjoint {
           arg1 = trace->get_next_loc_r();
           arg2_val = tape->get_next_r();
           arg1_val = tape->get_next_r();
-          for (type_adjoint adjoint : adjoint_vals) {
+          for (type_adjoint& adjoint : adjoint_vals) {
             Base w = adjoint[res];
             adjoint.erase(res);
             adjoint[arg1] += w * arg2_val;
@@ -129,7 +137,7 @@ class BaseReverseAdjoint {
           res = trace->get_next_loc_r();
           arg1 = trace->get_next_loc_r();
           coval = trace->get_next_val_r();
-          for (type_adjoint adjoint : adjoint_vals) {
+          for (type_adjoint& adjoint : adjoint_vals) {
             Base w = adjoint[res];
             adjoint.erase(res);
             adjoint[arg1] += w * coval;

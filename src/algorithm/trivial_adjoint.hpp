@@ -3,7 +3,7 @@
 
 #include <map>
 
-#include "VectorGraph.h"
+#include "abstract_adjoint.hpp"
 
 namespace ReverseAD {
 
@@ -18,8 +18,9 @@ class TrivialAdjoint : public AbstractAdjoint<LocType, Base> {
   ~TrivialAdjoint();
 
   void increase(LocType x, Base v);
-  Base get_and_erase(LocType x);
-  Base get(LocType x);
+  Base&& get_and_erase(LocType x);
+  Base& operator[] (LocType x);
+  void erase(LocType x);
   int get_size() const;
 
   bool has_live(LocType target) const;
@@ -27,115 +28,116 @@ class TrivialAdjoint : public AbstractAdjoint<LocType, Base> {
   void write_to_byte(char* buf) const;
   void debug() const;
 
-  class iterator : public AbstractAdjoint<LocType, Base>::iterator {
+  class enumerator : public AbstractAdjoint<LocType, Base>::enumerator {
    public:
-    iterator(TrivialAdjoint<LocType>::iterator* c_iter):_data(c_iter->_data),
-        iter(c_iter->iter) {};
-    iterator(std::map<LocType, Base>* _data_p):_data(_data_p) {};
-    virtual ~iterator();
-    bool reset();
-    bool get_next(LocType& x, Base& w);
-    typename TrivialAdjoint<LocType, Base>::iterator* copy_iter();
+    enumerator(const enumerator& other) {
+      this->_data = other._data;
+      this->_iter = other._iter;
+    }
+    ~enumerator() {};
+    void operator = (const typename AbstractAdjoint<LocType, Base>::enumerator& other) {
+      TrivialAdjoint<LocType, Base>::enumerator* dp =
+        dynamic_cast<TrivialAdjoint<LocType, Base>::enumerator*>(&other);
+      if (dp) {
+        this->_data = dp->_data;
+        this->_iter = dp->_iter;
+      } else {
+        std::cout << "TrivialAdjoint can not be assigned"
+                  << " from another Adjoint impelmentation." << std::endl;
+      }
+    }
+    bool has_next() {
+      return _iter != _data.end();
+    }
+    bool get_next(LocType& x, Base& w) {
+      x = _iter->first;
+      w = _iter->second;
+      _iter++;
+      return _iter != _data->end();;
+    }
+
    private:
-    const std::map<LocType, Base>* const _data;
-    typename std::map<LocType, Base>::const_iterator iter;
+    enumerator(const typename std::map<LocType, Base>::const_iterator* _data) {
+      this->_data = _data;
+      this->_iter = _data.begin();
+    }
+
+    const typename std::map<LocType, Base>* const _data;
+    typename std::map<LocType, Base>::const_iterator _iter;
+   
+   friend class TrivialAdjoint<LocType, Base>;
   };
 
-  typename VectorGraph<T>::iterator* get_iterator();
+  typename TrivialAdjoint<LocType, Base>::enumerator get_enumerator();
 
  private:
-  std::map<LocType, Base> data;
+  std::map<LocType, Base> _data;
 };
 
-template <typename LocType, typename Base>
-typename TrivialAdjoint<LocType, Base>::iterator* TrivialAdjoint<LocType, Base>::iterator::copy_iter() {
-  return new TrivialAdjoint<LocType, Base>::iterator(this);
-}
 
 template <typename LocType, typename Base>
-typename VectorGraph<T>::iterator* TrivialAdjoint<LocType, Base>::get_iterator() {
-  typename VectorGraph<T>::iterator* ret = new TrivialAdjoint<LocType, Base>::iterator(&data);
-  return ret;
-}
-
-template <typename LocType, typename Base>
-TrivialAdjoint<LocType, Base>::iterator::~iterator() {
-
-}
-
-template <typename LocType, typename Base>
-bool TrivialAdjoint<LocType, Base>::iterator::reset() {
-  iter = _data->begin();
-  if (iter == _data->end()) {
-    return false;
-  }
-  return true;
-}
-
-template <typename LocType, typename Base>
-bool TrivialAdjoint<LocType, Base>::iterator::get_next(T&x, double& w){
-  x = iter->first;
-  w = iter->second;
-  ++iter;
-  if (iter == _data->end()) {
-    return false;
-  }
-  return true;
+typename TrivialAdjoint<LocType, Base>::enumerator TrivialAdjoint<LocType, Base>::get_enumerator() {
+  TrivialAdjoint<LocType, Base>::enumerator enumtor(&_data);
+  return enumtor;
 }
 
 template <typename LocType, typename Base>
 TrivialAdjoint<LocType, Base>::TrivialAdjoint() {
-  data.clear();
+  _data.clear();
 }
 
 // L-value c-tor
 template <typename LocType, typename Base>
-TrivialAdjoint<LocType, Base>::TrivialAdjoint(std::map<T, double>& source) {
-  std::cout << "VectorGraph (L-ctor)" << std::endl;
-  data = source;
+TrivialAdjoint<LocType, Base>::TrivialAdjoint(std::map<LocType, Base>& source) {
+  std::cout << "TrivialAdjoint (L-ctor)" << std::endl;
+  _data = source;
 }
 
 // R-value c-tor
 template <typename LocType, typename Base>
-TrivialAdjoint<LocType, Base>::TrivialAdjoint(std::map<T, double>&& source) {
-//  std::cout << "VectorGraph (R-ctor)" << std::endl;
-  data = std::move(source);
+TrivialAdjoint<LocType, Base>::TrivialAdjoint(std::map<LocType, Base>&& source) {
+  std::cout << "TrivialAdjoint (R-ctor)" << std::endl;
+  _data = std::move(source);
 }
 
 // D-tor
 template <typename LocType, typename Base>
 TrivialAdjoint<LocType, Base>::~TrivialAdjoint() {
-  data.clear();
 }
 
 
 template <typename LocType, typename Base>
 void TrivialAdjoint<LocType, Base>::increase(LocType x, Base v) {
-  data[x]+=v;
+  _data[x]+=v;
 }
 
 template <typename LocType, typename Base>
-Base TrivialAdjoint<LocType, Base>::get_and_erase(LocType x) {
-  Base ret = std::move(data[x]);
-  data.erase(x);
-  return ret;
+Base&& TrivialAdjoint<LocType, Base>::get_and_erase(LocType x) {
+  Base ret = std::move(_data[x]);
+  _data.erase(x);
+  return std::move(ret);
 }
 
 template <typename LocType, typename Base>
-Base TrivialAdjoint<LocType, Base>::get(T x) {
-  return data[x];
+void TrivialAdjoint<LocType, Base>::erase(LocType x) {
+  _data.erase(x);
+}
+
+template <typename LocType, typename Base>
+Base& TrivialAdjoint<LocType, Base>::operator [] (LocType x) {
+  return _data[x];
 }
 
 template <typename LocType, typename Base>
 int TrivialAdjoint<LocType, Base>::get_size() const {
-  return data.size();
+  return _data.size();
 }
 
 template <typename LocType, typename Base>
 void TrivialAdjoint<LocType, Base>::debug() const {
   typename std::map<LocType, Base>::const_iterator t_iter;
-  t_iter = data.begin();
-  while(t_iter != data.end()) {
+  t_iter = _data.begin();
+  while(t_iter != _data.end()) {
     std::cout << "A[" << t_iter->first << "]=" << t_iter->second << std::endl;
     ++t_iter;
   }
@@ -143,19 +145,19 @@ void TrivialAdjoint<LocType, Base>::debug() const {
 
 template <typename LocType, typename Base>
 int TrivialAdjoint<LocType, Base>::byte_size() const {
-  return data.size() * (sizeof(LocType) + sizeof(Base)) + sizeof(int);
+  return _data.size() * (sizeof(LocType) + sizeof(Base)) + sizeof(int);
 }
 
 template <typename LocType, typename Base>
 void TrivialAdjoint<LocType, Base>::write_to_byte(char* buf) const {
   char* p = buf;
-  *((int*)p) = data.size();
+  *((int*)p) = _data.size();
   p += sizeof(int);
- typename std::map<LocType, Base>::const_iterator t_iter;
-  t_iter = data.begin();
-  while(t_iter != data.end()) {
+  typename std::map<LocType, Base>::const_iterator t_iter;
+  t_iter = _data.begin();
+  while(t_iter != _data.end()) {
     *((LocType*)p) = t_iter->first;
-    p += sizeof(T);
+    p += sizeof(LocType);
     *((Base*)p) = t_iter->second;
     p += sizeof(Base);
     ++t_iter;
@@ -164,7 +166,7 @@ void TrivialAdjoint<LocType, Base>::write_to_byte(char* buf) const {
 
 template <typename LocType, typename Base>
 TrivialAdjoint<LocType, Base>::TrivialAdjoint(char* buf) {
-  data.clear();
+  _data.clear();
   char* p = buf;
   LocType loc;
   Base w;
@@ -175,16 +177,13 @@ TrivialAdjoint<LocType, Base>::TrivialAdjoint(char* buf) {
     p += sizeof(LocType);
     w = *((Base*)p);
     p += sizeof(Base);
-    data[loc] = w;
+    _data[loc] = w;
   }
 }
 
 template <typename LocType, typename Base>
 bool TrivialAdjoint<LocType, Base>::has_live(LocType target) const {
-  if (data.find(target) != data.end()) {
-    return true;
-  }
-  return false;
+  return _data.find(target) != _data.end();
 }
 
 } // namespace ReverseAD
