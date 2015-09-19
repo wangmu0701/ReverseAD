@@ -3,15 +3,15 @@
 
 
 namespace ReverseAD {
-  class AbstractTrace;
+
+  class TrivialTrace;
 
   typedef unsigned int opbyte;
   typedef unsigned int locint;
 
   void trace_on();
   locint get_next_loc();
-  AbstractTrace* trace_off();
-  void trace_done(AbstractTrace* trace);
+  TrivialTrace* trace_off();
   
   void trace_put(opbyte, locint, locint);
   void trace_put(opbyte, locint, locint, locint);

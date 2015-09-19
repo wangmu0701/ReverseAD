@@ -5,6 +5,7 @@
 #include "src/algorithm/base_function_replay.hpp"
 #include "src/algorithm/base_reverse_adjoint.hpp"
 #include "src/trace/abstract_trace.hpp"
+#include "src/trace/trivial_trace.hpp"
 #include "src/tape/trivial_tape.hpp"
 
 //using namespace ReverseAD;

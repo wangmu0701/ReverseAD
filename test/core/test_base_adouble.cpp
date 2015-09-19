@@ -2,7 +2,7 @@
 
 #include "src/core/base_active.hpp"
 #include "src/core/reversead.hpp"
-#include "src/trace/abstract_trace.hpp"
+#include "src/trace/trivial_trace.hpp"
 
 //using namespace ReverseAD;
 //typedef BaseActive<double> adouble;
@@ -21,7 +21,7 @@ int main() {
   y = y * 2.0; // 36
   x = 2.0 * x;  // 36
   adouble z = x + y; // 72
-  ReverseAD::AbstractTrace* trace = ReverseAD::trace_off();
+  ReverseAD::TrivialTrace* trace = ReverseAD::trace_off();
   std::cout << "z = " << z.getVal() << std::endl;  
   trace->dump_trace();
 } 

@@ -2,12 +2,11 @@
 
 #include "src/core/reversead.hpp"
 #include "src/core/opcodes.hpp"
-#include "src/trace/abstract_trace.hpp"
 #include "src/trace/trivial_trace.hpp"
 
 namespace ReverseAD {
 
-  AbstractTrace *global_trace;
+  TrivialTrace* global_trace;
   bool is_tracing = false;
   locint curr_loc = 0;
   void trace_on() {
@@ -21,13 +20,10 @@ namespace ReverseAD {
     return curr_loc++;
   }
 
-  AbstractTrace* trace_off() {
+  TrivialTrace* trace_off() {
     global_trace->put_op(end_of_tape);
     is_tracing = false;
     return global_trace;
-  }
-  void trace_done(AbstractTrace* trace) {
-    delete trace;
   }
 
   void trace_put(opbyte op, locint res, locint arg) {
