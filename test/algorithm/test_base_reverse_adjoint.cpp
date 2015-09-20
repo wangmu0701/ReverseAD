@@ -40,15 +40,13 @@ int main() {
   std::cout << "z = " << z.getVal() << std::endl;
   ReverseAD::BaseFunctionReplay<double> replayer(trace);
   double ind[4] = {1, 2, 3, 4};
-  ReverseAD::TrivialTape<double> tape;
-  double* dep = replayer.replay(ind, 4, 1, &tape);
+  double* dep = replayer.replay(ind, 4, 1);
   std::cout << "replay dep = " << dep[0] << std::endl;
-  ReverseAD::BaseReverseAdjoint<double> adjoint(trace, &tape);
+  ReverseAD::BaseReverseAdjoint<double> adjoint(trace);
   double vbar = 1;
   double** res = adjoint.compute(&vbar, 4, 1);
   std::cout << res[0][0] << std::endl;
   std::cout << res[0][1] << std::endl;
   std::cout << res[0][2] << std::endl;
   std::cout << res[0][3] << std::endl;
-  tape.dump_tape();
 } 

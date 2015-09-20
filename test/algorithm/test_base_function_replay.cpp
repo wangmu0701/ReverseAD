@@ -4,7 +4,6 @@
 #include "src/core/reversead.hpp"
 #include "src/algorithm/base_function_replay.hpp"
 #include "src/trace/trivial_trace.hpp"
-#include "src/tape/trivial_tape.hpp"
 
 //using namespace ReverseAD;
 //typedef BaseActive<double> adouble;
@@ -29,8 +28,6 @@ int main() {
   std::cout << "z = " << z.getVal() << std::endl;
   ReverseAD::BaseFunctionReplay<double> replayer(trace);
   double ind[4] = {1, 2, 3, 4};
-  ReverseAD::TrivialTape<double> tape;
-  double* dep = replayer.replay(ind, 4, 1, &tape);
+  double* dep = replayer.replay(ind, 4, 1);
   std::cout << "replay dep = " << dep[0] << std::endl;
-  tape.dump_tape();
 } 

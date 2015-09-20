@@ -56,4 +56,15 @@ namespace ReverseAD {
       global_trace->put_loc(res);
     }
   }
+  void trace_put(opbyte op, locint res, locint arg1, locint arg2,
+                 double val1, double val2) {
+    if (is_tracing) {
+      global_trace->put_op(op);
+      global_trace->put_val(val1);
+      global_trace->put_val(val2);
+      global_trace->put_loc(arg1);
+      global_trace->put_loc(arg2);
+      global_trace->put_loc(res);
+    }
+  }
 } // ReverseAD

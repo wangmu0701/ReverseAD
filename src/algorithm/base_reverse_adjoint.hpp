@@ -23,9 +23,8 @@ class BaseReverseAdjoint {
   //typedef map<locint, Base> type_adjoint;
   typedef TrivialAdjoint<locint, Base> type_adjoint;
 
-  BaseReverseAdjoint(AbstractTrace* trace, AbstractTape<Base>* tape) {
+  BaseReverseAdjoint(AbstractTrace* trace) {
     this->trace = trace;
-    this->tape = tape;
   }
   Base** compute(Base* adjoint_dep, int ind_num, int dep_num) {
     Base** adjoint_ind = new Base*[dep_num];
@@ -45,7 +44,6 @@ class BaseReverseAdjoint {
     Base arg2_val;
 
     trace->init_reverse();
-    tape->init_reverse();
     opbyte op = trace->get_next_op_r();
 
     while (op != start_of_tape) {
@@ -124,8 +122,8 @@ class BaseReverseAdjoint {
           res = trace->get_next_loc_r();
           arg2 = trace->get_next_loc_r();
           arg1 = trace->get_next_loc_r();
-          arg2_val = tape->get_next_r();
-          arg1_val = tape->get_next_r();
+          arg2_val = trace->get_next_val_r();
+          arg1_val = trace->get_next_val_r();
           for (type_adjoint& adjoint : adjoint_vals) {
             Base w = adjoint[res];
             adjoint.erase(res);
@@ -153,7 +151,6 @@ class BaseReverseAdjoint {
   
  private:
   AbstractTrace* trace;
-  AbstractTape<Base>* tape;
 };
 
 } // namespace ReverseAD
