@@ -108,6 +108,37 @@ class BaseReverseAdjoint {
             std::cout << "a[" << arg2 << "] = " << adjoint[arg2] << std::endl;
           }
           break;
+        case minus_a_a:
+          res = trace->get_next_loc_r();
+          arg2 = trace->get_next_loc_r();
+          arg1 = trace->get_next_loc_r();
+          for (type_adjoint& adjoint : adjoint_vals) {
+            Base w = adjoint[res];
+            adjoint.erase(res);
+            adjoint[arg2] += w;
+            adjoint[arg1] -= w;
+          }
+          break;
+        case minus_a_d:
+          res = trace->get_next_loc_r();
+          arg1 = trace->get_next_loc_r();
+          coval = trace->get_next_val_r();
+          for (type_adjoint& adjoint : adjoint_vals) {
+            Base w = adjoint[res];
+            adjoint.erase(res);
+            adjoint[arg1] += w;
+          }
+          break;
+        case minus_d_a:
+          res = trace->get_next_loc_r();
+          arg1 = trace->get_next_loc_r();
+          coval = trace->get_next_val_r();
+          for (type_adjoint& adjoint : adjoint_vals) {
+            Base w = adjoint[res];
+            adjoint.erase(res);
+            adjoint[arg1] -= w;
+          }
+          break;
         case plus_d_a:
           res = trace->get_next_loc_r();
           coval = trace->get_next_val_r();

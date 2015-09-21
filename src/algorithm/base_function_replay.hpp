@@ -75,6 +75,24 @@ class BaseFunctionReplay {
           res = get_next_res();
           val_map[res] = val_map[arg1] + coval;
           break;
+        case minus_a_a:
+          arg1 = get_next_arg();
+          arg2 = get_next_arg();
+          res = get_next_res();
+          val_map[res] = val_map[arg1] - val_map[arg2];
+          break;
+        case minus_a_d:
+          arg1 = get_next_arg();
+          coval = trace->get_next_val_f();
+          res = get_next_res();
+          val_map[res] = val_map[arg1] - coval;
+          break;
+        case minus_d_a:
+          arg1 = get_next_arg();
+          coval = trace->get_next_val_f();
+          res = get_next_res();
+          val_map[res] = coval - val_map[arg1];
+          break;
         case mult_a_a:
           arg1 = get_next_arg();
           arg2 = get_next_arg();

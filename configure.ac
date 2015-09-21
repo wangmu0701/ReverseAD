@@ -26,6 +26,7 @@ AC_CONFIG_FILES(Makefile
                 test/algorithm/Makefile
                 test/tape/Makefile
                 test/trace/Makefile
+                test/rosenbrock/Makefile
 )
 
 AC_OUTPUT

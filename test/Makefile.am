@@ -1,4 +1,4 @@
-SUBDIRS = tape trace core algorithm
+SUBDIRS = tape trace core algorithm rosenbrock
 
 test:
 	./tape/test_tape

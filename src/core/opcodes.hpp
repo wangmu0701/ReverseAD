@@ -12,6 +12,9 @@ enum OPCODES {
   assign_d,
   plus_a_a,
   plus_d_a,
+  minus_a_a,
+  minus_a_d,
+  minus_d_a,
   mult_a_a,
   mult_d_a
 };
