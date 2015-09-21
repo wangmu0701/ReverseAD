@@ -16,17 +16,19 @@ AC_MSG_RESULT($ac_reversead_cxxflags)
 
 # output
 AC_CONFIG_FILES(Makefile
-                src/Makefile
-                src/core/Makefile
-                src/algorithm/Makefile
-                src/tape/Makefile
-                src/trace/Makefile
-                test/Makefile
-                test/core/Makefile
-                test/algorithm/Makefile
-                test/tape/Makefile
-                test/trace/Makefile
-                test/rosenbrock/Makefile
+                ReverseAD/Makefile
+                ReverseAD/src/Makefile
+                ReverseAD/src/trace/Makefile
+                ReverseAD/include/Makefile
+                ReverseAD/include/reversead/Makefile
+                ReverseAD/include/reversead/algorithm/Makefile
+                ReverseAD/include/reversead/trace/Makefile
+                ReverseAD/include/reversead/tape/Makefile
+                ReverseAD/test/Makefile
+                ReverseAD/test/algorithm/Makefile
+                ReverseAD/test/tape/Makefile
+                ReverseAD/test/trace/Makefile
+                ReverseAD/test/rosenbrock/Makefile
 )
 
 AC_OUTPUT

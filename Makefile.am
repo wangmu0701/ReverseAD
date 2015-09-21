@@ -1,9 +1,9 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = src test
+SUBDIRS = ReverseAD
 EXTRA_DIST = autogen.sh
 
 test:
-	cd test; $(MAKE) test
+	cd ReverseAD; $(MAKE) test
 
 .PHONY: test
