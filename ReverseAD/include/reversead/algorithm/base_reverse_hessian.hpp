@@ -13,12 +13,20 @@
 #include "reversead/algorithm/trivial_adjoint.hpp"
 #include "reversead/algorithm/trivial_hessian.hpp"
 
+#define COMBINE_D_1 info.dx += info.dy;
+#define COMBINE_D_2 info.pxx += 2.0 * info.pxy + info.pyy;\
+                    info.pxy = 0.0; info.pyy = 0.0;\
+                    COMBINE_D_1
+
+#define PSEUDO_BINARY if (info.x == info.y) {info.y = NULL_LOC; COMBINE_D_2}
 
 namespace ReverseAD {
 
 template <typename Base>
 class BaseReverseHessian {
  public:
+  typedef TrivialAdjiont<locint, Base> type_adjoint;
+  typedef TrivialHessian<locint, Base> type_hessian;
 
   BaseReverseHessian(AbstractTrace* trace) {
     this->trace = trace;
@@ -29,8 +37,8 @@ class BaseReverseHessian {
       std::cout << "Must be of a scalar functioni : dep_num = 1" << std:endl; 
       return;
     }
-    TrivialHessian<locint, Base> hessian_vals;
-    TrivialAdjiont<Locint, Base> adjoint_vals;
+    type_hessian hessian_vals;
+    type_adjoint adjoint_vals;
     std::map<locint, locint> indep_index_map;
     DerivativeInfo<locint, Base> info;
  
@@ -90,6 +98,7 @@ class BaseReverseHessian {
           info.x = trace->get_next_loc_r();
           info.dx = 1.0;
           info.dy = 1.0;
+          PSEUDO_BINARY
           std::cout << "plus_a_a : " << info.r << " = "
               << info.x << " + " << info.y << std::endl;
           break;
@@ -105,6 +114,7 @@ class BaseReverseHessian {
           info.x = trace->get_next_loc_r();
           info.dx = 1.0;
           info.dy = -1.0;
+          PSEUDO_BINARY
           break;
         case minus_a_d:
           info.r = trace->get_next_loc_r();
@@ -125,6 +135,7 @@ class BaseReverseHessian {
           info.dx = trace->get_next_val_r();
           info.dy = trace->get_next_val_r();
           info.pxy = 1.0;
+          PSEUDO_BINARY
           break;
         case mult_d_a:
           info.r = trace->get_next_loc_r();
@@ -136,7 +147,7 @@ class BaseReverseHessian {
       }
       if (info.r != NULL_LOC) {
         Base w = adjoint_vals.get_and_erase(info.r);
-        TrivialAdjoint<locint, Base> r = hessian_vals.get_and_erase(info.r);
+        type_adjoint r = hessian_vals.get_and_erase(info.r);
         compute_adjoint(info, adjoint_vals, w);
         compute_hessian(info, adjoint_vals, hessian_vals, w, r);
       } 
@@ -148,7 +159,7 @@ class BaseReverseHessian {
  private:
   AbstractTrace* trace;
   void compute_adjoint(DerivativeInfo<locint, Base>& info,
-                       TrivialAdjiont<locint, Base>& adjoint_vals,
+                       type_adjoint& adjoint_vals,
                        Base& w) {
     if (info.x != NULL_LOC) {
       adjoint_vals[info.x] += w * info.dx;
@@ -158,11 +169,11 @@ class BaseReverseHessian {
     }
   }
   void compute_hessian(DerivativeInfo<locint, Base>& info,
-                       TrivialAdjiont<locint, Base>& adjoint_vals,
-                       TrivialHessian<locint, Base>& hessian_vals,
+                       type_adjoint& adjoint_vals,
+                       type_hessian& hessian_vals,
                        Base& w,
-                       TrivialAdjiont<locint, Base>& r) {
-    typename TrivialAdjoint<locint, Base>::enumerator r_enum =
+                       type_adjoint& r) {
+    typename type_adjoint::enumerator r_enum =
       r.get_enumerator();
     bool has_next = r_enum.has_next();
     locint p;
@@ -173,46 +184,76 @@ class BaseReverseHessian {
         if (info.y != NULL_LOC) {
           if (p != info.r) {
             if (p == info.x) {
-              hessian_vals.increase(p, p, 2 * info.dx * w);
+              hessian_vals[p][p] += 2 * info.dx * w;
+              //hessian_vals.increase(p, p, 2 * info.dx * w);
             } else {
-              hessian_vals.increase(info.x, p, info.dx * w);
+              if (info.x > p) {
+                hessian_vals[info.x][p] += info.dx * w;
+              } else {
+                hessian_vals[p][info.x] += info.dx * w;
+              }
+              //hessian_vals.increase(info.x, p, info.dx * w);
             }
             if (p == info.y) {
-              hessian_vals.increase(p, p, 2 * info.dy * w);
+              hessian_vals[p][p] += 2 * info.dy * w;
+              //hessian_vals.increase(p, p, 2 * info.dy * w);
             } else {
-              hessian_vals.increase(info.y, p, info.dy * w);
+              if (info.y > p) {
+                hessian_vals[info.y][p] += info.dy * w;
+              } else {
+                hessian_vals[p][info.y] += info.dy * w;
+              }
+              //hessian_vals.increase(info.y, p, info.dy * w);
             }
           } else { // p == info.r
-            hessian_vals.increase(info.x, info.x, info.dx*info.dx*w);
-            hessian_vals.increase(info.x, info.y, info.dx*info.dy*w);
-            hessian_vals.increase(info.y, info.y, info.dy*info.dy*w);
+            hessian_vals[info.x][info.x] += info.dx * info.dx * w;
+            //hessian_vals.increase(info.x, info.x, info.dx*info.dx*w);
+            if (info.x > info.y) {
+              hessian_vals[info.x][info.y] += info.dx * info.dx * w;
+            } else {
+              hessian_vals[info.y][info.x] += info.dx * info.dy * w;
+            }
+            //hessian_vals.increase(info.x, info.y, info.dx*info.dy*w);
+            hessian_vals[info.y][info.y] += info.dy * info.dy * w;
+            //hessian_vals.increase(info.y, info.y, info.dy*info.dy*w);
           } 
         } else { // info.y == NULL_LOC
           if (p != info.r) {
             if (p == info.x) {
-              hessian_vals.increase(p, p, 2 * info.dx * w);
+              hessian_vals[p][p] += 2 * info.dx * w;
+              //hessian_vals.increase(p, p, 2 * info.dx * w);
             } else {
-              hessian_vals.increase(info.dx, p, info.dx * w);
+              if (info.x > p) {
+                hessian_vals[info.x][p] += info.dx * w;
+              } else {
+                hessian_vals[p][info.x] += info.dx * w;
+              }
+              //hessian_vals.increase(info.dx, p, info.dx * w);
             }
           } else {
-            hessian_vals.increase(info.x, info.x, info.dx * info.dx * w);
+            hessian_vals[info.x][info.x] += info.dx * info.dx * w;
+            //hessian_vals.increase(info.x, info.x, info.dx * info.dx * w);
           }
         }
       } // pw != 0.0
     } // while (has_next)
     if (w != 0.0) {
       if (info.pxx != 0.0) {
-        hessian_vals.increase(info.x, info.x, info.pxx * w);
+        hessian_vals[info.x][info.x] += info.pxx * w;
+        //hessian_vals.increase(info.x, info.x, info.pxx * w);
       }
       if (info.pyy != 0.0) {
-        hessian_vals.increase(info.y, info.y, info.pyy * w);
+        hessian_vals[info.y][info.y] += info.pyy * w;
+        //hessian_vals.increase(info.y, info.y, info.pyy * w);
       }
       if (info.pxy != 0.0) {
-        if (info.x != info.y) {
-          hessian_vals.increase(info.x, info.y, w * info.pxy);
+        // already eliminate pseudo binary functions, menas info.x != info.y
+        if (info.x > info.y) {
+          hessian_vals[info.x][info.y] += info.pxy * w;
         } else {
-          hessian_vals.increase(info.x, info.y, 2.0 * w * info.pxy);
+          hessian_vals[info.y][info.x] += info.pxy * w;
         }
+        //hessian_vals.increase(info.x, info.y, w * info.pxy);
       }
     }
   }
