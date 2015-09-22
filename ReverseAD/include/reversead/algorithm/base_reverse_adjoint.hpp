@@ -185,4 +185,4 @@ class BaseReverseAdjoint {
 
 } // namespace ReverseAD
 
-#endif // BASE_FUNCTION_REPLAY_H_
+#endif // BASE_REVERSE_HESSIAN_H_

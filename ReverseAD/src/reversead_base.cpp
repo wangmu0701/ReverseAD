@@ -9,10 +9,12 @@ namespace ReverseAD {
   TrivialTrace* global_trace;
   bool is_tracing = false;
   locint curr_loc = 0;
+
   void trace_on() {
     global_trace = new TrivialTrace();
     is_tracing = true;
-    curr_loc = 0;
+    // location begins with 1
+    curr_loc = 1;
     global_trace->put_op(start_of_tape);
   }
 

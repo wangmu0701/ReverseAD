@@ -3,51 +3,44 @@
 
 #include <map>
 
-#include "abstract_adjoint.hpp"
+#include "abstract_serializable.hpp"
 
 namespace ReverseAD {
 
 template <typename LocType, typename Base>
-class TrivialAdjoint : public AbstractAdjoint<LocType, Base> {
+class TrivialAdjoint : public AbstractSerializable {
  public:
   TrivialAdjoint();
   TrivialAdjoint(char* buf);
-  TrivialAdjoint(std::map<LocType, Base>& source);
-  TrivialAdjoint(std::map<LocType, Base>&& source);
+  TrivialAdjoint(const TrivialAdjoint<LocType, Base>& other);
+  TrivialAdjoint(TrivialAdjoint<LocType, Base>&& other);
 
   ~TrivialAdjoint();
 
-  void increase(LocType x, Base v);
   Base&& get_and_erase(LocType x);
   Base& operator[] (LocType x);
   void erase(LocType x);
-  int get_size() const;
 
-  bool has_live(LocType target) const;
+  // serializable
+  void debug() const;
+  int get_size() const;
   int byte_size() const;
   void write_to_byte(char* buf) const;
-  void debug() const;
 
-  class enumerator : public AbstractAdjoint<LocType, Base>::enumerator {
+  class enumerator {
    public:
-    enumerator(const enumerator& other) {
-      this->_data = other._data;
+    enumerator(const enumerator& other): _data(other._data) {
       this->_iter = other._iter;
     }
     ~enumerator() {};
-    void operator = (const typename AbstractAdjoint<LocType, Base>::enumerator& other) {
-      TrivialAdjoint<LocType, Base>::enumerator* dp =
-        dynamic_cast<TrivialAdjoint<LocType, Base>::enumerator*>(&other);
-      if (dp) {
-        this->_data = dp->_data;
-        this->_iter = dp->_iter;
-      } else {
-        std::cout << "TrivialAdjoint can not be assigned"
-                  << " from another Adjoint impelmentation." << std::endl;
-      }
+    void operator = (const enumerator& other) {
+      if (this->_data != other._data) {
+        std::cout << "must be enumerator to a same backend" << std::endl;
+      } 
+      this->_iter = other._iter;
     }
     bool has_next() {
-      return _iter != _data.end();
+      return _iter != _data->end();
     }
     bool get_next(LocType& x, Base& w) {
       x = _iter->first;
@@ -57,9 +50,9 @@ class TrivialAdjoint : public AbstractAdjoint<LocType, Base> {
     }
 
    private:
-    enumerator(const typename std::map<LocType, Base>::const_iterator* _data) {
-      this->_data = _data;
-      this->_iter = _data.begin();
+    enumerator(const typename std::map<LocType, Base>* const data_)
+      : _data(data_) {
+      this->_iter = _data->begin();
     }
 
     const typename std::map<LocType, Base>* const _data;
@@ -68,7 +61,7 @@ class TrivialAdjoint : public AbstractAdjoint<LocType, Base> {
    friend class TrivialAdjoint<LocType, Base>;
   };
 
-  typename TrivialAdjoint<LocType, Base>::enumerator get_enumerator();
+  typename TrivialAdjoint<LocType, Base>::enumerator get_enumerator() const;
 
  private:
   std::map<LocType, Base> _data;
@@ -76,7 +69,7 @@ class TrivialAdjoint : public AbstractAdjoint<LocType, Base> {
 
 
 template <typename LocType, typename Base>
-typename TrivialAdjoint<LocType, Base>::enumerator TrivialAdjoint<LocType, Base>::get_enumerator() {
+typename TrivialAdjoint<LocType, Base>::enumerator TrivialAdjoint<LocType, Base>::get_enumerator() const {
   TrivialAdjoint<LocType, Base>::enumerator enumtor(&_data);
   return enumtor;
 }
@@ -88,27 +81,24 @@ TrivialAdjoint<LocType, Base>::TrivialAdjoint() {
 
 // L-value c-tor
 template <typename LocType, typename Base>
-TrivialAdjoint<LocType, Base>::TrivialAdjoint(std::map<LocType, Base>& source) {
-  std::cout << "TrivialAdjoint (L-ctor)" << std::endl;
-  _data = source;
+TrivialAdjoint<LocType, Base>::TrivialAdjoint(
+  const TrivialAdjoint<LocType, Base>& other) {
+  std::cout << "TrivialAdjoint (L-ctor)"<< this <<" = " << &other << std::endl;
+  _data = other._data;
 }
 
 // R-value c-tor
 template <typename LocType, typename Base>
-TrivialAdjoint<LocType, Base>::TrivialAdjoint(std::map<LocType, Base>&& source) {
-  std::cout << "TrivialAdjoint (R-ctor)" << std::endl;
-  _data = std::move(source);
+TrivialAdjoint<LocType, Base>::TrivialAdjoint(
+  TrivialAdjoint<LocType, Base>&& other) {
+  std::cout << "TrivialAdjoint (R-ctor)"<< this <<" = " << &other << std::endl;
+  _data = std::move(other._data);
 }
 
 // D-tor
 template <typename LocType, typename Base>
 TrivialAdjoint<LocType, Base>::~TrivialAdjoint() {
-}
 
-
-template <typename LocType, typename Base>
-void TrivialAdjoint<LocType, Base>::increase(LocType x, Base v) {
-  _data[x]+=v;
 }
 
 template <typename LocType, typename Base>
@@ -179,11 +169,6 @@ TrivialAdjoint<LocType, Base>::TrivialAdjoint(char* buf) {
     p += sizeof(Base);
     _data[loc] = w;
   }
-}
-
-template <typename LocType, typename Base>
-bool TrivialAdjoint<LocType, Base>::has_live(LocType target) const {
-  return _data.find(target) != _data.end();
 }
 
 } // namespace ReverseAD

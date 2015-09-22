@@ -1,6 +1,7 @@
 #ifndef REVERSE_AD_BASE_H_
 #define REVERSE_AD_BASE_H_
 
+#define NULL_LOC 0
 
 namespace ReverseAD {
 
