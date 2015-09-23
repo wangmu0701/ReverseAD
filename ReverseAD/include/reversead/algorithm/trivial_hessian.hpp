@@ -25,6 +25,36 @@ class TrivialHessian : public AbstractSerializable {
   void write_to_byte(char*) const;
   void debug() const;
 
+  class enumerator {
+   public:
+    bool has_next() {
+      return _iter != _data->end();
+    }
+    bool get_next(LocType& x, LocType& y, Base& w) {
+      x = _iter->first;
+      _enum.get_next(y, w);
+      find_next();
+      return _iter != _data->end();
+    }
+    
+   private:
+    enumerator(const typename std::map<LocType, TrivialAdjoint<LocType, Base> >* const data) {
+      this->_data = data;
+      this->_iter = data.begin();
+      this->_enum = _iter->second.get_enumerator();
+      find_next();
+    }
+    void find_next() {
+      while(!_enum.has_next() && _iter != _data->end()) {
+        ++_iter;
+        _enum = _iter->second.get_enumerator();
+      }
+    }
+    const typename std::map<LocType, TrivialAdjoint<LocType, Base> >* _data;
+    typename std::map<LocType, TrivialAdjoint<LocType, Base> >::const_iterator _iter;
+    typename TrivialAdjoint<LocType, Base>::enumerator _enum;
+  };
+  enumerator get_enumerator();
  private:
   std::map<LocType, TrivialAdjoint<LocType, Base> > _data;
 

@@ -6,6 +6,7 @@ namespace ReverseAD {
 template <typename Type>
 class AbstractTape {
  public:  
+  virtual ~AbstractTape() {}
   virtual void clear() = 0;
   // put a Type data to the tape
   virtual void put(Type) = 0;

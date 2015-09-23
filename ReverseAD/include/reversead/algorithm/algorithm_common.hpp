@@ -1,6 +1,7 @@
 #ifndef ALGORITHM_COMMON_H_
 #define ALGORITHM_COMMON_H_
 
+#include <iostream>
 #include "reversead/reversead_base.hpp"
 
 namespace ReverseAD {
@@ -13,7 +14,7 @@ inline void T_SWAP(T& a, T& b) {
 }
 
 template <typename LocType>
-inline MAX_SWAP(LocType& a, LocType& b) {
+inline void MAX_SWAP(LocType& a, LocType& b) {
   if (a < b) { T_SWAP(a,b);}
 }
 
@@ -29,7 +30,13 @@ class DerivativeInfo {
     dx = 0.0; dy = 0.0;
     pxx = 0.0; pxy = 0.0; pyy = 0.0;
   }
-
+  void debug() {
+    std::cout << "opcode = " << opcode << " r = " << r
+              << " x = " << x << " y = " << y << std::endl;
+    std::cout << "dx = " << dx << " dy = " << dy 
+              << " pxx = " << pxx << " pxy = " << pxy
+              << " pyy = " << pyy << std::endl;
+  }
   opbyte opcode;
   LocType r, x, y;
   Base dx, dy;

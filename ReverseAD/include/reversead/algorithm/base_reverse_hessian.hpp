@@ -25,7 +25,7 @@ namespace ReverseAD {
 template <typename Base>
 class BaseReverseHessian {
  public:
-  typedef TrivialAdjiont<locint, Base> type_adjoint;
+  typedef TrivialAdjoint<locint, Base> type_adjoint;
   typedef TrivialHessian<locint, Base> type_hessian;
 
   BaseReverseHessian(AbstractTrace* trace) {
@@ -34,7 +34,7 @@ class BaseReverseHessian {
   void compute(int ind_num, int dep_num,
           locint** rind, locint** cind, Base** values) {
     if (dep_num != 1) {
-      std::cout << "Must be of a scalar functioni : dep_num = 1" << std:endl; 
+      std::cout << "Must be of a scalar functioni : dep_num = 1" << std::endl; 
       return;
     }
     type_hessian hessian_vals;
@@ -57,6 +57,7 @@ class BaseReverseHessian {
 
     while (op != start_of_tape) {
       info.clear();
+      info.opcode = op;
       switch (op) {
         case start_of_tape:
         case end_of_tape:
@@ -146,18 +147,31 @@ class BaseReverseHessian {
           std::cerr << "Unrecongized opcode : " << (int)op << std::endl; 
       }
       if (info.r != NULL_LOC) {
+        //info.debug();
         Base w = adjoint_vals.get_and_erase(info.r);
         type_adjoint r = hessian_vals.get_and_erase(info.r);
         compute_adjoint(info, adjoint_vals, w);
         compute_hessian(info, adjoint_vals, hessian_vals, w, r);
+        //adjoint_vals.debug();
+        //hessian_vals.debug();
       } 
       op = trace->get_next_op_r();
     }
-    return adjoint_ind;
+    retrieve_sparse_format(hessian_vals, rind, cind, values);
+    return;
   }
   
  private:
   AbstractTrace* trace;
+  void retrieve_sparse_format(type_hessian& hessian_vals,
+    locint** rind, locint** cind, Base** values) {
+    int size = hessian_vals.get_size();
+    (*rind) = new locint[size];
+    (*cind) = new locint[size];
+    (*values) = new Base[size];
+    hessian_vals.debug();    
+  }
+
   void compute_adjoint(DerivativeInfo<locint, Base>& info,
                        type_adjoint& adjoint_vals,
                        Base& w) {
@@ -180,59 +194,60 @@ class BaseReverseHessian {
     Base pw;
     while (has_next) {
       has_next = r_enum.get_next(p, pw);
+      std::cout << "p = " << p << "pw = " << pw << std::endl;
       if (pw != 0.0) {
         if (info.y != NULL_LOC) {
           if (p != info.r) {
             if (p == info.x) {
-              hessian_vals[p][p] += 2 * info.dx * w;
-              //hessian_vals.increase(p, p, 2 * info.dx * w);
+              hessian_vals[p][p] += 2 * info.dx * pw;
+              //hessian_vals.increase(p, p, 2 * info.dx * pw);
             } else {
               if (info.x > p) {
-                hessian_vals[info.x][p] += info.dx * w;
+                hessian_vals[info.x][p] += info.dx * pw;
               } else {
-                hessian_vals[p][info.x] += info.dx * w;
+                hessian_vals[p][info.x] += info.dx * pw;
               }
-              //hessian_vals.increase(info.x, p, info.dx * w);
+              //hessian_vals.increase(info.x, p, info.dx * pw);
             }
             if (p == info.y) {
-              hessian_vals[p][p] += 2 * info.dy * w;
-              //hessian_vals.increase(p, p, 2 * info.dy * w);
+              hessian_vals[p][p] += 2 * info.dy * pw;
+              //hessian_vals.increase(p, p, 2 * info.dy * pw);
             } else {
               if (info.y > p) {
-                hessian_vals[info.y][p] += info.dy * w;
+                hessian_vals[info.y][p] += info.dy * pw;
               } else {
-                hessian_vals[p][info.y] += info.dy * w;
+                hessian_vals[p][info.y] += info.dy * pw;
               }
-              //hessian_vals.increase(info.y, p, info.dy * w);
+              //hessian_vals.increase(info.y, p, info.dy * pw);
             }
           } else { // p == info.r
-            hessian_vals[info.x][info.x] += info.dx * info.dx * w;
-            //hessian_vals.increase(info.x, info.x, info.dx*info.dx*w);
+            hessian_vals[info.x][info.x] += info.dx * info.dx * pw;
+            //hessian_vals.increase(info.x, info.x, info.dx*info.dx*pw);
             if (info.x > info.y) {
-              hessian_vals[info.x][info.y] += info.dx * info.dx * w;
+              hessian_vals[info.x][info.y] += info.dx * info.dx * pw;
             } else {
-              hessian_vals[info.y][info.x] += info.dx * info.dy * w;
+              hessian_vals[info.y][info.x] += info.dx * info.dy * pw;
             }
-            //hessian_vals.increase(info.x, info.y, info.dx*info.dy*w);
-            hessian_vals[info.y][info.y] += info.dy * info.dy * w;
-            //hessian_vals.increase(info.y, info.y, info.dy*info.dy*w);
+            //hessian_vals.increase(info.x, info.y, info.dx*info.dy*pw);
+            hessian_vals[info.y][info.y] += info.dy * info.dy * pw;
+            //hessian_vals.increase(info.y, info.y, info.dy*info.dy*pw);
           } 
         } else { // info.y == NULL_LOC
           if (p != info.r) {
             if (p == info.x) {
-              hessian_vals[p][p] += 2 * info.dx * w;
-              //hessian_vals.increase(p, p, 2 * info.dx * w);
+              hessian_vals[p][p] += 2 * info.dx * pw;
+              //hessian_vals.increase(p, p, 2 * info.dx * pw);
             } else {
               if (info.x > p) {
-                hessian_vals[info.x][p] += info.dx * w;
+                hessian_vals[info.x][p] += info.dx * pw;
               } else {
-                hessian_vals[p][info.x] += info.dx * w;
+                hessian_vals[p][info.x] += info.dx * pw;
               }
-              //hessian_vals.increase(info.dx, p, info.dx * w);
+              //hessian_vals.increase(info.dx, p, info.dx * pw);
             }
           } else {
-            hessian_vals[info.x][info.x] += info.dx * info.dx * w;
-            //hessian_vals.increase(info.x, info.x, info.dx * info.dx * w);
+            hessian_vals[info.x][info.x] += info.dx * info.dx * pw;
+            //hessian_vals.increase(info.x, info.x, info.dx * info.dx * pw);
           }
         }
       } // pw != 0.0

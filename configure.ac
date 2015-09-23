@@ -18,7 +18,6 @@ AC_MSG_RESULT($ac_reversead_cxxflags)
 AC_CONFIG_FILES(Makefile
                 ReverseAD/Makefile
                 ReverseAD/src/Makefile
-                ReverseAD/src/trace/Makefile
                 ReverseAD/include/Makefile
                 ReverseAD/include/reversead/Makefile
                 ReverseAD/include/reversead/algorithm/Makefile
@@ -29,6 +28,7 @@ AC_CONFIG_FILES(Makefile
                 ReverseAD/test/tape/Makefile
                 ReverseAD/test/trace/Makefile
                 ReverseAD/test/rosenbrock/Makefile
+                ReverseAD/test/simple/Makefile
 )
 
 AC_OUTPUT

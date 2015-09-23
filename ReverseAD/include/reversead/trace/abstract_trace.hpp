@@ -7,9 +7,11 @@ namespace ReverseAD {
 
 class AbstractTrace {
  public:
-  virtual void put_op(opbyte) = 0;
-  virtual void put_loc(locint) = 0;
-  virtual void put_val(double) = 0;
+  virtual ~AbstractTrace() {}
+
+  inline virtual void put_op(opbyte) = 0;
+  inline virtual void put_loc(locint) = 0;
+  inline virtual void put_val(double) = 0;
   
   // forward sweep
   virtual void init_forward() = 0;

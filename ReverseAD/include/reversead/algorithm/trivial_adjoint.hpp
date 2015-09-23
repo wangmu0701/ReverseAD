@@ -34,9 +34,7 @@ class TrivialAdjoint : public AbstractSerializable {
     }
     ~enumerator() {};
     void operator = (const enumerator& other) {
-      if (this->_data != other._data) {
-        std::cout << "must be enumerator to a same backend" << std::endl;
-      } 
+      this->_data = other._data;
       this->_iter = other._iter;
     }
     bool has_next() {
@@ -50,12 +48,12 @@ class TrivialAdjoint : public AbstractSerializable {
     }
 
    private:
-    enumerator(const typename std::map<LocType, Base>* const data_)
-      : _data(data_) {
-      this->_iter = _data->begin();
+    enumerator(const typename std::map<LocType, Base>* const data)
+      : _data(data) {
+      this->_iter = data->begin();
     }
 
-    const typename std::map<LocType, Base>* const _data;
+    const typename std::map<LocType, Base>* _data;
     typename std::map<LocType, Base>::const_iterator _iter;
    
    friend class TrivialAdjoint<LocType, Base>;
