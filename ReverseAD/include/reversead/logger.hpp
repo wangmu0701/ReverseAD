@@ -38,9 +38,10 @@ class Logger {
 
 class Log {
  public:
-  Log(std::ostream* infosink, std::ostream* fatalsink)
-    : info(infosink), fatal(fatalsink, true) {};
+  Log(std::ostream* infosink, std::ostream* warnsink, std::ostream* fatalsink)
+    : info(infosink), warning(warnsink), fatal(fatalsink, true) {};
   Logger info;
+  Logger warning;
   Logger fatal;
 };
 

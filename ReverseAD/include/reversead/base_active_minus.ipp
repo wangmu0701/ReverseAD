@@ -2,7 +2,7 @@
   friend BaseActive<Base> operator-(const BaseActive<Base>& lhs, const BaseActive<Base>& rhs) {
     BaseActive<Base> res(lhs.val - rhs.val);
     trace_put(minus_a_a, res.loc, lhs.loc, rhs.loc);
-    std::cout << "L(" << &res <<")[" << res.loc << "] = " 
+    log.info << "L(" << &res <<")[" << res.loc << "] = " 
               << "L("<< &lhs << ")["<<lhs.loc<<"] - L("
               << &rhs << ")[" << rhs.loc << "]" << std::endl;
     return res;
@@ -10,7 +10,7 @@
   friend BaseActive<Base> operator-(const BaseActive<Base>& lhs, const Base& val) {
     BaseActive<Base> res(lhs.val - val);
     trace_put(minus_a_d, res.loc, lhs.loc, val);
-    std::cout << "L(" << &res <<")[" << res.loc << "] = " 
+    log.info << "L(" << &res <<")[" << res.loc << "] = " 
               << "L("<< &lhs << ")["<<lhs.loc<<"] - const("
               << val << ")" << std::endl;
     return res;
@@ -18,7 +18,7 @@
   friend BaseActive<Base> operator-(const Base& val, const BaseActive<Base>& rhs) {
     BaseActive<Base> res(val - rhs.val);
     trace_put(minus_d_a, res.loc, rhs.loc, val);
-    std::cout << "L(" << &res <<")[" << res.loc << "] = " 
+    log.info << "L(" << &res <<")[" << res.loc << "] = " 
               << "const("<< val << ") - L(" << &rhs << ")["
               << rhs.loc << "]" << std::endl;
     return res;
@@ -31,7 +31,7 @@
     opbyte resloc = get_next_loc();
     trace_put(minus_a_a, resloc, lhs.loc, rhs.loc);
     lhs.loc = resloc;
-    std::cout << "R(" << &lhs <<")[" << resloc << "] = " 
+    log.info << "R(" << &lhs <<")[" << resloc << "] = " 
               << "R("<< &lhs << ")["<<lhs.loc<<"] - L("
               << &rhs << ")[" << rhs.loc << "]" << std::endl;
     return std::move(lhs); 
@@ -41,7 +41,7 @@
     opbyte resloc = get_next_loc();
     trace_put(minus_a_a, resloc, lhs.loc, rhs.loc);
     rhs.loc = resloc;
-    std::cout << "R(" << &rhs <<")[" << resloc << "] = " 
+    log.info << "R(" << &rhs <<")[" << resloc << "] = " 
               << "L("<< &lhs << ")["<<lhs.loc<<"] - R("
               << &rhs << ")[" << rhs.loc << "]" << std::endl;
     return std::move(rhs);
@@ -51,7 +51,7 @@
     opbyte resloc = get_next_loc();
     trace_put(minus_a_a, resloc, lhs.loc, rhs.loc);
     lhs.loc = resloc;
-    std::cout << "R(" << &lhs <<")[" << resloc << "] = " 
+    log.info << "R(" << &lhs <<")[" << resloc << "] = " 
               << "R("<< &lhs << ")["<<lhs.loc<<"] - R("
               << &rhs << ")[" << rhs.loc << "]" << std::endl;
     return std::move(lhs);
@@ -61,7 +61,7 @@
     opbyte resloc = get_next_loc();
     trace_put(minus_a_d, resloc, lhs.loc, val);
     lhs.loc = resloc;
-    std::cout << "R(" << &lhs <<")[" << resloc << "] = " 
+    log.info << "R(" << &lhs <<")[" << resloc << "] = " 
               << "R("<< &lhs << ")["<<lhs.loc<<"] - const("
               << val << ")" << std::endl;
     return std::move(lhs);
@@ -71,7 +71,7 @@
     opbyte resloc = get_next_loc();
     trace_put(minus_d_a, resloc, rhs.loc, val);
     rhs.loc = resloc;
-    std::cout << "R(" << &rhs <<")[" << resloc << "] = " 
+    log.info << "R(" << &rhs <<")[" << resloc << "] = " 
               << "const("<< val << ") - R(" << &rhs << ")["
               << rhs.loc << "]" << std::endl;
     return std::move(rhs);

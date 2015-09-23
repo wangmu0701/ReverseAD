@@ -20,7 +20,7 @@
   
   // copy c-tor
   BaseActive(const BaseActive<Base>& other) {
-    std::cout << "L-ctor: " << this <<"["<<this->loc<<"]" 
+    log.info << "L-ctor: " << this <<"["<<this->loc<<"]" 
               <<" <- " << &other <<"["<<other.loc<<"]"<< std::endl;
     this->val = other.val;
     this->loc = get_next_loc();
@@ -45,7 +45,7 @@
     this->val = val;
     this->loc = get_next_loc();
     trace_put(assign_d, this->loc, val);
-    std::cout << "V-assign: " << this <<"["<<this->loc<<"]" << " = " << val << std::endl;
+    log.info << "V-assign: " << this <<"["<<this->loc<<"]" << " = " << val << std::endl;
     return *this;
   }
 
@@ -56,7 +56,7 @@
       this->val = get_next_loc();
     }
     trace_put(assign_a, this->loc, other.loc);
-    std::cout << "L-assign: " << this <<"["<<this->loc<<"]" 
+    log.info << "L-assign: " << this <<"["<<this->loc<<"]" 
               <<" <- " << &other <<"["<<other.loc<<"]"<< std::endl;
     return *this;
   }
@@ -67,7 +67,7 @@
   BaseActive(BaseActive<Base>&& other) {
     this->val = other.val;
     this->loc = get_next_loc();
-    std::cout << "R-ctor: " << this <<"["<<this->loc<<"]" 
+    log.info << "R-ctor: " << this <<"["<<this->loc<<"]" 
               <<" <- " << &other <<"["<<other.loc<<"]"<< std::endl;
     trace_put(assign_a, this->loc, other.loc);
   }
@@ -79,7 +79,7 @@
       this->loc = get_next_loc();
     }
     trace_put(assign_a, this->loc, other.loc);
-    std::cout << "R-assign: " << this <<"["<<this->loc<<"]" 
+    log.info << "R-assign: " << this <<"["<<this->loc<<"]" 
               <<" <- " << &other <<"["<<other.loc<<"]"<< std::endl;
     return *this;
   }

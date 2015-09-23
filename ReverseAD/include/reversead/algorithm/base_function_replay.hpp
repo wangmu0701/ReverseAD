@@ -37,7 +37,7 @@ class BaseFunctionReplay {
           break;
         case assign_ind:
           if (ind_count >= ind_num) {
-            std::cerr << "more independents found on tape than : " << ind_num << std::endl;
+            log.warning << "more independents found on tape than : " << ind_num << std::endl;
             return NULL;
           }
           res = get_next_res();
@@ -46,7 +46,7 @@ class BaseFunctionReplay {
           break;
         case assign_dep:
           if (dep_count >= dep_num) {
-            std::cerr << "more dependents found on tape than : " << ind_num << std::endl;
+            log.warning << "more dependents found on tape than : " << ind_num << std::endl;
             return NULL;
           }
           res = get_next_res();
@@ -110,7 +110,7 @@ class BaseFunctionReplay {
           val_map[res] = val_map[arg1] * coval;
           break;
         default:
-          std::cerr << "Unrecongized opcode : " << (int)op << std::endl; 
+          log.warning << "Unrecongized opcode : " << (int)op << std::endl; 
       }
       op = trace->get_next_op_f();
     }

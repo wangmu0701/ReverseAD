@@ -82,7 +82,7 @@ TrivialAdjoint<LocType, Base>::TrivialAdjoint() {
 template <typename LocType, typename Base>
 TrivialAdjoint<LocType, Base>::TrivialAdjoint(
   const TrivialAdjoint<LocType, Base>& other) {
-  std::cout << "TrivialAdjoint (L-ctor)"<< this <<" = " << &other << std::endl;
+  //std::cout << "TrivialAdjoint (L-ctor)"<< this <<" = " << &other << std::endl;
   _data = other._data;
 }
 
@@ -90,7 +90,7 @@ TrivialAdjoint<LocType, Base>::TrivialAdjoint(
 template <typename LocType, typename Base>
 TrivialAdjoint<LocType, Base>::TrivialAdjoint(
   TrivialAdjoint<LocType, Base>&& other) {
-  std::cout << "TrivialAdjoint (R-ctor)"<< this <<" = " << &other << std::endl;
+  //std::cout << "TrivialAdjoint (R-ctor)"<< this <<" = " << &other << std::endl;
   _data = std::move(other._data);
 }
 

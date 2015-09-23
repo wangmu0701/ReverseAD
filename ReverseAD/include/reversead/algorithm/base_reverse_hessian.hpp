@@ -34,7 +34,7 @@ class BaseReverseHessian {
   void compute(int ind_num, int dep_num,
           locint** rind, locint** cind, Base** values) {
     if (dep_num != 1) {
-      std::cout << "Must be of a scalar functioni : dep_num = 1" << std::endl; 
+      log.warning<< "Must be of a scalar functioni : dep_num = 1" << std::endl; 
       return;
     }
     reverse_local_hessian(ind_num, dep_num);
@@ -66,7 +66,7 @@ class BaseReverseHessian {
           break;
         case assign_ind:
           if (ind_count < 0) {
-            std::cerr << "more independents found on tape than : " << ind_num << std::endl;
+            log.warning << "more independents found on tape than : " << ind_num << std::endl;
             return;
           }
           res = trace->get_next_loc_r();;
@@ -76,13 +76,12 @@ class BaseReverseHessian {
           break;
         case assign_dep:
           if (dep_count >= dep_num) {
-            std::cerr << "more dependents found on tape than : " << ind_num << std::endl;
+            log.warning << "more dependents found on tape than : " << ind_num << std::endl;
             return;
           }
           res = trace->get_next_loc_r();
           coval = trace->get_next_val_r();
           adjoint_vals[res] = 1.0;
-          std::cout << "this is where everything begins" << std::endl;
           dep_count++; 
           break;
         case assign_d:
@@ -93,7 +92,6 @@ class BaseReverseHessian {
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
           info.dx = 1.0;
-          std::cout << "assign_a_a : " << info.r << " = " << info.x << std::endl; 
           break;
         case plus_a_a:
           info.r = trace->get_next_loc_r();
@@ -102,8 +100,6 @@ class BaseReverseHessian {
           info.dx = 1.0;
           info.dy = 1.0;
           PSEUDO_BINARY
-          std::cout << "plus_a_a : " << info.r << " = "
-              << info.x << " + " << info.y << std::endl;
           break;
         case plus_d_a:
           info.r = trace->get_next_loc_r();
@@ -146,7 +142,7 @@ class BaseReverseHessian {
           info.dx = trace->get_next_val_r();
           break;
         default:
-          std::cerr << "Unrecongized opcode : " << (int)op << std::endl; 
+          log.warning << "Unrecongized opcode : " << (int)op << std::endl; 
       }
       if (info.r != NULL_LOC) {
         //info.debug();
@@ -207,7 +203,7 @@ class BaseReverseHessian {
     Base pw;
     while (has_next) {
       has_next = r_enum.get_next(p, pw);
-      std::cout << "p = " << p << "pw = " << pw << std::endl;
+      log.info << "p = " << p << "pw = " << pw << std::endl;
       if (pw != 0.0) {
         if (info.y != NULL_LOC) {
           if (p != info.r) {

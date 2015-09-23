@@ -52,7 +52,7 @@ class BaseReverseAdjoint {
           break;
         case assign_ind:
           if (ind_count < 0) {
-            std::cerr << "more independents found on tape than : " << ind_num << std::endl;
+            log.warning << "more independents found on tape than : " << ind_num << std::endl;
             return nullptr;
           }
           res = trace->get_next_loc_r();;
@@ -64,13 +64,13 @@ class BaseReverseAdjoint {
           break;
         case assign_dep:
           if (dep_count >= dep_num) {
-            std::cerr << "more dependents found on tape than : " << ind_num << std::endl;
+            log.warning << "more dependents found on tape than : " << ind_num << std::endl;
             return nullptr;
           }
           res = trace->get_next_loc_r();
           coval = trace->get_next_val_r();
           adjoint_vals[dep_count][res] = adjoint_dep[dep_count];
-          std::cout << "a[" << res << "] = " << adjoint_vals[dep_count][res] << std::endl;
+          log.info << "a[" << res << "] = " << adjoint_vals[dep_count][res] << std::endl;
           dep_count++; 
           break;
         case assign_d:
@@ -83,28 +83,28 @@ class BaseReverseAdjoint {
         case assign_a:
           res = trace->get_next_loc_r();
           arg1 = trace->get_next_loc_r();
-          std::cout << "assign_a : " << res << " = " << arg1 << std::endl;
+          log.info << "assign_a : " << res << " = " << arg1 << std::endl;
           for (type_adjoint& adjoint : adjoint_vals) {
             Base w = adjoint[res];
             adjoint.erase(res);
             adjoint[arg1] += w;
-            std::cout << "res = " << res << " w = " << w << std::endl;
-            std::cout << "a[" << arg1 << "] = " << adjoint[arg1] << std::endl;
+            log.info << "res = " << res << " w = " << w << std::endl;
+            log.info << "a[" << arg1 << "] = " << adjoint[arg1] << std::endl;
           }
           break;
         case plus_a_a:
           res = trace->get_next_loc_r();
           arg2 = trace->get_next_loc_r();
           arg1 = trace->get_next_loc_r();
-          std::cout << "plus_a_a : " << res << " = " << arg1 << " + " << arg2<< std::endl;
+          log.info << "plus_a_a : " << res << " = " << arg1 << " + " << arg2<< std::endl;
           for (type_adjoint& adjoint : adjoint_vals) {
             Base w = adjoint[res];
             adjoint.erase(res);
             adjoint[arg1] += w;
             adjoint[arg2] += w;
-            std::cout << "res = " << res << " w = " << w << std::endl;
-            std::cout << "a[" << arg1 << "] = " << adjoint[arg1] << std::endl;
-            std::cout << "a[" << arg2 << "] = " << adjoint[arg2] << std::endl;
+            log.info << "res = " << res << " w = " << w << std::endl;
+            log.info << "a[" << arg1 << "] = " << adjoint[arg1] << std::endl;
+            log.info << "a[" << arg2 << "] = " << adjoint[arg2] << std::endl;
           }
           break;
         case minus_a_a:
@@ -172,7 +172,7 @@ class BaseReverseAdjoint {
           }
           break;
         default:
-          std::cerr << "Unrecongized opcode : " << (int)op << std::endl; 
+          log.warning << "Unrecongized opcode : " << (int)op << std::endl; 
       }
       op = trace->get_next_op_r();
     }
