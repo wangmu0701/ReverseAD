@@ -29,6 +29,7 @@ class TrivialAdjoint : public AbstractSerializable {
 
   class enumerator {
    public:
+    enumerator() {};
     enumerator(const enumerator& other): _data(other._data) {
       this->_iter = other._iter;
     }

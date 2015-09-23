@@ -29,7 +29,7 @@
 
   BaseActive<Base>& operator <<= (Base val) {
     this->val = val;
-    this->loc = get_next_loc();
+    this->loc = get_next_ind_loc();
     trace_put(assign_ind, this->loc, val);
     return *this;
   }

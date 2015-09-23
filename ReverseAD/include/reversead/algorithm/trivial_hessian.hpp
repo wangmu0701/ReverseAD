@@ -40,7 +40,7 @@ class TrivialHessian : public AbstractSerializable {
    private:
     enumerator(const typename std::map<LocType, TrivialAdjoint<LocType, Base> >* const data) {
       this->_data = data;
-      this->_iter = data.begin();
+      this->_iter = data->begin();
       this->_enum = _iter->second.get_enumerator();
       find_next();
     }
@@ -53,12 +53,22 @@ class TrivialHessian : public AbstractSerializable {
     const typename std::map<LocType, TrivialAdjoint<LocType, Base> >* _data;
     typename std::map<LocType, TrivialAdjoint<LocType, Base> >::const_iterator _iter;
     typename TrivialAdjoint<LocType, Base>::enumerator _enum;
+
+    friend class TrivialHessian<LocType, Base>;
   };
-  enumerator get_enumerator();
+  enumerator get_enumerator() const;
  private:
   std::map<LocType, TrivialAdjoint<LocType, Base> > _data;
 
 };
+
+
+template <typename LocType, typename Base>
+typename TrivialHessian<LocType, Base>::enumerator
+  TrivialHessian<LocType, Base>::get_enumerator() const {
+  TrivialHessian<LocType, Base>::enumerator ret(&_data);
+  return ret;
+}
 
 template <typename LocType, typename Base>
 TrivialHessian<LocType, Base>::TrivialHessian() {

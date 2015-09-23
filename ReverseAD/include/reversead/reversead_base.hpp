@@ -2,7 +2,10 @@
 #define REVERSE_AD_BASE_H_
 
 #define NULL_LOC 0
+#define RANK_SHIFT 8
+#define RANK_BASE 0x000000ff
 
+#define BASE_LOC 0x800000
 namespace ReverseAD {
 
   class TrivialTrace;
@@ -12,6 +15,7 @@ namespace ReverseAD {
 
   void trace_on();
   locint get_next_loc();
+  locint get_next_ind_loc();
   TrivialTrace* trace_off();
   
   void trace_put(opbyte, locint, locint);

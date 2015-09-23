@@ -37,9 +37,11 @@ class BaseReverseHessian {
       std::cout << "Must be of a scalar functioni : dep_num = 1" << std::endl; 
       return;
     }
-    type_hessian hessian_vals;
-    type_adjoint adjoint_vals;
-    std::map<locint, locint> indep_index_map;
+    reverse_local_hessian(ind_num, dep_num);
+    retrieve_sparse_format(rind, cind, values);
+  }
+ private:
+  void reverse_local_hessian(int ind_num, int dep_num) {
     DerivativeInfo<locint, Base> info;
  
     int ind_count = ind_num - 1;
@@ -157,19 +159,30 @@ class BaseReverseHessian {
       } 
       op = trace->get_next_op_r();
     }
-    retrieve_sparse_format(hessian_vals, rind, cind, values);
     return;
   }
-  
- private:
-  AbstractTrace* trace;
-  void retrieve_sparse_format(type_hessian& hessian_vals,
-    locint** rind, locint** cind, Base** values) {
+
+  void retrieve_sparse_format(locint** rind, locint** cind, Base** values) {
     int size = hessian_vals.get_size();
     (*rind) = new locint[size];
     (*cind) = new locint[size];
     (*values) = new Base[size];
-    hessian_vals.debug();    
+    //hessian_vals.debug();
+    typename type_hessian::enumerator h_enum = hessian_vals.get_enumerator();
+    bool has_next = h_enum.has_next();
+    locint x,y;
+    Base w;
+    int l =0;
+    while(has_next) {
+      has_next = h_enum.get_next(x, y, (*values)[l]);
+      (*rind)[l] = indep_index_map[x];
+      (*cind)[l] = indep_index_map[y];
+      l++;
+    }
+    for(int i=0; i<size;i++) {
+      std::cout << "H["<<(*rind)[i]<<","<<(*cind)[i]<<"] = "
+                << (*values)[i] << std::endl;
+    }
   }
 
   void compute_adjoint(DerivativeInfo<locint, Base>& info,
@@ -272,6 +285,12 @@ class BaseReverseHessian {
       }
     }
   }
+
+  // private members
+  AbstractTrace* trace;
+  type_adjoint adjoint_vals;
+  type_hessian hessian_vals;
+  std::map<locint, locint> indep_index_map;
 
 };
 

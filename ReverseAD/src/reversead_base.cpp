@@ -9,17 +9,27 @@ namespace ReverseAD {
   TrivialTrace* global_trace;
   bool is_tracing = false;
   locint curr_loc = 0;
-
+  locint curr_ind_loc = 0;
+  int rank = 0;
   void trace_on() {
     global_trace = new TrivialTrace();
     is_tracing = true;
-    // location begins with 1
-    curr_loc = 1;
+    curr_loc = BASE_LOC;
+    // independent location begins with 1 so that null_loc can be 0
+    curr_ind_loc = 1;
     global_trace->put_op(start_of_tape);
   }
 
   locint get_next_loc() {
-    return curr_loc++;
+    locint ret = curr_loc++;
+    ret = (ret << RANK_SHIFT) | (rank & RANK_BASE); 
+    return ret;
+  }
+
+  locint get_next_ind_loc() {
+    locint ret = curr_ind_loc++;
+    ret = (ret << RANK_SHIFT) | (rank & RANK_BASE);
+    return ret;
   }
 
   TrivialTrace* trace_off() {
