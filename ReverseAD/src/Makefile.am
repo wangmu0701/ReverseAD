@@ -3,4 +3,4 @@ AM_CPPFLAGS = -I$(top_builddir)/ReverseAD/include
 
 noinst_LTLIBRARIES = libreverseadsrc.la
 
-libreverseadsrc_la_SOURCES = reversead_base.cpp
+libreverseadsrc_la_SOURCES = reversead_base.cpp logger.cpp

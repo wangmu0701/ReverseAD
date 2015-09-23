@@ -6,7 +6,12 @@
 #define RANK_BASE 0x000000ff
 
 #define BASE_LOC 0x800000
+
+#include "reversead/logger.hpp"
+
 namespace ReverseAD {
+
+  extern Log log;
 
   class TrivialTrace;
 

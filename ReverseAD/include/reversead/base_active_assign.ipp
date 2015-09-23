@@ -3,18 +3,18 @@
   BaseActive() {
     this->val = 0.0;
     this->loc = get_next_loc();
-    std::cout << "V-ctor: " << this <<"["<<this->loc<<"]" << " = " << val << std::endl;
+    log.info << "V-ctor: " << this <<"["<<this->loc<<"]" << " = " << val << std::endl;
     trace_put(assign_d, this->loc, 0.0);
   }
   ~BaseActive() {
-    std::cout << "free loc: " << this << "["<<this->loc<<"]" << std::endl;
+    log.info << "free loc: " << this << "["<<this->loc<<"]" << std::endl;
   }
 
   // value c-tor
   BaseActive(Base val) {
     this->val = val;
     this->loc = get_next_loc();
-    std::cout << "V-ctor: " << this <<"["<<this->loc<<"]" << " = " << val << std::endl;
+    log.info << "V-ctor: " << this <<"["<<this->loc<<"]" << " = " << val << std::endl;
     trace_put(assign_d, this->loc, val);
   }
   

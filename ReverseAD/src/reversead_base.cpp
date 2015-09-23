@@ -33,6 +33,8 @@ namespace ReverseAD {
   }
 
   TrivialTrace* trace_off() {
+    std::cout << "number of indepent = " << curr_ind_loc - 1 << std::endl;
+    std::cout << "number of intermediate = " << curr_loc-BASE_LOC << std::endl;
     global_trace->put_op(end_of_tape);
     is_tracing = false;
     return global_trace;
