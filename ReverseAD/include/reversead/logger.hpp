@@ -27,10 +27,13 @@ class Logger {
     return os;
   }
  private:
+  void reset(std::ostream* sink) {
+    _sink = sink;
+  }
   Logger(std::ostream* sink) :_sink(sink), _fatal(false){};
   Logger(std::ostream* sink, bool fatal) : _sink(sink), _fatal(fatal) {};
 
-  std::ostream* const _sink;
+  std::ostream* _sink;
   const bool _fatal;
 
   friend class Log;
@@ -38,6 +41,9 @@ class Logger {
 
 class Log {
  public:
+  void reset_info(std::ostream* infosink) {
+    info.reset(infosink);
+  }
   Log(std::ostream* infosink, std::ostream* warnsink, std::ostream* fatalsink)
     : info(infosink), warning(warnsink), fatal(fatalsink, true) {};
   Logger info;

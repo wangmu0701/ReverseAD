@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <iostream>
+#include "reversead/logger.hpp"
 #include "reversead/tape/abstract_tape.hpp"
 
 #define INITIAL_TAPE_VECTOR_SIZE 65536
@@ -31,6 +32,7 @@ class TrivialTape : public AbstractTape<Type> {
   Type get_next_r();
 
   void dump_tape();
+  void dump_tape(Logger& logger);
 
  private:
   std::vector<Type> data_;
@@ -110,6 +112,16 @@ void TrivialTape<Type>::dump_tape() {
   }
   std::cout << std::endl;
 }
+
+template <typename Type>
+void TrivialTape<Type>::dump_tape(Logger& logger) {
+  logger << "[" << data_.size() << "]";
+  for(size_t i = 0; i < data_.size(); i++) {
+    logger << " " << data_[i];
+  }
+  logger << std::endl;
+}
+
 } // namespace ReverseAD
 
 #endif // TRIVIAL_TAPE_H_

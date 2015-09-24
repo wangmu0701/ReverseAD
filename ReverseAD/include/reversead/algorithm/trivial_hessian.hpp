@@ -24,6 +24,7 @@ class TrivialHessian : public AbstractSerializable {
   int byte_size() const;
   void write_to_byte(char*) const;
   void debug() const;
+  void debug(Logger&) const;
 
   class enumerator {
    public:
@@ -119,6 +120,26 @@ void TrivialHessian<LocType, Base>::debug() const {
     while (has_next) {
       has_next = t_enum.get_next(y, w);
       std::cout << "H[" << t_iter->first << "," <<y << "] = "
+                << w << std::endl;
+    }
+    ++t_iter;
+  }
+}
+
+template <typename LocType, typename Base>
+void TrivialHessian<LocType, Base>::debug(Logger& logger) const {
+  typename std::map<LocType, TrivialAdjoint<LocType, Base> >::const_iterator
+    t_iter;
+  t_iter = _data.begin();
+  while (t_iter != _data.end()) {
+    typename TrivialAdjoint<LocType, Base>::enumerator t_enum =
+      t_iter->second.get_enumerator();
+    bool has_next = t_enum.has_next();
+    LocType y;
+    Base w;
+    while (has_next) {
+      has_next = t_enum.get_next(y, w);
+      logger << "H[" << t_iter->first << "," <<y << "] = "
                 << w << std::endl;
     }
     ++t_iter;

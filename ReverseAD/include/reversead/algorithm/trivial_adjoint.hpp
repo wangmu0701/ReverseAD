@@ -3,6 +3,7 @@
 
 #include <map>
 
+#include "reversead/logger.hpp"
 #include "abstract_serializable.hpp"
 
 namespace ReverseAD {
@@ -23,6 +24,7 @@ class TrivialAdjoint : public AbstractSerializable {
 
   // serializable
   void debug() const;
+  void debug(Logger&) const;
   int get_size() const;
   int byte_size() const;
   void write_to_byte(char* buf) const;
@@ -128,6 +130,16 @@ void TrivialAdjoint<LocType, Base>::debug() const {
   t_iter = _data.begin();
   while(t_iter != _data.end()) {
     std::cout << "A[" << t_iter->first << "]=" << t_iter->second << std::endl;
+    ++t_iter;
+  }
+}
+
+template <typename LocType, typename Base>
+void TrivialAdjoint<LocType, Base>::debug(Logger& logger) const {
+  typename std::map<LocType, Base>::const_iterator t_iter;
+  t_iter = _data.begin();
+  while(t_iter != _data.end()) {
+    logger << "A[" << t_iter->first << "]=" << t_iter->second << std::endl;
     ++t_iter;
   }
 }

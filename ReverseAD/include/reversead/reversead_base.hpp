@@ -18,6 +18,7 @@ namespace ReverseAD {
   typedef unsigned int opbyte;
   typedef unsigned int locint;
 
+  void logging_on();
   void trace_on();
   locint get_next_loc();
   locint get_next_ind_loc();

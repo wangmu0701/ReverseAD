@@ -87,6 +87,14 @@ class TrivialTrace : public AbstractTrace {
     val_tape->dump_tape();
   }
    
+  inline void dump_trace(Logger& logger) {
+    logger << "Op tape:" << std::endl;
+    op_tape->dump_tape(logger);
+    logger << "Loc tape:" << std::endl;
+    loc_tape->dump_tape(logger);
+    logger << "Val tape:" << std::endl;
+    val_tape->dump_tape(logger);
+  }
  private:
   TrivialTape<opbyte> *op_tape;
   TrivialTape<locint> *loc_tape;

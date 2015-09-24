@@ -1,6 +1,7 @@
 #ifndef ABSTRACT_TRACE_H_
 #define ABSTRACT_TRACE_H_
 
+#include "reversead/logger.hpp"
 #include "reversead/reversead_base.hpp"
 
 namespace ReverseAD {
@@ -30,6 +31,7 @@ class AbstractTrace {
 
   // for debug
   virtual void dump_trace() = 0;
+  virtual void dump_trace(Logger& logger) = 0;
 };
 
 } // namespace ReverseAD

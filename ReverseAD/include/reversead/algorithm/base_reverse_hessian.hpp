@@ -46,9 +46,9 @@ class BaseReverseHessian {
     }
     reverse_local_hessian(ind_num, dep_num);
     for (auto& kv : dep_hess) {
-      std::cout << "Dep : " << kv.first << std::endl;
-      kv.second.adjoint_vals.debug();
-      kv.second.hessian_vals.debug();
+      log.info << "Dep : " << kv.first << std::endl;
+      kv.second.adjoint_vals.debug(log.info);
+      kv.second.hessian_vals.debug(log.info);
     }
     //retrieve_sparse_format(rind, cind, values);
   }
@@ -60,11 +60,7 @@ class BaseReverseHessian {
     int dep_count = 0;
 
     locint res;
-    locint arg1;
-    locint arg2;
     double coval;
-    Base arg1_val;
-    Base arg2_val;
 
     trace->init_reverse();
     opbyte op = trace->get_next_op_r();

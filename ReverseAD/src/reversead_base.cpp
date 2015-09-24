@@ -40,6 +40,10 @@ namespace ReverseAD {
     return ret;
   }
 
+  void logging_on() {
+    log.reset_info(&(std::cout));   
+  }
+
   TrivialTrace* trace_off() {
     log.info << "number of indepent = " << curr_ind_loc - 1 << std::endl;
     log.info << "number of intermediate = " << curr_loc-BASE_LOC << std::endl;
