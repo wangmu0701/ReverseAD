@@ -10,11 +10,13 @@ namespace ReverseAD {
   bool is_tracing = false;
   locint curr_loc = 0;
   locint curr_ind_loc = 0;
+  locint curr_dummy_loc = 0;
   int rank = 0;
   void trace_on() {
     global_trace = new TrivialTrace();
     is_tracing = true;
     curr_loc = BASE_LOC;
+    curr_dummy_loc = BASE_LOC - 1;
     // independent location begins with 1 so that null_loc can be 0
     curr_ind_loc = 1;
     global_trace->put_op(start_of_tape);
@@ -32,6 +34,12 @@ namespace ReverseAD {
     return ret;
   }
 
+  locint get_next_dummy_loc() {
+    locint ret = curr_dummy_loc--;
+    ret = (ret << RANK_SHIFT) | (rank & RANK_BASE);
+    return ret;
+  }
+
   TrivialTrace* trace_off() {
     log.info << "number of indepent = " << curr_ind_loc - 1 << std::endl;
     log.info << "number of intermediate = " << curr_loc-BASE_LOC << std::endl;
@@ -41,6 +49,12 @@ namespace ReverseAD {
     global_trace->put_op(end_of_tape);
     is_tracing = false;
     return global_trace;
+  }
+
+  void trace_put(opbyte op) {
+    if (is_tracing) {
+      global_trace->put_op(op);
+    }
   }
 
   void trace_put(opbyte op, locint res, locint arg) {

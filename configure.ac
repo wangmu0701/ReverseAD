@@ -29,6 +29,7 @@ AC_CONFIG_FILES(Makefile
                 ReverseAD/test/trace/Makefile
                 ReverseAD/test/rosenbrock/Makefile
                 ReverseAD/test/simple/Makefile
+                ReverseAD/test/mpi/Makefile
 )
 
 AC_OUTPUT

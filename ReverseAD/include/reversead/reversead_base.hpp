@@ -21,8 +21,10 @@ namespace ReverseAD {
   void trace_on();
   locint get_next_loc();
   locint get_next_ind_loc();
+  locint get_next_dummy_loc();
   TrivialTrace* trace_off();
-  
+
+  void trace_put(opbyte);  
   void trace_put(opbyte, locint, locint);
   void trace_put(opbyte, locint, locint, locint);
   void trace_put(opbyte, locint, double);

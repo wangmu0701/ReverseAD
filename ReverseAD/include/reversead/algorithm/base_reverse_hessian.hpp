@@ -1,6 +1,7 @@
 #ifndef BASE_REVERSE_HESSIAN_H_
 #define BASE_REVERSE_HESSIAN_H_
 
+#include <set>
 #include <vector>
 #include <map>
 #include <iostream>
@@ -28,6 +29,12 @@ class BaseReverseHessian {
   typedef TrivialAdjoint<locint, Base> type_adjoint;
   typedef TrivialHessian<locint, Base> type_hessian;
 
+  class SingleDeriv {
+   public:
+    type_adjoint adjoint_vals;
+    type_hessian hessian_vals;
+  };
+
   BaseReverseHessian(AbstractTrace* trace) {
     this->trace = trace;
   }
@@ -35,10 +42,15 @@ class BaseReverseHessian {
           locint** rind, locint** cind, Base** values) {
     if (dep_num != 1) {
       log.warning<< "Must be of a scalar functioni : dep_num = 1" << std::endl; 
-      return;
+      //return;
     }
     reverse_local_hessian(ind_num, dep_num);
-    retrieve_sparse_format(rind, cind, values);
+    for (auto& kv : dep_hess) {
+      std::cout << "Dep : " << kv.first << std::endl;
+      kv.second.adjoint_vals.debug();
+      kv.second.hessian_vals.debug();
+    }
+    //retrieve_sparse_format(rind, cind, values);
   }
  private:
   void reverse_local_hessian(int ind_num, int dep_num) {
@@ -67,7 +79,7 @@ class BaseReverseHessian {
         case assign_ind:
           if (ind_count < 0) {
             log.warning << "more independents found on tape than : " << ind_num << std::endl;
-            return;
+            //return;
           }
           res = trace->get_next_loc_r();;
           coval = trace->get_next_val_r();
@@ -77,11 +89,13 @@ class BaseReverseHessian {
         case assign_dep:
           if (dep_count >= dep_num) {
             log.warning << "more dependents found on tape than : " << ind_num << std::endl;
-            return;
+            //return;
           }
           res = trace->get_next_loc_r();
           coval = trace->get_next_val_r();
-          adjoint_vals[res] = 1.0;
+          dep_hess[res].adjoint_vals[res] = 1.0;
+          reverse_live[res].insert(res);
+          //adjoint_vals[res] = 1.0;
           dep_count++; 
           break;
         case assign_d:
@@ -146,18 +160,29 @@ class BaseReverseHessian {
       }
       if (info.r != NULL_LOC) {
         //info.debug();
-        Base w = adjoint_vals.get_and_erase(info.r);
-        type_adjoint r = hessian_vals.get_and_erase(info.r);
-        compute_adjoint(info, adjoint_vals, w);
-        compute_hessian(info, adjoint_vals, hessian_vals, w, r);
-        //adjoint_vals.debug();
-        //hessian_vals.debug();
+        std::set<locint> dep_set = std::move(reverse_live[info.r]);
+        reverse_live.erase(info.r);
+        for (const locint& dep : dep_set) {
+          process_sac(info, dep_hess[dep]);
+          if (info.x != NULL_LOC) {
+            reverse_live[info.x].insert(dep);
+          }
+          if (info.y != NULL_LOC) {
+            reverse_live[info.y].insert(dep);
+          }
+        }
       } 
       op = trace->get_next_op_r();
     }
     return;
   }
-
+  void process_sac(DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) {
+    Base w = deriv.adjoint_vals.get_and_erase(info.r);
+    type_adjoint r = deriv.hessian_vals.get_and_erase(info.r);
+    compute_adjoint(info, deriv.adjoint_vals, w);
+    compute_hessian(info, deriv.adjoint_vals, deriv.hessian_vals, w, r);
+  }
+  /*
   void retrieve_sparse_format(locint** rind, locint** cind, Base** values) {
     int size = hessian_vals.get_size();
     (*rind) = new locint[size];
@@ -180,6 +205,7 @@ class BaseReverseHessian {
                 << (*values)[i] << std::endl;
     }
   }
+  */
 
   void compute_adjoint(DerivativeInfo<locint, Base>& info,
                        type_adjoint& adjoint_vals,
@@ -284,9 +310,10 @@ class BaseReverseHessian {
 
   // private members
   AbstractTrace* trace;
-  type_adjoint adjoint_vals;
-  type_hessian hessian_vals;
+  std::map<locint, std::set<locint> > reverse_live;
+  std::map<locint, SingleDeriv> dep_hess;
   std::map<locint, locint> indep_index_map;
+
 
 };
 

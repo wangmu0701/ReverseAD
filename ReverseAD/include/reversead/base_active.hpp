@@ -20,7 +20,8 @@ class BaseActive {
   #include "base_active_mult.ipp" // mult *
   #include "base_active_minus.ipp" // minus -
   
-  inline Base getVal() { return val;}
+  inline Base getVal() {return val;}
+  inline Base getLoc() {return loc;}
  private:
   Base val;
   locint loc;

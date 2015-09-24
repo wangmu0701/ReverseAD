@@ -27,7 +27,15 @@
     trace_put(assign_a, this->loc, other.loc);
   }
 
-  BaseActive<Base>& operator <<= (Base val) {
+  void markDummyInd(const Base& val) {
+    this->val = val;
+    this->loc = get_next_dummy_loc();
+    log.info << "dummy ind: " << this << "[" << this->loc << "] = "
+             << val << std::endl;
+    trace_put(assign_ind, this->loc, val);
+  }
+
+  BaseActive<Base>& operator <<= (const Base& val) {
     this->val = val;
     this->loc = get_next_ind_loc();
     trace_put(assign_ind, this->loc, val);

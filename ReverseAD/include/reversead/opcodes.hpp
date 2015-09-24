@@ -16,7 +16,9 @@ enum OPCODES {
   minus_a_d,
   minus_d_a,
   mult_a_a,
-  mult_d_a
+  mult_d_a,
+  rmpi_send,
+  rmpi_recv
 };
 
 } // namespace ReverseAD

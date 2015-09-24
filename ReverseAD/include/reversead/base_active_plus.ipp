@@ -28,7 +28,7 @@
   // R-value plus
   friend BaseActive<Base>&& operator+(BaseActive<Base>&& lhs, const BaseActive<Base>& rhs) {
     lhs.val += rhs.val;
-    opbyte resloc = get_next_loc();
+    locint resloc = get_next_loc();
     trace_put(plus_a_a, resloc, lhs.loc, rhs.loc);
     lhs.loc = resloc;
     log.info << "R(" << &lhs <<")[" << resloc << "] = " 
@@ -38,7 +38,7 @@
   }
   friend BaseActive<Base>&& operator+(const BaseActive<Base>& lhs, BaseActive<Base>&& rhs) {
     rhs.val += lhs.val;
-    opbyte resloc = get_next_loc();
+    locint resloc = get_next_loc();
     trace_put(plus_a_a, resloc, lhs.loc, rhs.loc);
     rhs.loc = resloc;
     log.info << "R(" << &rhs <<")[" << resloc << "] = " 
@@ -48,7 +48,7 @@
   }
   friend BaseActive<Base>&& operator+(BaseActive<Base>&& lhs, BaseActive<Base>&& rhs) {
     lhs.val += rhs.val;
-    opbyte resloc = get_next_loc();
+    locint resloc = get_next_loc();
     trace_put(plus_a_a, resloc, lhs.loc, rhs.loc);
     lhs.loc = resloc;
     log.info << "R(" << &lhs <<")[" << resloc << "] = " 
@@ -58,7 +58,7 @@
   }
   friend BaseActive<Base>&& operator+(BaseActive<Base>&& lhs, const Base& val) {
     lhs.val += val;
-    opbyte resloc = get_next_loc();
+    locint resloc = get_next_loc();
     trace_put(plus_d_a, resloc, lhs.loc, val);
     lhs.loc = resloc;
     log.info << "R(" << &lhs <<")[" << resloc << "] = " 
@@ -68,7 +68,7 @@
   }
   friend BaseActive<Base>&& operator+(const Base& val, BaseActive<Base>&& rhs) {
     rhs.val += val;
-    opbyte resloc = get_next_loc();
+    locint resloc = get_next_loc();
     trace_put(plus_d_a, resloc, rhs.loc, val);
     rhs.loc = resloc;
     log.info << "R(" << &rhs <<")[" << resloc << "] = " 

@@ -25,7 +25,7 @@
 #ifdef REVERSE_AD_CPP11 
   // R-value mult
   friend BaseActive<Base>&& operator*(BaseActive<Base>&& lhs, const BaseActive<Base>& rhs) {
-    opbyte resloc = get_next_loc();
+    locint resloc = get_next_loc();
     trace_put(mult_a_a, resloc, lhs.loc, rhs.loc, lhs.val, rhs.val);
     lhs.val *= rhs.val;
     lhs.loc = resloc;
@@ -34,7 +34,7 @@
     return std::move(lhs); 
   }
   friend BaseActive<Base>&& operator*(const BaseActive<Base>& lhs, BaseActive<Base>&& rhs) {
-    opbyte resloc = get_next_loc();
+    locint resloc = get_next_loc();
     trace_put(mult_a_a, resloc, lhs.loc, rhs.loc, lhs.val, rhs.val);
     rhs.val *= lhs.val;
     rhs.loc = resloc;
@@ -43,7 +43,7 @@
     return std::move(rhs);
   }
   friend BaseActive<Base>&& operator*(BaseActive<Base>&& lhs, BaseActive<Base>&& rhs) {
-    opbyte resloc = get_next_loc();
+    locint resloc = get_next_loc();
     trace_put(mult_a_a, resloc, lhs.loc, rhs.loc, lhs.val, rhs.val);
     lhs.val *= rhs.val;
     lhs.loc = resloc;
@@ -53,7 +53,7 @@
   }
   friend BaseActive<Base>&& operator*(BaseActive<Base>&& lhs, const Base& val) {
     lhs.val *= val;
-    opbyte resloc = get_next_loc();
+    locint resloc = get_next_loc();
     trace_put(mult_d_a, resloc, lhs.loc, val);
     lhs.loc = resloc;
     log.info << "R(" << &lhs <<")[" << lhs.loc << "] = " 
@@ -62,7 +62,7 @@
   }
   friend BaseActive<Base>&& operator*(const Base& val, BaseActive<Base>&& rhs) {
     rhs.val *= val;
-    opbyte resloc = get_next_loc();
+    locint resloc = get_next_loc();
     trace_put(mult_d_a, resloc, rhs.loc, val);
     rhs.loc = resloc;
     log.info << "R(" << &rhs <<")[" << resloc << "] = " 
