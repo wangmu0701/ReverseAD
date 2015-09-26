@@ -22,6 +22,9 @@ class TrivialAdjoint : public AbstractSerializable {
   Base& operator[] (LocType x);
   void erase(LocType x);
 
+  void increase(const LocType& x, const Base& w) {
+    _data[x] += w;
+  }
   // serializable
   void debug() const;
   void debug(Logger&) const;

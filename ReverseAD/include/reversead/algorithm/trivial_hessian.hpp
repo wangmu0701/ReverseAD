@@ -19,6 +19,14 @@ class TrivialHessian : public AbstractSerializable {
   TrivialAdjoint<LocType, Base> get_and_erase(const LocType& x);
   TrivialAdjoint<LocType, Base>& operator [] (LocType x);
 
+  void increase(const LocType& x, const LocType& y, const Base& w) {
+    if (x >= y) {
+      _data[x][y] += w;
+    } else {
+      _data[y][x] += w;
+    }
+  }
+
   // serializable
   int get_size() const;
   int byte_size() const;
