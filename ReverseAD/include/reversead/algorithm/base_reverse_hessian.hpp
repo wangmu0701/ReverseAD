@@ -31,12 +31,37 @@ class BaseReverseHessian {
 
   class SingleDeriv {
    public:
-    type_adjoint adjoint_vals;
-    type_hessian hessian_vals;
+    SingleDeriv() {
+      adjoint_vals = new type_adjoint();
+      hessian_vals = new type_hessian();
+    }
+    SingleDeriv(char* buf) {
+      adjoint_vals = new type_adjoint(buf);
+      hessian_vals = new type_hessian(&buf[adjoint_vals->byte_size()]);
+    }
+    int byte_size() {
+      return adjoint_vals->byte_size() + hessian_vals->byte_size();
+    }
+    void write_to_byte(char* buf) {
+      adjoint_vals->write_to_byte(buf);
+      hessian_vals->write_to_byte(&buf[adjoint_vals->byte_size()]);
+    }
+    void debug(Logger& logger) {
+      adjoint_vals->debug(logger);
+      hessian_vals->debug(logger);
+    }
+    type_adjoint* adjoint_vals;
+    type_hessian* hessian_vals;
   };
 
   BaseReverseHessian(AbstractTrace* trace) {
     this->trace = trace;
+    this->comm_tape = nullptr;
+  }
+  BaseReverseHessian(AbstractTrace* trace,
+                     AbstractTape<SendRecvInfo>* comm_tape) {
+    this->trace = trace;
+    this->comm_tape = comm_tape;
   }
   void compute(int ind_num, int dep_num,
           locint** rind, locint** cind, Base** values) {
@@ -45,12 +70,17 @@ class BaseReverseHessian {
       //return;
     }
     reverse_local_hessian(ind_num, dep_num);
+    //retrieve_sparse_format(rind, cind, values);
+  }
+  void compute_mpi() {
+    // here we should pass the correct num for ind and dep
+    reverse_local_hessian(0, 0);
     for (auto& kv : dep_hess) {
       log.info << "Dep : " << kv.first << std::endl;
-      kv.second.adjoint_vals.debug(log.info);
-      kv.second.hessian_vals.debug(log.info);
+      kv.second.adjoint_vals->debug(log.info);
+      kv.second.hessian_vals->debug(log.info);
     }
-    //retrieve_sparse_format(rind, cind, values);
+    forward_global_hessian();
   }
  private:
   void reverse_local_hessian(int ind_num, int dep_num) {
@@ -89,7 +119,7 @@ class BaseReverseHessian {
           }
           res = trace->get_next_loc_r();
           coval = trace->get_next_val_r();
-          dep_hess[res].adjoint_vals[res] = 1.0;
+          (*(dep_hess[res].adjoint_vals))[res] = 1.0;
           reverse_live[res].insert(res);
           //adjoint_vals[res] = 1.0;
           dep_count++; 
@@ -151,6 +181,9 @@ class BaseReverseHessian {
           info.x = trace->get_next_loc_r();
           info.dx = trace->get_next_val_r();
           break;
+        case rmpi_send:
+        case rmpi_recv:
+          break;
         default:
           log.warning << "Unrecongized opcode : " << (int)op << std::endl; 
       }
@@ -172,11 +205,147 @@ class BaseReverseHessian {
     }
     return;
   }
+  void forward_global_hessian() {
+    if (!comm_tape) {return;}
+    comm_tape->init_forward();
+    while(comm_tape->has_next_f()) {
+      SendRecvInfo sr_info = comm_tape->get_next_f();
+      log.info << sr_info;
+      if (sr_info.comm_op == COMM_RMPI_SEND) {
+        int total_buf_size = 0;
+        for (int i = 0; i < sr_info.count; i++) {
+          total_buf_size += dep_hess[sr_info.locs[i]].byte_size();
+        }
+        char* buf = new char[total_buf_size];
+        total_buf_size = 0;
+        for (int i = 0; i < sr_info.count; i++) {
+          dep_hess[sr_info.locs[i]].write_to_byte(&buf[total_buf_size]);
+          total_buf_size += dep_hess[sr_info.locs[i]].byte_size();
+          dep_hess.erase(sr_info.locs[i]);
+        }
+        MPI_Send(&total_buf_size, 1, MPI_INT, sr_info.peer,
+                 sr_info.tag, sr_info.comm);
+        MPI_Send((void*)buf, total_buf_size, MPI_CHAR, sr_info.peer,
+                 sr_info.tag, sr_info.comm);
+        delete buf;
+      } else if (sr_info.comm_op == COMM_RMPI_RECV){
+        int total_buf_size = 0;
+        MPI_Recv(&total_buf_size, 1, MPI_INT, sr_info.peer,
+                 sr_info.tag, sr_info.comm, MPI_STATUS_IGNORE);
+        char* buf = new char[total_buf_size];
+        MPI_Recv((void*)buf, total_buf_size, MPI_CHAR, sr_info.peer,
+                 sr_info.tag, sr_info.comm, MPI_STATUS_IGNORE);
+        total_buf_size = 0;
+        for(int i = 0; i < sr_info.count; i++) {
+          SingleDeriv local_deriv(&buf[total_buf_size]);
+          local_deriv.debug(log.info);
+          // we only remove things from reverse_live_set during forward
+          locint dummy_ind = sr_info.locs[i];
+          std::set<locint> dep_set = std::move(reverse_live[dummy_ind]);
+          reverse_live.erase(dummy_ind);
+          for (const locint& dep : dep_set) {
+            log.info << "processing : " << dep << std::endl;
+            dep_hess[dep].debug(log.info);
+            process_single_deriv(dummy_ind, local_deriv, dep_hess[dep]);
+            dep_hess[dep].debug(log.info);
+          }
+        }
+      }
+    }
+  }
+  void process_single_deriv(locint local_dep, SingleDeriv& local_deriv, SingleDeriv& deriv) {
+    Base w = deriv.adjoint_vals->get_and_erase(local_dep);
+    type_adjoint r = deriv.hessian_vals->get_and_erase(local_dep);
+    // compute adjoint;
+    compute_adjoint_deriv(*(local_deriv.adjoint_vals),
+                          *(deriv.adjoint_vals),
+                          w);
+    // compute hessian;
+    compute_hessian_deriv(local_dep,
+                          *(local_deriv.adjoint_vals),
+                          *(local_deriv.hessian_vals),
+                          *(deriv.hessian_vals),
+                          w,
+                          r);
+  }
+  void compute_adjoint_deriv(type_adjoint& local_adjoint,
+                             type_adjoint& global_adjoint,
+                             Base& w) {
+    if (w != 0.0) {
+      locint v;
+      Base vw;
+      typename type_adjoint::enumerator l_enum = local_adjoint.get_enumerator();
+      bool has_next = l_enum.has_next();
+      while(has_next) {
+        has_next = l_enum.get_next(v, vw);
+        global_adjoint[v] += w * vw;
+      }
+    }
+  }
+  void compute_hessian_deriv(locint local_dep,
+                             type_adjoint& local_adjoint,
+                             type_hessian& local_hessian,
+                             type_hessian& global_hessian,
+                             Base& w,
+                             type_adjoint& r) {
+    locint p, v;
+    Base pw, vw;
+    if (r[local_dep] != 0.0) {
+      Base dw = r[local_dep];
+      typename type_adjoint::enumerator a_enum = local_adjoint.get_enumerator();
+      bool a_has_next = a_enum.has_next();
+      while(a_has_next) {
+        typename type_adjoint::enumerator a2_enum = a_enum;
+        a_has_next = a_enum.get_next(p, pw);
+        bool a2_has_next = true;
+        while(a2_has_next) {
+          a2_has_next = a2_enum.get_next(v, vw);
+          if (p >= v) {
+            global_hessian[p][v] += dw * pw * vw;
+          } else {
+            global_hessian[v][p] += dw * pw * vw;
+          }
+        }
+      }
+    }
+    r.erase(local_dep);
+    typename type_adjoint::enumerator r_enum = r.get_enumerator();
+    bool r_has_next = r_enum.has_next();
+    while(r_has_next) {
+      r_has_next = r_enum.get_next(p, pw);
+      typename type_adjoint::enumerator a_enum = local_adjoint.get_enumerator();
+      bool a_has_next = a_enum.has_next();
+      while(a_has_next) {
+        a_has_next = a_enum.get_next(v, vw);
+        if (p != v) {
+          if (p >= v) {
+            global_hessian[p][v] += pw * vw;
+          } else {
+            global_hessian[v][p] += pw * vw;
+          }
+        } else {
+          global_hessian[p][v] += 2.0 * pw * vw;
+        }
+      }
+    }
+    if (w != 0.0) {
+      typename type_hessian::enumerator h_enum = local_hessian.get_enumerator();
+      bool h_has_next = h_enum.has_next();
+      while(h_has_next) {
+        h_has_next = h_enum.get_next(p, v, pw);
+        if (p >= v) {
+          global_hessian[p][v] += w * pw;
+        } else {
+          global_hessian[v][p] += w * pw;
+        }
+      }
+    }
+  }
   void process_sac(DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) {
-    Base w = deriv.adjoint_vals.get_and_erase(info.r);
-    type_adjoint r = deriv.hessian_vals.get_and_erase(info.r);
-    compute_adjoint(info, deriv.adjoint_vals, w);
-    compute_hessian(info, deriv.adjoint_vals, deriv.hessian_vals, w, r);
+    Base w = deriv.adjoint_vals->get_and_erase(info.r);
+    type_adjoint r = deriv.hessian_vals->get_and_erase(info.r);
+    compute_adjoint_sac(info, *(deriv.adjoint_vals), w);
+    compute_hessian_sac(info, *(deriv.adjoint_vals),*(deriv.hessian_vals),w,r);
   }
   /*
   void retrieve_sparse_format(locint** rind, locint** cind, Base** values) {
@@ -203,9 +372,9 @@ class BaseReverseHessian {
   }
   */
 
-  void compute_adjoint(DerivativeInfo<locint, Base>& info,
-                       type_adjoint& adjoint_vals,
-                       Base& w) {
+  void compute_adjoint_sac(DerivativeInfo<locint, Base>& info,
+                           type_adjoint& adjoint_vals,
+                           Base& w) {
     if (info.x != NULL_LOC) {
       adjoint_vals[info.x] += w * info.dx;
     }
@@ -213,11 +382,11 @@ class BaseReverseHessian {
       adjoint_vals[info.y] += w * info.dy;
     }
   }
-  void compute_hessian(DerivativeInfo<locint, Base>& info,
-                       type_adjoint& adjoint_vals,
-                       type_hessian& hessian_vals,
-                       Base& w,
-                       type_adjoint& r) {
+  void compute_hessian_sac(DerivativeInfo<locint, Base>& info,
+                           type_adjoint& adjoint_vals,
+                           type_hessian& hessian_vals,
+                           Base& w,
+                           type_adjoint& r) {
     typename type_adjoint::enumerator r_enum =
       r.get_enumerator();
     bool has_next = r_enum.has_next();
@@ -306,6 +475,7 @@ class BaseReverseHessian {
 
   // private members
   AbstractTrace* trace;
+  AbstractTape<SendRecvInfo>* comm_tape;
   std::map<locint, std::set<locint> > reverse_live;
   std::map<locint, SingleDeriv> dep_hess;
   std::map<locint, locint> indep_index_map;

@@ -8,15 +8,19 @@ using ReverseAD::RMPI_Send;
 using ReverseAD::RMPI_Recv;
 using ReverseAD::RMPI_ADOUBLE;
 using ReverseAD::BaseReverseHessian;
+using ReverseAD::RMPI_get_comm_tape;
 
 int main(int argc, char** argv) {
   int size;
   int rank;
   ReverseAD::RMPI_Init(&argc, &argv);
-  ReverseAD::logging_on();
+
   MPI_Comm_size(MPI_COMM_WORLD, &size);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   std::cout << "rank : " << rank << " of " << size << std::endl;
+  if (rank == 0) {
+    ReverseAD::logging_on();
+  }
   ReverseAD::trace_on();
   if (rank == 0) {
     adouble v0;
@@ -37,11 +41,8 @@ int main(int argc, char** argv) {
     RMPI_Send(&t1, 1, RMPI_ADOUBLE, 0, 0, MPI_COMM_WORLD);
   }
   ReverseAD::TrivialTrace* trace = ReverseAD::trace_off();
-  if (rank == 0) {
-    trace->dump_trace();
-    BaseReverseHessian<double> hessian(trace);
-    hessian.compute(10, 2, NULL, NULL, NULL);
-  }
+  BaseReverseHessian<double> hessian(trace, RMPI_get_comm_tape());
+  hessian.compute_mpi();
 
   ReverseAD::RMPI_Finalize();
 }

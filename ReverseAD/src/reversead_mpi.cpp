@@ -6,20 +6,29 @@
 
 namespace ReverseAD {
 
-  extern bool is_tracing;
   MPI_Datatype RMPI_ADOUBLE;
-  TrivialTape<SendRecvInfo> comm_trace;
-  
+  extern bool is_tracing;
+  extern int rank;
+ 
+  TrivialTape<SendRecvInfo>* comm_tape; 
   void RMPI_Init(int* argc, char** argv[]) {
     MPI_Init(argc, argv);
     MPI_Type_contiguous(1, MPI_DOUBLE, &RMPI_ADOUBLE);
     MPI_Type_commit(&RMPI_ADOUBLE);
-    comm_trace.clear();
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    comm_tape = new TrivialTape<SendRecvInfo>();
   }
 
   void RMPI_Finalize() {
     if (RMPI_ADOUBLE != MPI_DATATYPE_NULL) {MPI_Type_free(&RMPI_ADOUBLE);}
     MPI_Finalize();
+  }
+
+  void trace_put(const SendRecvInfo& sr_info) {
+    comm_tape->put(sr_info);
+  }
+  AbstractTape<SendRecvInfo>* RMPI_get_comm_tape() {
+    return comm_tape;
   }
 
   int RMPI_Send(void* buf,
@@ -40,7 +49,7 @@ namespace ReverseAD {
       if (is_tracing) {
         trace_put(rmpi_send);
         SendRecvInfo info(COMM_RMPI_SEND, count, dest, tag, comm, locs);
-        comm_trace.put(info);
+        trace_put(info);
       } else {
         delete locs;
       }
@@ -73,7 +82,7 @@ namespace ReverseAD {
       if (is_tracing) {
         trace_put(rmpi_recv);
         SendRecvInfo info(COMM_RMPI_RECV, count, src, tag, comm, locs);
-        comm_trace.put(info);
+        trace_put(info);
       } else {
         delete locs;
       }
