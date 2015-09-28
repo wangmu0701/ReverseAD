@@ -15,6 +15,7 @@ test_trace
 test_rosenbrock
 test_simple
 test_mpi
+test_mpi_reduce
 test_base_adouble
 test_base_function_replay
 test_base_reverse_adjoint

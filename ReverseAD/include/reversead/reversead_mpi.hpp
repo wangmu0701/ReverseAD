@@ -60,6 +60,13 @@ namespace ReverseAD {
                 MPI_Comm comm,
                 MPI_Status* status);
 
+  int RMPI_Reduce(void* sendbuf,
+                  void* recvbuf,
+                  int count,
+                  MPI_Datatype datatype,
+                  MPI_Op op,
+                  int root,
+                  MPI_Comm comm);
 } // namespace ReverseAD
 
 #endif // REVERSE_AD_MPI_H_
