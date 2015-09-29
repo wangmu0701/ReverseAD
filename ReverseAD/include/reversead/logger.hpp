@@ -51,6 +51,8 @@ class Log {
   Logger fatal;
 };
 
+double get_timing();
+
 } // namespace ReverseAD
 
 #endif // REVERSE_AD_LOGGER_H_

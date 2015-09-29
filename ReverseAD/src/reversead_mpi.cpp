@@ -4,6 +4,8 @@
 #include "reversead/reversead_mpi.hpp"
 #include "reversead/tape/trivial_tape.hpp"
 
+#define MPI_LOCINT MPI_UNSIGNED
+
 namespace ReverseAD {
 
   MPI_Datatype RMPI_ADOUBLE;
@@ -32,6 +34,55 @@ namespace ReverseAD {
     return comm_tape;
   }
 
+  int RMPI_Send_ind(adouble* buf,
+                    int count,
+                    int dest,
+                    int tag,
+                    MPI_Comm comm) {
+    int rc = MPI_SUCCESS;
+    double* send_val = new double[count];
+    locint* send_loc = new locint[count];
+    for (int i = 0; i < count; i++) {
+      send_val[i] = buf[i].getVal();
+      send_loc[i] = buf[i].getLoc();
+    }
+    rc = MPI_Send((void*)send_val, count, MPI_DOUBLE, dest, tag, comm);
+    if (rc != MPI_SUCCESS) {
+      log.fatal << "Sending vals in Send_ind error." << std::endl;
+    }
+    rc = MPI_Send((void*)send_loc, count, MPI_LOCINT, dest, tag, comm);
+    if (rc != MPI_SUCCESS) {
+      log.fatal << "Sending locs in Send_ind error." << std::endl;
+    }
+    delete[] send_val;
+    delete[] send_loc;
+    return rc;
+  }
+
+  int RMPI_Recv_ind(adouble* buf,
+                    int count,
+                    int src,
+                    int tag,
+                    MPI_Comm comm) {
+    int rc= MPI_SUCCESS;
+    double* recv_val = new double[count];
+    locint* recv_loc = new locint[count];
+    rc = MPI_Recv((void*)recv_val, count, MPI_DOUBLE, src, tag, comm, MPI_STATUS_IGNORE);
+    if (rc != MPI_SUCCESS) {
+      log.fatal << "Recving vals in Send_ind error." << std::endl;
+    }
+    rc = MPI_Recv((void*)recv_loc, count, MPI_LOCINT, src, tag, comm, MPI_STATUS_IGNORE);
+    if (rc != MPI_SUCCESS) {
+      log.fatal << "Recving locs in Send_ind error." << std::endl;
+    }
+    for (int i = 0; i < count; i++) {
+      buf[i].markRemoteInd(recv_val[i], recv_loc[i]);
+    }
+    delete[] recv_val;
+    delete[] recv_loc;
+    return rc;
+  }
+
   int RMPI_Send(void* buf,
                 int count,
                 MPI_Datatype datatype,
@@ -52,10 +103,10 @@ namespace ReverseAD {
         SendRecvInfo info(COMM_RMPI_SEND, count, dest, tag, comm, locs);
         trace_put(info);
       } else {
-        delete locs;
+        delete[] locs;
       }
       rc = MPI_Send((void*)send_buf, count, MPI_DOUBLE, dest, tag, comm);
-      delete send_buf;
+      delete[] send_buf;
     } else {
       rc = MPI_Send(buf, count, datatype, dest, tag, comm);
     }
@@ -85,7 +136,7 @@ namespace ReverseAD {
         SendRecvInfo info(COMM_RMPI_RECV, count, src, tag, comm, locs);
         trace_put(info);
       } else {
-        delete locs;
+        delete[] locs;
       }
     } else {
       rc = MPI_Recv(buf, count, datatype, src, tag, comm, status);
@@ -108,7 +159,6 @@ namespace ReverseAD {
       int myid;
       MPI_Comm_size(comm, &size);
       MPI_Comm_rank(comm, &myid);
-      int d = 0;
       int p = 1;
       int mask, peer;
       while(p < size) {
@@ -117,7 +167,6 @@ namespace ReverseAD {
           peer = myid ^ p;
           if (peer < size) {
             if ((myid & p) == 0) {
-              std::cout << myid << "recv form : " << peer << std::endl;
               rc = RMPI_Recv((void*)t_buf, count, RMPI_ADOUBLE, peer, 0, comm,
                              MPI_STATUS_IGNORE);
               for (int i = 0; i < count; i++) {
@@ -130,13 +179,12 @@ namespace ReverseAD {
                 }
               }
             } else {
-              std::cout << myid << "send to : " << peer << std::endl;
               rc = RMPI_Send(sendbuf, count, RMPI_ADOUBLE, peer, 0, comm);
             }
           }
         }
         if (rc != MPI_SUCCESS) {
-          log.warning << "RMPI_Reduct fail on : " << myid << std::endl;
+          log.fatal << "RMPI_Reduce fail on : " << myid << std::endl;
         }
         p = p * 2;
       }

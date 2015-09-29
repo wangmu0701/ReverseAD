@@ -2,7 +2,7 @@
 
 #include "reversead/reversead.hpp"
 
-#define N 5
+#define N 4
 
 int main() {
   adouble* xad = new adouble[N];
@@ -10,8 +10,10 @@ int main() {
   double* x = new double[N];
   double y;
   for (int i = 0; i < N; i++) {
-    x[i] = i;
+    x[i] = i+1;
   }
+  ReverseAD::logging_on();
+  ReverseAD::get_timing();
   ReverseAD::trace_on();
   yad = 0;
   for (int i = 0; i < N; i++) {
@@ -24,14 +26,17 @@ int main() {
   yad >>= y;
   std::cout << "yad = " << yad.getVal() << std::endl;
   ReverseAD::TrivialTrace* trace = ReverseAD::trace_off();
+  double time_elapsed = ReverseAD::get_timing();
+  std::cout << "overloaded function time = " << time_elapsed << std::endl;
+
   ReverseAD::BaseFunctionReplay<double> replay(trace);
   double* ry = replay.replay(x, N, 1);
   std::cout << " ry = " << ry[0] << std::endl;
-  ReverseAD::BaseReverseAdjoint<double> adjoint(trace);
-  double ay = 1;
-  double** ax = adjoint.compute(&ay, N, 1);
-  for (int i = 0; i < N; i++) {
-    std::cout<<"ax["<<i<<"] = " << ax[0][i] << std::endl;
-  }
-  delete x;
+  ReverseAD::get_timing();
+  ReverseAD::BaseReverseHessian<double> hessian(trace);
+  hessian.compute(N, 1, nullptr, nullptr, nullptr);
+  time_elapsed = ReverseAD::get_timing();
+  std::cout << "evaluate hessian time = " << time_elapsed << std::endl;
+  delete[] x;
+  delete[] xad;
 }

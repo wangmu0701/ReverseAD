@@ -64,13 +64,14 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base> {
         total_buf_size = 0;
         for(int i = 0; i < sr_info.count; i++) {
           SingleDeriv local_deriv(&buf[total_buf_size]);
+          total_buf_size += local_deriv.byte_size();
           local_deriv.debug(log.info);
           // we only remove things from reverse_live_set during forward
           locint dummy_ind = sr_info.locs[i];
           std::set<locint> dep_set = std::move(reverse_live[dummy_ind]);
           reverse_live.erase(dummy_ind);
           for (const locint& dep : dep_set) {
-            log.info << "processing : " << dep << std::endl;
+            log.info << "processing : " << dummy_ind << std::endl;
             dep_hess[dep].debug(log.info);
             process_single_deriv(dummy_ind, local_deriv, dep_hess[dep]);
             dep_hess[dep].debug(log.info);

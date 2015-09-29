@@ -35,6 +35,14 @@
     trace_put(assign_ind, this->loc, val);
   }
 
+  void markRemoteInd(const Base& val, const locint& loc) {
+    this->val = val;
+    this->loc = loc;
+    log.info << "remote ind: " << this << "[" << this->loc << "] = "
+             << val << std::endl;
+    trace_put(assign_ind, this->loc, val);
+  }
+
   BaseActive<Base>& operator <<= (const Base& val) {
     this->val = val;
     this->loc = get_next_ind_loc();
@@ -43,6 +51,7 @@
   }
 
   BaseActive<Base>& operator >>= (Base& val) {
+    std::cout << "this->val = " << this->val << std::endl;
     val = this->val;
     trace_put(assign_dep, this->loc, val);
     return *this;
@@ -59,10 +68,14 @@
 
   // copy assignment
   BaseActive<Base>& operator = (const BaseActive<Base>& other) {
-    if (this != &other) {
+    log.info << this << " ==? " << (&other) << std::endl;
+    if (this != (&other)) {
       this->val = other.val;
-      this->val = get_next_loc();
+      this->loc = get_next_loc();
+      log.info << "this.val = " << this->val << std::endl;
+      log.info << "other.val = " << other.val << std::endl; 
     }
+
     trace_put(assign_a, this->loc, other.loc);
     log.info << "L-assign: " << this <<"["<<this->loc<<"]" 
               <<" <- " << &other <<"["<<other.loc<<"]"<< std::endl;

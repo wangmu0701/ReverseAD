@@ -40,6 +40,10 @@ class BaseReverseHessian {
       //return;
     }
     reverse_local_hessian(ind_num, dep_num);
+    for (auto& kv : dep_hess) {
+      log.info << "Dep : " << kv.first << std::endl;
+      kv.second.debug(log.info);
+    }
     //retrieve_sparse_format(rind, cind, values);
   }
 
@@ -100,7 +104,7 @@ class BaseReverseHessian {
     Base pw;
     while (has_next) {
       has_next = r_enum.get_next(p, pw);
-      log.info << "p = " << p << "pw = " << pw << std::endl;
+      //log.info << "p = " << p << "pw = " << pw << std::endl;
       if (pw != 0.0) {
         if (info.y != NULL_LOC) {
           if (p != info.r) {

@@ -3,7 +3,8 @@
 
 #include <mpi.h>
 #include <iostream>
-#include "reversead_base.hpp"
+#include "reversead/reversead_base.hpp"
+#include "reversead/base_active.hpp"
 #include "reversead/tape/abstract_tape.hpp"
 
 #define COMM_RMPI_SEND 0
@@ -45,6 +46,17 @@ namespace ReverseAD {
   
   void trace_put(const SendRecvInfo& sr_info);
   AbstractTape<SendRecvInfo>* RMPI_get_comm_tape();
+
+  int RMPI_Send_ind(adouble* buf,
+                    int count,
+                    int dest,
+                    int tag,
+                    MPI_Comm comm);
+  int RMPI_Recv_ind(adouble* buf,
+                    int count,
+                    int src,
+                    int tag,
+                    MPI_Comm comm);
 
   int RMPI_Send(void* buf,
                 int count,
