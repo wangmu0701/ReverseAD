@@ -11,7 +11,7 @@ using ReverseAD::RMPI_ADOUBLE;
 using ReverseAD::BaseMpiReverseHessian;
 using ReverseAD::RMPI_get_comm_tape;
 
-#define N 2
+#define N 2000
 
 int main(int argc, char** argv) {
   int size;
@@ -21,8 +21,8 @@ int main(int argc, char** argv) {
   MPI_Comm_size(MPI_COMM_WORLD, &size);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   std::cout << "rank : " << rank << " of " << size << std::endl;
-  if (rank == 1) {
-    ReverseAD::logging_on();
+  if (rank == 0) {
+    //ReverseAD::logging_on();
   }
   ReverseAD::trace_on();
   if (rank == 0) {

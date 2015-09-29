@@ -5,6 +5,9 @@
 
 namespace ReverseAD {
 
+extern int num_dummy_ind;
+extern int num_dummy_dep;
+
 template <typename Base>
 class BaseMpiReverseHessian : public BaseReverseHessian<Base> {
  public:
@@ -22,13 +25,25 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base> {
   }
   void compute_mpi() {
     // here we should pass the correct num for ind and dep
+    double time = get_timing();
     this->reverse_local_hessian(0, 0);
+    time = get_timing();
+    log.warning << "reverse  local hessian timing : " << time << std::endl;
+/*
     for (auto& kv : dep_hess) {
       log.info << "Dep : " << kv.first << std::endl;
       kv.second.adjoint_vals->debug(log.info);
       kv.second.hessian_vals->debug(log.info);
     }
+*/
     forward_global_hessian();
+    time = get_timing();
+    log.warning << "forward global hessian timing : " << time << std::endl;
+    for (auto& kv : dep_hess) {
+      log.info << "Dep : " << kv.first << std::endl;
+      kv.second.adjoint_vals->debug(log.info);
+      kv.second.hessian_vals->debug(log.info);
+    }
   }
  protected:
   void forward_global_hessian() {
@@ -36,7 +51,7 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base> {
     comm_tape->init_forward();
     while(comm_tape->has_next_f()) {
       SendRecvInfo sr_info = comm_tape->get_next_f();
-      log.info << sr_info;
+      //log.info << sr_info;
       if (sr_info.comm_op == COMM_RMPI_SEND) {
         int total_buf_size = 0;
         for (int i = 0; i < sr_info.count; i++) {
@@ -65,16 +80,16 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base> {
         for(int i = 0; i < sr_info.count; i++) {
           SingleDeriv local_deriv(&buf[total_buf_size]);
           total_buf_size += local_deriv.byte_size();
-          local_deriv.debug(log.info);
+          //local_deriv.debug(log.info);
           // we only remove things from reverse_live_set during forward
           locint dummy_ind = sr_info.locs[i];
           std::set<locint> dep_set = std::move(reverse_live[dummy_ind]);
           reverse_live.erase(dummy_ind);
           for (const locint& dep : dep_set) {
-            log.info << "processing : " << dummy_ind << std::endl;
-            dep_hess[dep].debug(log.info);
+            //log.info << "processing : " << dummy_ind << std::endl;
+            //dep_hess[dep].debug(log.info);
             process_single_deriv(dummy_ind, local_deriv, dep_hess[dep]);
-            dep_hess[dep].debug(log.info);
+            //dep_hess[dep].debug(log.info);
           }
         }
       }

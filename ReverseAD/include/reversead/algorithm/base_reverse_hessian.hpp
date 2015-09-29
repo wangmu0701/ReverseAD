@@ -39,7 +39,10 @@ class BaseReverseHessian {
       log.warning<< "Must be of a scalar functioni : dep_num = 1" << std::endl; 
       //return;
     }
+    double time = get_timing();
     reverse_local_hessian(ind_num, dep_num);
+    time = get_timing();
+    log.warning << "reverse local hessian timing : " << time << std::endl;
     for (auto& kv : dep_hess) {
       log.info << "Dep : " << kv.first << std::endl;
       kv.second.debug(log.info);
@@ -213,7 +216,7 @@ void BaseReverseHessian<Base>::reverse_local_hessian(int ind_num, int dep_num) {
           break;
         case assign_ind:
           if (ind_count < 0) {
-            log.warning << "more independents found on tape than : " << ind_num << std::endl;
+            //log.warning << "more independents found on tape than : " << ind_num << std::endl;
             //return;
           }
           res = trace->get_next_loc_r();;
@@ -223,7 +226,7 @@ void BaseReverseHessian<Base>::reverse_local_hessian(int ind_num, int dep_num) {
           break;
         case assign_dep:
           if (dep_count >= dep_num) {
-            log.warning << "more dependents found on tape than : " << ind_num << std::endl;
+            //log.warning << "more dependents found on tape than : " << ind_num << std::endl;
             //return;
           }
           res = trace->get_next_loc_r();

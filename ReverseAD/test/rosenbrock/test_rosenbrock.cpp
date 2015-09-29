@@ -2,7 +2,7 @@
 
 #include "reversead/reversead.hpp"
 
-#define N 4
+#define N 4000
 
 int main() {
   adouble* xad = new adouble[N];
@@ -12,7 +12,7 @@ int main() {
   for (int i = 0; i < N; i++) {
     x[i] = i+1;
   }
-  ReverseAD::logging_on();
+  //ReverseAD::logging_on();
   ReverseAD::get_timing();
   ReverseAD::trace_on();
   yad = 0;
@@ -32,11 +32,8 @@ int main() {
   ReverseAD::BaseFunctionReplay<double> replay(trace);
   double* ry = replay.replay(x, N, 1);
   std::cout << " ry = " << ry[0] << std::endl;
-  ReverseAD::get_timing();
   ReverseAD::BaseReverseHessian<double> hessian(trace);
   hessian.compute(N, 1, nullptr, nullptr, nullptr);
-  time_elapsed = ReverseAD::get_timing();
-  std::cout << "evaluate hessian time = " << time_elapsed << std::endl;
   delete[] x;
   delete[] xad;
 }

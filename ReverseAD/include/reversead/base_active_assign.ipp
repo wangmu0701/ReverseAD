@@ -3,25 +3,33 @@
   BaseActive() {
     this->val = 0.0;
     this->loc = get_next_loc();
+#ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     log.info << "V-ctor: " << this <<"["<<this->loc<<"]" << " = " << val << std::endl;
+#endif
     trace_put(assign_d, this->loc, 0.0);
   }
   ~BaseActive() {
+#ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     log.info << "free loc: " << this << "["<<this->loc<<"]" << std::endl;
+#endif
   }
 
   // value c-tor
   BaseActive(Base val) {
     this->val = val;
     this->loc = get_next_loc();
+#ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     log.info << "V-ctor: " << this <<"["<<this->loc<<"]" << " = " << val << std::endl;
+#endif
     trace_put(assign_d, this->loc, val);
   }
   
   // copy c-tor
   BaseActive(const BaseActive<Base>& other) {
+#ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     log.info << "L-ctor: " << this <<"["<<this->loc<<"]" 
               <<" <- " << &other <<"["<<other.loc<<"]"<< std::endl;
+#endif
     this->val = other.val;
     this->loc = get_next_loc();
     trace_put(assign_a, this->loc, other.loc);
@@ -30,16 +38,20 @@
   void markDummyInd(const Base& val) {
     this->val = val;
     this->loc = get_next_dummy_loc();
+#ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     log.info << "dummy ind: " << this << "[" << this->loc << "] = "
              << val << std::endl;
+#endif
     trace_put(assign_ind, this->loc, val);
   }
 
   void markRemoteInd(const Base& val, const locint& loc) {
     this->val = val;
     this->loc = loc;
+#ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     log.info << "remote ind: " << this << "[" << this->loc << "] = "
              << val << std::endl;
+#endif
     trace_put(assign_ind, this->loc, val);
   }
 
@@ -51,7 +63,6 @@
   }
 
   BaseActive<Base>& operator >>= (Base& val) {
-    std::cout << "this->val = " << this->val << std::endl;
     val = this->val;
     trace_put(assign_dep, this->loc, val);
     return *this;
@@ -62,34 +73,35 @@
     this->val = val;
     this->loc = get_next_loc();
     trace_put(assign_d, this->loc, val);
+#ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     log.info << "V-assign: " << this <<"["<<this->loc<<"]" << " = " << val << std::endl;
+#endif
     return *this;
   }
 
   // copy assignment
   BaseActive<Base>& operator = (const BaseActive<Base>& other) {
-    log.info << this << " ==? " << (&other) << std::endl;
     if (this != (&other)) {
       this->val = other.val;
       this->loc = get_next_loc();
-      log.info << "this.val = " << this->val << std::endl;
-      log.info << "other.val = " << other.val << std::endl; 
     }
-
     trace_put(assign_a, this->loc, other.loc);
+#ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     log.info << "L-assign: " << this <<"["<<this->loc<<"]" 
               <<" <- " << &other <<"["<<other.loc<<"]"<< std::endl;
+#endif
     return *this;
   }
 
-  // I guess we can safely reuse the location assigned to a r-value?
 #ifdef REVERSE_AD_CPP11 
   // move c-tor
   BaseActive(BaseActive<Base>&& other) {
     this->val = other.val;
     this->loc = get_next_loc();
+#ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     log.info << "R-ctor: " << this <<"["<<this->loc<<"]" 
               <<" <- " << &other <<"["<<other.loc<<"]"<< std::endl;
+#endif
     trace_put(assign_a, this->loc, other.loc);
   }
 
@@ -100,8 +112,10 @@
       this->loc = get_next_loc();
     }
     trace_put(assign_a, this->loc, other.loc);
+#ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     log.info << "R-assign: " << this <<"["<<this->loc<<"]" 
               <<" <- " << &other <<"["<<other.loc<<"]"<< std::endl;
+#endif
     return *this;
   }
 #endif

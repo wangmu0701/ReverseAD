@@ -11,6 +11,8 @@ namespace ReverseAD {
   MPI_Datatype RMPI_ADOUBLE;
   extern bool is_tracing;
   extern int rank;
+  int num_dummy_ind;
+  int num_dummy_dep;
  
   TrivialTape<SendRecvInfo>* comm_tape; 
   void RMPI_Init(int* argc, char** argv[]) {
@@ -19,6 +21,8 @@ namespace ReverseAD {
     MPI_Type_commit(&RMPI_ADOUBLE);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     comm_tape = new TrivialTape<SendRecvInfo>();
+    num_dummy_ind = 0;
+    num_dummy_dep = 0;
   }
 
   void RMPI_Finalize() {
@@ -80,6 +84,7 @@ namespace ReverseAD {
     }
     delete[] recv_val;
     delete[] recv_loc;
+    num_dummy_ind += count;
     return rc;
   }
 
@@ -102,6 +107,7 @@ namespace ReverseAD {
         trace_put(rmpi_send);
         SendRecvInfo info(COMM_RMPI_SEND, count, dest, tag, comm, locs);
         trace_put(info);
+        num_dummy_dep += count;
       } else {
         delete[] locs;
       }
@@ -135,6 +141,7 @@ namespace ReverseAD {
         trace_put(rmpi_recv);
         SendRecvInfo info(COMM_RMPI_RECV, count, src, tag, comm, locs);
         trace_put(info);
+        num_dummy_ind += count;
       } else {
         delete[] locs;
       }
