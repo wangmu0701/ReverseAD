@@ -33,7 +33,7 @@ int main() {
   double* ry = replay.replay(x, N, 1);
   std::cout << " ry = " << ry[0] << std::endl;
   ReverseAD::BaseReverseHessian<double> hessian(trace);
-  hessian.compute(N, 1, nullptr, nullptr, nullptr);
+  hessian.compute(N, 1);
   delete[] x;
   delete[] xad;
 }

@@ -33,8 +33,7 @@ class BaseReverseHessian {
     this->trace = trace;
   }
 
-  void compute(int ind_num, int dep_num,
-          locint** rind, locint** cind, Base** values) {
+  void compute(int ind_num, int dep_num) {
     double time = get_timing();
     reverse_local_hessian(ind_num, dep_num);
     time = get_timing();
@@ -43,7 +42,6 @@ class BaseReverseHessian {
       log.info << "Dep : " << kv.first << std::endl;
       kv.second.debug(log.info);
     }
-    //retrieve_sparse_format(rind, cind, values);
   }
 
  //protected:
@@ -56,30 +54,37 @@ class BaseReverseHessian {
     compute_hessian_sac(info, *(deriv.adjoint_vals),*(deriv.hessian_vals),w,r);
   }
 
-  /*
-  void retrieve_sparse_format(locint** rind, locint** cind, Base** values) {
-    int size = hessian_vals.get_size();
-    (*rind) = new locint[size];
-    (*cind) = new locint[size];
-    (*values) = new Base[size];
-    //hessian_vals.debug();
-    typename type_hessian::enumerator h_enum = hessian_vals.get_enumerator();
-    bool has_next = h_enum.has_next();
-    locint x,y;
-    Base w;
-    int l =0;
-    while(has_next) {
-      has_next = h_enum.get_next(x, y, (*values)[l]);
-      (*rind)[l] = indep_index_map[x];
-      (*cind)[l] = indep_index_map[y];
-      l++;
-    }
-    for(int i=0; i<size;i++) {
-      std::cout << "H["<<(*rind)[i]<<","<<(*cind)[i]<<"] = "
-                << (*values)[i] << std::endl;
+  void retrieve_hessian_sparse_format(int** ssize, locint*** rind, locint*** cind, Base*** values) {
+    int dep_size = dep_hess.size();
+    (*ssize) = new int[dep_size];
+    (*rind) = new locint*[dep_size];
+    (*cind) = new locint*[dep_size];
+    (*values) = new Base*[dep_size];
+    for (auto& kv : dep_hess) {
+      locint dep = dep_index_map[kv.first] - 1;
+      int size = kv.second.hessian_vals->get_size();
+      (*ssize)[dep] = size;
+      (*rind)[dep] = new locint[size];
+      (*cind)[dep] = new locint[size];
+      (*values)[dep] = new Base[size];
+      typename type_hessian::enumerator h_enum = kv.second.hessian_vals->get_enumerator();
+      bool has_next = h_enum.has_next();
+      locint x,y;
+      Base w;
+      int l =0;
+      while(has_next) {
+        has_next = h_enum.get_next(x, y, (*values)[dep][l]);
+        (*rind)[dep][l] = indep_index_map[x];
+        (*cind)[dep][l] = indep_index_map[y];
+        l++;
+      }
+      log.info << "Dep : " << dep + 1 << std::endl;
+      for(int i=0; i<size;i++) {
+        log.info << "H["<<(*rind)[i]<<","<<(*cind)[i]<<"] = "
+                 << (*values)[i] << std::endl;
+      }
     }
   }
-  */
 
   void compute_adjoint_sac(DerivativeInfo<locint, Base>& info,
                            type_adjoint& adjoint_vals,
@@ -187,6 +192,7 @@ class BaseReverseHessian {
   std::map<locint, std::set<locint> > reverse_live;
   std::map<locint, SingleDeriv> dep_hess;
   std::map<locint, locint> indep_index_map;
+  std::map<locint, locint> dep_index_map;
 
 };
 
@@ -205,7 +211,7 @@ void BaseReverseHessian<Base>::reverse_local_hessian(int ind_num, int dep_num) {
                   << "). Will proceed with the trace. " << std::endl;
     }
     int ind_count = trace->get_num_ind();
-    int dep_count = 0;
+    int dep_count = trace->get_num_dep();
 
     locint res;
     double coval;
@@ -231,7 +237,8 @@ void BaseReverseHessian<Base>::reverse_local_hessian(int ind_num, int dep_num) {
           coval = trace->get_next_val_r();
           (*(dep_hess[res].adjoint_vals))[res] = 1.0;
           reverse_live[res].insert(res);
-          dep_count++; 
+          dep_index_map[res] = dep_count;
+          dep_count--; 
           break;
         case assign_d:
           info.r = trace->get_next_loc_r();

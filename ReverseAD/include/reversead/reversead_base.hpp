@@ -2,10 +2,10 @@
 #define REVERSE_AD_BASE_H_
 
 #define NULL_LOC 0
-#define RANK_SHIFT 8
-#define RANK_BASE 0x000000ff
+#define RANK_SHIFT 16
+#define RANK_BASE 0x000000000000fffful
 
-#define BASE_LOC 0x800000
+#define BASE_LOC 0x800000000000ul
 
 #include "reversead/logger.hpp"
 
@@ -16,7 +16,8 @@ namespace ReverseAD {
   class TrivialTrace;
 
   typedef unsigned int opbyte;
-  typedef unsigned int locint;
+  //typedef unsigned int locint;
+  typedef unsigned long locint;
 
   void logging_on();
   void trace_on();
