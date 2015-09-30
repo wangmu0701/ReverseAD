@@ -17,16 +17,16 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base> {
 
   using BaseReverseHessian<Base>::dep_hess;
   using BaseReverseHessian<Base>::reverse_live;
+  using BaseReverseHessian<Base>::trace;
 
-  BaseMpiReverseHessian(AbstractTrace* trace,
-                        AbstractTape<SendRecvInfo>* comm_tape)
+  BaseMpiReverseHessian(AbstractTrace* trace)
     : BaseReverseHessian<Base>(trace) {
-    this->comm_tape = comm_tape;
   }
+
   void compute_mpi() {
     // here we should pass the correct num for ind and dep
     double time = get_timing();
-    this->reverse_local_hessian(0, 0);
+    this->reverse_local_hessian(trace->get_num_ind(), trace->get_num_dep());
     time = get_timing();
     log.warning << "reverse  local hessian timing : " << time << std::endl;
 /*
@@ -47,10 +47,9 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base> {
   }
  protected:
   void forward_global_hessian() {
-    if (!comm_tape) {return;}
-    comm_tape->init_forward();
-    while(comm_tape->has_next_f()) {
-      SendRecvInfo sr_info = comm_tape->get_next_f();
+    trace->init_forward();
+    while(trace->has_next_sr_info_f()) {
+      SendRecvInfo sr_info = trace->get_next_sr_info_f();
       //log.info << sr_info;
       if (sr_info.comm_op == COMM_RMPI_SEND) {
         int total_buf_size = 0;

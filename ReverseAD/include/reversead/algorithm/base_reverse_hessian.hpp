@@ -35,10 +35,6 @@ class BaseReverseHessian {
 
   void compute(int ind_num, int dep_num,
           locint** rind, locint** cind, Base** values) {
-    if (dep_num != 1) {
-      log.warning<< "Must be of a scalar functioni : dep_num = 1" << std::endl; 
-      //return;
-    }
     double time = get_timing();
     reverse_local_hessian(ind_num, dep_num);
     time = get_timing();
@@ -198,7 +194,17 @@ template <typename Base>
 void BaseReverseHessian<Base>::reverse_local_hessian(int ind_num, int dep_num) {
     DerivativeInfo<locint, Base> info;
  
-    int ind_count = ind_num - 1;
+    if (ind_num != trace->get_num_ind()) {
+      log.warning << "The given number of independent variables (" << ind_num << ")"
+                  << " does not match the record on the trace (" << trace->get_num_ind()
+                  << "). Will proceed with the trace. " << std::endl;
+    }
+    if (dep_num != trace->get_num_dep()) {
+      log.warning << "The given number of dependent variables (" << ind_num << ")"
+                  << " does not match the record on the trace (" << trace->get_num_dep()
+                  << "). Will proceed with the trace. " << std::endl;
+    }
+    int ind_count = trace->get_num_ind();
     int dep_count = 0;
 
     locint res;
@@ -215,25 +221,16 @@ void BaseReverseHessian<Base>::reverse_local_hessian(int ind_num, int dep_num) {
         case end_of_tape:
           break;
         case assign_ind:
-          if (ind_count < 0) {
-            //log.warning << "more independents found on tape than : " << ind_num << std::endl;
-            //return;
-          }
           res = trace->get_next_loc_r();;
           coval = trace->get_next_val_r();
           indep_index_map[res] = ind_count;
           ind_count--;
           break;
         case assign_dep:
-          if (dep_count >= dep_num) {
-            //log.warning << "more dependents found on tape than : " << ind_num << std::endl;
-            //return;
-          }
           res = trace->get_next_loc_r();
           coval = trace->get_next_val_r();
           (*(dep_hess[res].adjoint_vals))[res] = 1.0;
           reverse_live[res].insert(res);
-          //adjoint_vals[res] = 1.0;
           dep_count++; 
           break;
         case assign_d:

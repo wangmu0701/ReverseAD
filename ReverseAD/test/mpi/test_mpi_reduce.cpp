@@ -9,7 +9,7 @@ using ReverseAD::RMPI_Recv;
 using ReverseAD::RMPI_Reduce;
 using ReverseAD::RMPI_ADOUBLE;
 using ReverseAD::BaseMpiReverseHessian;
-using ReverseAD::RMPI_get_comm_tape;
+using ReverseAD::get_timing;
 
 #define N 2000
 
@@ -26,6 +26,7 @@ int main(int argc, char** argv) {
   }
   ReverseAD::trace_on();
   if (rank == 0) {
+    get_timing();
     adouble* x = new adouble[size * N];
     for (int i = 0; i < size * N; i++) {
       x[i] <<= (i+1);
@@ -42,7 +43,8 @@ int main(int argc, char** argv) {
     RMPI_Reduce(&yad, &tad, 1, RMPI_ADOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     double y;
     tad >>= y;
-    std::cout << "y = " << y << std::endl;
+    double time = get_timing();
+    std::cout << "y = " << y << " time_elapsed = " << time << std::endl;
   } else {
     adouble* x = new adouble[N + 1];
     RMPI_Recv_ind(x, N+1, 0, 0, MPI_COMM_WORLD);
@@ -55,7 +57,7 @@ int main(int argc, char** argv) {
     RMPI_Reduce(&yad, NULL, 1, RMPI_ADOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   }
   ReverseAD::TrivialTrace* trace = ReverseAD::trace_off();
-  BaseMpiReverseHessian<double> hessian(trace, RMPI_get_comm_tape());
+  BaseMpiReverseHessian<double> hessian(trace);
   hessian.compute_mpi();
 
   ReverseAD::RMPI_Finalize();

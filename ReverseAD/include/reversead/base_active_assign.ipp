@@ -59,12 +59,14 @@
     this->val = val;
     this->loc = get_next_ind_loc();
     trace_put(assign_ind, this->loc, val);
+    trace_declare_ind();
     return *this;
   }
 
   BaseActive<Base>& operator >>= (Base& val) {
     val = this->val;
     trace_put(assign_dep, this->loc, val);
+    trace_declare_dep();
     return *this;
   }
 

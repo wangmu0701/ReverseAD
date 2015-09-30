@@ -7,7 +7,6 @@ using ReverseAD::RMPI_Send;
 using ReverseAD::RMPI_Recv;
 using ReverseAD::RMPI_ADOUBLE;
 using ReverseAD::BaseMpiReverseHessian;
-using ReverseAD::RMPI_get_comm_tape;
 
 int main(int argc, char** argv) {
   int size;
@@ -40,7 +39,7 @@ int main(int argc, char** argv) {
     RMPI_Send(&t1, 1, RMPI_ADOUBLE, 0, 0, MPI_COMM_WORLD);
   }
   ReverseAD::TrivialTrace* trace = ReverseAD::trace_off();
-  BaseMpiReverseHessian<double> hessian(trace, RMPI_get_comm_tape());
+  BaseMpiReverseHessian<double> hessian(trace);
   hessian.compute_mpi();
 
   ReverseAD::RMPI_Finalize();

@@ -54,7 +54,12 @@ namespace ReverseAD {
     is_tracing = false;
     return global_trace;
   }
-
+  void trace_declare_ind() {
+    global_trace->declare_ind();
+  }
+  void trace_declare_dep() {
+    global_trace->declare_dep();
+  }
   void trace_put(opbyte op) {
     if (is_tracing) {
       global_trace->put_op(op);
