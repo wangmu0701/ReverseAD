@@ -23,7 +23,7 @@ class BaseActive {
   #include "base_active_minus.ipp" // minus -
   
   inline Base getVal() {return val;}
-  inline Base getLoc() {return loc;}
+  inline locint getLoc() {return loc;}
  private:
   Base val;
   locint loc;

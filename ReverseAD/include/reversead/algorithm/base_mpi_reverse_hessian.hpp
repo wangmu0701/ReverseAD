@@ -82,6 +82,7 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base> {
           //local_deriv.debug(log.info);
           // we only remove things from reverse_live_set during forward
           locint dummy_ind = sr_info.locs[i];
+          //log.info << "dummy_ind = " << dummy_ind << std::endl;
           std::set<locint> dep_set = std::move(reverse_live[dummy_ind]);
           reverse_live.erase(dummy_ind);
           for (const locint& dep : dep_set) {
