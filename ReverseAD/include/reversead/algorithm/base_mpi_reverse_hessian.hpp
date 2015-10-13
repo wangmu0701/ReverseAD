@@ -47,7 +47,7 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base> {
   }
  protected:
   void forward_global_hessian() {
-    trace->init_forward();
+    trace->init_comm_forward();
     while(trace->has_next_sr_info_f()) {
       SendRecvInfo sr_info = trace->get_next_sr_info_f();
       //log.info << sr_info;

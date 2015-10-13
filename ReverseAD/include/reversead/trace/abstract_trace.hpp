@@ -16,10 +16,9 @@ class AbstractTrace {
   }
   virtual ~AbstractTrace() {}
 
-  inline virtual void put_op(const opbyte&) = 0;
-  inline virtual void put_loc(const locint&) = 0;
-  inline virtual void put_val(const double&) = 0;
-  inline virtual void put_sr_info(const SendRecvInfo&) = 0;
+  virtual void put_op(const opbyte&) = 0;
+  virtual void put_loc(const locint&) = 0;
+  virtual void put_val(const double&) = 0;
   
   // forward sweep
   virtual void init_forward() = 0;
@@ -27,8 +26,6 @@ class AbstractTrace {
   virtual opbyte get_next_op_f() = 0;
   virtual locint get_next_loc_f() = 0;
   virtual double get_next_val_f() = 0;
-  virtual bool has_next_sr_info_f() = 0;
-  virtual SendRecvInfo get_next_sr_info_f() = 0;
 
   // reverse sweep
   virtual void init_reverse() = 0;
@@ -36,12 +33,19 @@ class AbstractTrace {
   virtual opbyte get_next_op_r() = 0;
   virtual locint get_next_loc_r() = 0;
   virtual double get_next_val_r() = 0;
-  virtual SendRecvInfo get_next_sr_info_r() = 0;
+
+  // communication trace
+  virtual void put_sr_info(const SendRecvInfo&) = 0;
+  virtual void init_comm_forward() = 0;
+  virtual void end_comm_forward() = 0;
+  virtual bool has_next_sr_info_f() = 0;
+  virtual SendRecvInfo get_next_sr_info_f() = 0;
 
   // for debug
   virtual void dump_trace() = 0;
   virtual void dump_trace(Logger& logger) = 0;
   
+  // independent and dependent counters
   void declare_ind() {num_ind++;}
   void declare_dep() {num_dep++;}
   int get_num_ind() {return num_ind;}
