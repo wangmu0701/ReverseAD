@@ -12,8 +12,34 @@ using ReverseAD::RMPI_ADOUBLE;
 using ReverseAD::BaseMpiReverseHessian;
 using ReverseAD::get_timing;
 
-#define N 128000
+#define N 400
 
+#define PI 3.1416926
+
+inline adouble get_eulid_dist(
+    adouble x1, adouble y1, adouble z1,
+    adouble x2, adouble y2, adouble z2) {
+  return sqrt((z1-z2)*(z1-z2) + (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
+}
+adouble compute_thomson_function(adouble* x, adouble* p, int rank, int size) {
+  adouble ret = 0;
+  for (int i=0; i< N*size; i++) {
+    adouble t = cos(x[i*2]);
+    p[i*3] = sin(x[i*2]);
+    p[i*3+1] = t * cos(x[i*2+1]);
+    p[i*3+2] = t * sin(x[i*2+1]);
+  }
+  for(int i=rank*N; i<(rank+1)*N; i++) {
+    for(int j=0; j<size*N; j++) {
+      if (i!=j) {
+      ret = ret + 1.0 / get_eulid_dist(p[i*3], p[i*3+1], p[i*3+2],
+                                       p[j*3], p[j*3+1], p[j*3+2]);
+      }
+    }
+  }
+  return ret;
+}
+//parallel thomson problem
 int main(int argc, char** argv) {
   int size;
   int rank;
@@ -26,36 +52,30 @@ int main(int argc, char** argv) {
     //ReverseAD::logging_on();
   }
   ReverseAD::trace_on();
+  adouble* x = new adouble[size*N*2];
+  adouble* p = new adouble[size*N*3];
+  adouble tad = 0;
   if (rank == 0) {
     get_timing();
-    adouble* x = new adouble[size * N];
+    srand(12345);
     for (int i = 0; i < size * N; i++) {
-      x[i] <<= (i+1);
+      x[i*2] <<= (double)rand();
+      x[i*2+1] <<= (double)rand();
     }
     for (int i = 1; i < size; i++) {
-      RMPI_Send_ind(&(x[i*N-1]), N+1, i, 0, MPI_COMM_WORLD);
+      RMPI_Send_ind(&(x[0]), size*N*2, i, 0, MPI_COMM_WORLD);
     }
+    tad = compute_thomson_function(x, p, rank, size);
     adouble yad = 0;
-    for (int i = 0; i < N - 1; i++) {
-      yad = yad + (1-x[i])*(1-x[i]) + 100*(x[i+1]-x[i]*x[i])*(x[i+1]-x[i]*x[i]);
-    }
-    std::cout << "yad.val = " << yad.getVal() << std::endl;
-    adouble tad = 0;
-    RMPI_Reduce(&yad, &tad, 1, RMPI_ADOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    RMPI_Reduce(&tad, &yad, 1, RMPI_ADOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     double y;
-    tad >>= y;
+    yad >>= y;
     double time = get_timing();
     std::cout << "y = " << y << " time_elapsed = " << time << std::endl;
   } else {
-    adouble* x = new adouble[N + 1];
-    RMPI_Recv_ind(x, N+1, 0, 0, MPI_COMM_WORLD);
-    adouble yad = 0;
-    for (int i = 0; i<N; i++) {
-      yad = yad + (1-x[i])*(1-x[i]) + 100*(x[i+1]-x[i]*x[i])*(x[i+1]-x[i]*x[i]);
-    }
-    //adouble t1 = t0 * t0;
-    std::cout << "yad.val = " << yad.getVal() << std::endl;
-    RMPI_Reduce(&yad, NULL, 1, RMPI_ADOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    RMPI_Recv_ind(x, size*N*2, 0, 0, MPI_COMM_WORLD);
+    tad = compute_thomson_function(x, p, rank, size);
+    RMPI_Reduce(&tad, NULL, 1, RMPI_ADOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   }
   ReverseAD::TrivialTrace* trace = ReverseAD::trace_off();
   BaseMpiReverseHessian<double> hessian(trace);

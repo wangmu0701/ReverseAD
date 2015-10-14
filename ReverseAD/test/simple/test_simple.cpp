@@ -15,7 +15,7 @@ int main() {
   b <<= 2.0;
   c <<= 3.0;
   d <<= 4.0;
-  yad = sin(a) + cos(b) + c / d + 1.0/c;
+  yad = sin(a) + sqrt(b) + c / d + 1.0/c;
   yad >>= y;
   std::cout << "yad = " << yad.getVal() << std::endl;
   ReverseAD::TrivialTrace* trace = ReverseAD::trace_off();

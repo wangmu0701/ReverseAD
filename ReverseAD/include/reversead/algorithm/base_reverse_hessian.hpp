@@ -333,6 +333,18 @@ void BaseReverseHessian<Base>::reverse_local_hessian(int ind_num, int dep_num) {
           info.dx = -sin(vx);
           info.pxx = -cos(vx);
           break;
+        case sqrt_a:
+          info.r = trace->get_next_loc_r();
+          info.x = trace->get_next_loc_r();
+          vx = trace->get_next_val_r();
+          if (vx != 0.0) {
+            info.dx = 0.5/sqrt(vx);
+            info.pxx = -0.5 * info.dx / vx;
+          } else {
+            info.dx = 0.0;
+            info.pxx = 0.0;
+          }
+          break;
         case rmpi_send:
         case rmpi_recv:
           break;

@@ -10,6 +10,7 @@
 *~
 .libs
 .deps
+machines
 test_tape
 test_trace
 test_rosenbrock

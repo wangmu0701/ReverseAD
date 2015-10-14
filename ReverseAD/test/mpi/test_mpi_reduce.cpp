@@ -12,7 +12,7 @@ using ReverseAD::RMPI_ADOUBLE;
 using ReverseAD::BaseMpiReverseHessian;
 using ReverseAD::get_timing;
 
-#define N 128000
+#define N 256000
 
 int main(int argc, char** argv) {
   int size;

@@ -21,6 +21,7 @@ enum OPCODES {
   div_d_a,
   sin_a,
   cos_a,
+  sqrt_a,
   rmpi_send,
   rmpi_recv
 };
