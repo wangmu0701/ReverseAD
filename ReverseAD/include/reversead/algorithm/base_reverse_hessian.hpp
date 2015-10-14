@@ -1,6 +1,8 @@
 #ifndef BASE_REVERSE_HESSIAN_H_
 #define BASE_REVERSE_HESSIAN_H_
 
+#include <math.h>
+
 #include <set>
 #include <vector>
 #include <map>
@@ -316,6 +318,20 @@ void BaseReverseHessian<Base>::reverse_local_hessian(int ind_num, int dep_num) {
           coval = trace->get_next_val_r();
           info.dx = -1.0 / (vx*vx);
           info.pxx = 2.0 / (vx*vx*vx);
+          break;
+        case sin_a:
+          info.r = trace->get_next_loc_r();
+          info.x = trace->get_next_loc_r();
+          vx = trace->get_next_val_r();
+          info.dx = cos(vx);
+          info.pxx = -sin(vx);
+          break;
+        case cos_a:
+          info.r = trace->get_next_loc_r();
+          info.x = trace->get_next_loc_r();
+          vx = trace->get_next_val_r();
+          info.dx = -sin(vx);
+          info.pxx = -cos(vx);
           break;
         case rmpi_send:
         case rmpi_recv:

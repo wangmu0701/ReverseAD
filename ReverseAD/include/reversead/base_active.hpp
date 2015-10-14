@@ -1,6 +1,7 @@
 #ifndef BASE_ACBaseIVE_H_
 #define BASE_ACBaseIVE_H_
 
+#include <math.h>
 #include <iostream>
 #include "reversead/reversead_base.hpp"
 #include "reversead/opcodes.hpp"
@@ -22,6 +23,7 @@ class BaseActive {
   #include "base_active_mult.ipp" // mult *
   #include "base_active_minus.ipp" // minus -
   #include "base_active_div.ipp" // div /
+  #include "base_active_sincos.ipp" // sin cos
 
   inline Base getVal() {return val;}
   inline locint getLoc() {return loc;}

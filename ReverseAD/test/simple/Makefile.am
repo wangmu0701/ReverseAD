@@ -1,5 +1,5 @@
 AM_CXXFLAGS = @ac_reversead_cxxflags@
-AM_CPPFLAGS = -I$(top_builddir)/ReverseAD/include
+AM_CPPFLAGS = -I$(top_builddir)/ReverseAD/include -lmath
 
 noinst_PROGRAMS = test_simple
 
