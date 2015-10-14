@@ -1,3 +1,4 @@
+#include <sys/time.h>
 #include <mpi.h>
 #include <iostream>
 #include "reversead/reversead.hpp"
@@ -11,7 +12,7 @@ using ReverseAD::RMPI_ADOUBLE;
 using ReverseAD::BaseMpiReverseHessian;
 using ReverseAD::get_timing;
 
-#define N 4
+#define N 128000
 
 int main(int argc, char** argv) {
   int size;
@@ -22,7 +23,7 @@ int main(int argc, char** argv) {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   std::cout << "rank : " << rank << " of " << size << std::endl;
   if (rank == 0) {
-    ReverseAD::logging_on();
+    //ReverseAD::logging_on();
   }
   ReverseAD::trace_on();
   if (rank == 0) {
@@ -58,7 +59,16 @@ int main(int argc, char** argv) {
   }
   ReverseAD::TrivialTrace* trace = ReverseAD::trace_off();
   BaseMpiReverseHessian<double> hessian(trace);
+  struct timeval tv1, tv2;
+  if (rank == 0) {
+    gettimeofday(&tv1, NULL);
+  }
   hessian.compute_mpi();
-
+  if (rank == 0) {
+    gettimeofday(&tv2, NULL);
+    double time_elapsed = (tv2.tv_sec - tv1.tv_sec)
+                        + (double)(tv2.tv_usec - tv1.tv_usec) / 1000000;
+    std::cout << "Total Hessian Time = " << time_elapsed << std::endl;
+  }
   ReverseAD::RMPI_Finalize();
 }

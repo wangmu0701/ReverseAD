@@ -17,6 +17,8 @@ enum OPCODES {
   minus_d_a,
   mult_a_a,
   mult_d_a,
+  div_a_a,
+  div_d_a,
   rmpi_send,
   rmpi_recv
 };

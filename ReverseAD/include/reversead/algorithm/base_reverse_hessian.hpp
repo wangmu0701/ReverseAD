@@ -214,7 +214,7 @@ void BaseReverseHessian<Base>::reverse_local_hessian(int ind_num, int dep_num) {
     int dep_count = trace->get_num_dep();
 
     locint res;
-    double coval;
+    double vx, vy, coval;
 
     trace->init_reverse();
     opbyte op = trace->get_next_op_r();
@@ -296,6 +296,26 @@ void BaseReverseHessian<Base>::reverse_local_hessian(int ind_num, int dep_num) {
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
           info.dx = trace->get_next_val_r();
+          break;
+        case div_a_a:
+          info.r = trace->get_next_loc_r();
+          info.y = trace->get_next_loc_r();
+          info.x = trace->get_next_loc_r();
+          vy = trace->get_next_val_r();
+          vx = trace->get_next_val_r();
+          info.dx = 1.0 / vy;
+          info.dy = -vx / (vy*vy);
+          info.pxy = -1.0 / (vy*vy);
+          info.pyy = 2.0 * vx / (vy*vy*vy);
+          PSEUDO_BINARY
+          break;
+        case div_d_a:
+          info.r = trace->get_next_loc_r();
+          info.x = trace->get_next_loc_r();
+          vx = trace->get_next_val_r();
+          coval = trace->get_next_val_r();
+          info.dx = -1.0 / (vx*vx);
+          info.pxx = 2.0 / (vx*vx*vx);
           break;
         case rmpi_send:
         case rmpi_recv:
