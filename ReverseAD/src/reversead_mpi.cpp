@@ -3,15 +3,12 @@
 #include "reversead/reversead_base.hpp"
 #include "reversead/reversead_mpi.hpp"
 #include "reversead/trace/trivial_trace.hpp"
-#include "reversead/trace/dynamic_buffer.hpp"
 
 #define MPI_LOCINT MPI_UNSIGNED
 
 namespace ReverseAD {
 
   MPI_Datatype RMPI_ADOUBLE;
-  DynamicBuffer<locint>* loc_buffer;
-  DynamicBuffer<double>* double_buffer;
 
   extern TrivialTrace* global_trace;
   extern bool is_tracing;
@@ -22,8 +19,6 @@ namespace ReverseAD {
     MPI_Type_contiguous(1, MPI_DOUBLE, &RMPI_ADOUBLE);
     MPI_Type_commit(&RMPI_ADOUBLE);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    loc_buffer = new DynamicBuffer<locint>();
-    double_buffer = new DynamicBuffer<double>();
   }
 
   void RMPI_Finalize() {
@@ -41,8 +36,8 @@ namespace ReverseAD {
                     int tag,
                     MPI_Comm comm) {
     int rc = MPI_SUCCESS;
-    double* send_val = double_buffer->use_temp_size(count);
-    locint* send_loc = loc_buffer->use_temp_size(count);
+    double* send_val = new double[count];
+    locint* send_loc = new locint[count];
     for (int i = 0; i < count; i++) {
       send_val[i] = buf[i].getVal();
       send_loc[i] = buf[i].getLoc();
@@ -55,6 +50,8 @@ namespace ReverseAD {
     if (rc != MPI_SUCCESS) {
       log.fatal << "Sending locs in Send_ind error." << std::endl;
     }
+    delete[] send_val;
+    delete[] send_loc;
     return rc;
   }
 
@@ -64,8 +61,8 @@ namespace ReverseAD {
                     int tag,
                     MPI_Comm comm) {
     int rc= MPI_SUCCESS;
-    double* recv_val = double_buffer->use_temp_size(count);
-    locint* recv_loc = loc_buffer->use_temp_size(count);
+    double* recv_val = new double[count];
+    locint* recv_loc = new locint[count];
     rc = MPI_Recv((void*)recv_val, count, MPI_DOUBLE, src, tag, comm, MPI_STATUS_IGNORE);
     if (rc != MPI_SUCCESS) {
       log.fatal << "Recving vals in Send_ind error." << std::endl;
@@ -78,6 +75,8 @@ namespace ReverseAD {
       buf[i].markRemoteInd(recv_val[i], recv_loc[i]);
     }
     global_trace->increase_dummy_ind(count);
+    delete[] recv_val;
+    delete[] recv_loc;
     return rc;
   }
 
@@ -90,20 +89,22 @@ namespace ReverseAD {
     int rc = 0;
     if (datatype == RMPI_ADOUBLE) {
       adouble* dummy_dep = (adouble*)buf;
-      double* send_buf = double_buffer->use_temp_size(count);
-      locint* locs = loc_buffer->use_temp_size(count);
+      double* send_buf = new double[count];
+      locint* send_loc = new locint[count];
       for (int i = 0; i < count; i++) {
         dummy_dep[i] >>= send_buf[i];
-        locs[i] = dummy_dep[i].getLoc();
+        send_loc[i] = dummy_dep[i].getLoc();
       }
       if (is_tracing) {
         trace_put(rmpi_send);
-        loc_buffer->use_size(count);
-        SendRecvInfo info(COMM_RMPI_SEND, count, dest, tag, comm, locs);
+        SendRecvInfo info(COMM_RMPI_SEND, count, dest, tag, comm, send_loc);
         trace_put(info);
         global_trace->increase_dummy_dep(count);
+      } else {
+        delete[] send_loc;
       }
       rc = MPI_Send((void*)send_buf, count, MPI_DOUBLE, dest, tag, comm);
+      delete[] send_buf;
     } else {
       rc = MPI_Send(buf, count, datatype, dest, tag, comm);
     }
@@ -120,21 +121,23 @@ namespace ReverseAD {
     int rc = 0;
     if (datatype == RMPI_ADOUBLE) {
       adouble* dummy_ind = (adouble*) buf;
-      double* recv_buf = double_buffer->use_temp_size(count);
-      locint* locs = loc_buffer->use_temp_size(count);
+      double* recv_buf = new double[count];
+      locint* recv_loc = new locint[count];
       rc = MPI_Recv((void*)recv_buf, count, MPI_DOUBLE, src, tag, comm, status);
       if (rc != MPI_SUCCESS) {return rc;}
       for (int i = 0; i < count; i++) {
         dummy_ind[i].markDummyInd(recv_buf[i]);
-        locs[i] = dummy_ind[i].getLoc();
+        recv_loc[i] = dummy_ind[i].getLoc();
       }
       if (is_tracing) {
         trace_put(rmpi_recv);
-        loc_buffer->use_size(count);
-        SendRecvInfo info(COMM_RMPI_RECV, count, src, tag, comm, locs);
+        SendRecvInfo info(COMM_RMPI_RECV, count, src, tag, comm, recv_loc);
         trace_put(info);
         global_trace->increase_dummy_ind(count);
+      } else {
+        delete[] recv_loc;
       }
+      delete[] recv_buf;
     } else {
       rc = MPI_Recv(buf, count, datatype, src, tag, comm, status);
     }

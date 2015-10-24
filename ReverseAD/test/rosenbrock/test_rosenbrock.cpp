@@ -2,7 +2,7 @@
 
 #include "reversead/reversead.hpp"
 
-#define N 4000
+#define N 4
 
 int main() {
   adouble* xad = new adouble[N];
@@ -12,7 +12,7 @@ int main() {
   for (int i = 0; i < N; i++) {
     x[i] = i+1;
   }
-  //ReverseAD::logging_on();
+  ReverseAD::logging_on();
   ReverseAD::get_timing();
   ReverseAD::trace_on();
   yad = 0;
