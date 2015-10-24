@@ -15,7 +15,7 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base> {
   typedef typename BaseReverseHessian<Base>::type_hessian type_hessian;
   typedef typename BaseReverseHessian<Base>::SingleDeriv SingleDeriv;
 
-  using BaseReverseHessian<Base>::dep_hess;
+  using BaseReverseHessian<Base>::dep_deriv;
   using BaseReverseHessian<Base>::reverse_live;
   using BaseReverseHessian<Base>::trace;
 
@@ -26,20 +26,20 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base> {
   void compute_mpi() {
     // here we should pass the correct num for ind and dep
     double time = get_timing();
-    this->reverse_local_hessian(trace->get_num_ind(), trace->get_num_dep());
+    this->reverse_local_computation(trace->get_num_ind(), trace->get_num_dep());
     time = get_timing();
     log.warning << "reverse  local hessian timing : " << time << std::endl;
-/*
-    for (auto& kv : dep_hess) {
+
+    for (auto& kv : dep_deriv) {
       log.info << "Dep : " << kv.first << std::endl;
       kv.second.adjoint_vals->debug(log.info);
       kv.second.hessian_vals->debug(log.info);
     }
-*/
+
     forward_global_hessian();
     time = get_timing();
     log.warning << "forward global hessian timing : " << time << std::endl;
-    for (auto& kv : dep_hess) {
+    for (auto& kv : dep_deriv) {
       log.info << "Dep : " << kv.first << std::endl;
       kv.second.adjoint_vals->debug(log.info);
       kv.second.hessian_vals->debug(log.info);
@@ -54,14 +54,14 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base> {
       if (sr_info.comm_op == COMM_RMPI_SEND) {
         int total_buf_size = 0;
         for (int i = 0; i < sr_info.count; i++) {
-          total_buf_size += dep_hess[sr_info.locs[i]].byte_size();
+          total_buf_size += dep_deriv[sr_info.locs[i]].byte_size();
         }
         char* buf = new char[total_buf_size];
         total_buf_size = 0;
         for (int i = 0; i < sr_info.count; i++) {
-          dep_hess[sr_info.locs[i]].write_to_byte(&buf[total_buf_size]);
-          total_buf_size += dep_hess[sr_info.locs[i]].byte_size();
-          dep_hess.erase(sr_info.locs[i]);
+          dep_deriv[sr_info.locs[i]].write_to_byte(&buf[total_buf_size]);
+          total_buf_size += dep_deriv[sr_info.locs[i]].byte_size();
+          dep_deriv.erase(sr_info.locs[i]);
         }
         MPI_Send(&total_buf_size, 1, MPI_INT, sr_info.peer,
                  sr_info.tag, sr_info.comm);
@@ -87,9 +87,9 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base> {
           reverse_live.erase(dummy_ind);
           for (const locint& dep : dep_set) {
             //log.info << "processing : " << dummy_ind << std::endl;
-            //dep_hess[dep].debug(log.info);
-            process_single_deriv(dummy_ind, local_deriv, dep_hess[dep]);
-            //dep_hess[dep].debug(log.info);
+            //dep_deriv[dep].debug(log.info);
+            process_single_deriv(dummy_ind, local_deriv, dep_deriv[dep]);
+            //dep_deriv[dep].debug(log.info);
           }
         }
       }

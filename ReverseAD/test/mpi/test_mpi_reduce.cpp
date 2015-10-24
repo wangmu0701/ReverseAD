@@ -12,7 +12,7 @@ using ReverseAD::RMPI_ADOUBLE;
 using ReverseAD::BaseMpiReverseHessian;
 using ReverseAD::get_timing;
 
-#define N 256000
+#define N 2
 
 int main(int argc, char** argv) {
   int size;
@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   std::cout << "rank : " << rank << " of " << size << std::endl;
   if (rank == 0) {
-    //ReverseAD::logging_on();
+    ReverseAD::logging_on();
   }
   ReverseAD::trace_on();
   if (rank == 0) {

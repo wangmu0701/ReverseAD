@@ -99,8 +99,6 @@ class BaseFunctionReplay {
           res = get_next_res();
           trace->get_next_val_f();
           trace->get_next_val_f();
-          // check (val1 == val_map[arg1])
-          // check (val2 == val_map[arg2])
           val_map[res] = val_map[arg1] * val_map[arg2];
           break;
         case mult_d_a:

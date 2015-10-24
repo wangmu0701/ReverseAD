@@ -4,7 +4,7 @@
 #include "reversead/reversead_mpi.hpp"
 #include "reversead/trace/trivial_trace.hpp"
 
-#define MPI_LOCINT MPI_UNSIGNED
+#define MPI_LOCINT MPI_LONG_LONG
 
 namespace ReverseAD {
 
