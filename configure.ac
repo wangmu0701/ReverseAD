@@ -14,6 +14,20 @@ AC_SUBST(ac_reversead_cxxflags)
 AC_MSG_RESULT($ac_reversead_cxxflags)
 #AX_CXX_COMPILE_STDCXX_11(noext,mandatory)
 
+AC_MSG_CHECKING(whether to enable mpi)
+AC_ARG_ENABLE(mpi, [AS_HELP_STRING([--enable-mpi],
+  [enable mpi in ReverseAD [default=no]])],
+  [enable_mpi=$enableval], [enable_mpi=no])
+AC_MSG_RESULT($enable_mpi)
+
+if test x$enable_mpi = xyes ; then
+  ENABLE_MPI="#define ENABLE_REVERSEAD_MPI 1"
+else
+  ENABLE_MPI="#undef ENABLE_REVERSEAD_MPI"
+fi
+AC_SUBST(ENABLE_MPI)
+
+
 # output
 AC_CONFIG_FILES(Makefile
                 ReverseAD/Makefile
@@ -23,6 +37,7 @@ AC_CONFIG_FILES(Makefile
                 ReverseAD/include/reversead/algorithm/Makefile
                 ReverseAD/include/reversead/trace/Makefile
                 ReverseAD/include/reversead/tape/Makefile
+                ReverseAD/include/reversead/reversead_config.h
                 ReverseAD/test/Makefile
                 ReverseAD/test/algorithm/Makefile
                 ReverseAD/test/tape/Makefile

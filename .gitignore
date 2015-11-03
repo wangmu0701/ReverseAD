@@ -24,6 +24,7 @@ test_base_reverse_adjoint
 compile
 Makefile
 Makefile.in
+reversead_config.h
 m4/*
 configure
 aclocal.m4

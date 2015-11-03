@@ -1,0 +1,6 @@
+#ifndef REVERSE_AD_CONFIG_H_
+#define REVERSE_AD_CONFIG_H_
+
+@ENABLE_MPI@
+
+#endif // REVERSE_AD_CONFIG_H_
