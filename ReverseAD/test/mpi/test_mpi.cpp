@@ -1,8 +1,6 @@
 #include <mpi.h>
 #include <iostream>
 #include "reversead/reversead.hpp"
-#include "reversead/reversead_mpi.hpp"
-#include "reversead/algorithm/base_mpi_reverse_hessian.hpp"
 using ReverseAD::RMPI_Send;
 using ReverseAD::RMPI_Recv;
 using ReverseAD::RMPI_ADOUBLE;

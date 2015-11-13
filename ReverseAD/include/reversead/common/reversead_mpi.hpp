@@ -6,6 +6,8 @@
 #ifdef ENABLE_REVERSEAD_MPI
 #include <mpi.h>
 
+#include "reversead/activetype/base_active.hpp"
+
 #define MPI_LOCINT MPI_LONG_LONG
 
 #define COMM_RMPI_SEND 0
@@ -86,6 +88,9 @@ namespace ReverseAD {
 namespace ReverseAD {
   // a dummy class to avoid undefined errors
   class SendRecvInfo {
+    friend std::ostream& operator<<(std::ostream& os,const SendRecvInfo& info) {
+      return os;
+    }
   };
 } // namespace ReverseAD
 #endif // ENABLE_REVERSEAD_MPI
