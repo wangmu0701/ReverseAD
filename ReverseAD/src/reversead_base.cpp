@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "reversead/reversead_base.hpp"
-#include "reversead/opcodes.hpp"
+#include "reversead/common/reversead_base.hpp"
+#include "reversead/common/opcodes.hpp"
 #include "reversead/trace/trivial_trace.hpp"
 
 namespace ReverseAD {

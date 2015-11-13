@@ -12,7 +12,8 @@
 #define RANK_BASE 0x000000ff
 #define BASE_LOC 0x800000
 */
-#include "reversead/logger.hpp"
+
+#include "reversead/util/logger.hpp"
 
 namespace ReverseAD {
 

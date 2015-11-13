@@ -8,8 +8,8 @@
 #include <map>
 #include <iostream>
 
-#include "reversead/reversead_base.hpp"
-#include "reversead/opcodes.hpp"
+#include "reversead/common/reversead_base.hpp"
+#include "reversead/common/opcodes.hpp"
 #include "reversead/trace/abstract_trace.hpp"
 #include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/single_derivative.hpp"

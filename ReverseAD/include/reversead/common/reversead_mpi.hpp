@@ -1,16 +1,17 @@
 #ifndef REVERSE_AD_MPI_H_
 #define REVERSE_AD_MPI_H_
 
+#include "reversead/common/reversead_config.h"
+
+#ifdef ENABLE_REVERSEAD_MPI
 #include <mpi.h>
-#include <iostream>
-#include "reversead/reversead_base.hpp"
-#include "reversead/base_active.hpp"
+
+#define MPI_LOCINT MPI_LONG_LONG
 
 #define COMM_RMPI_SEND 0
 #define COMM_RMPI_RECV 1
 
 namespace ReverseAD {
-
   class SendRecvInfo {
    public:
     SendRecvInfo(int comm_op, int count, int peer, int tag, MPI_Comm comm,
@@ -80,5 +81,14 @@ namespace ReverseAD {
                   int root,
                   MPI_Comm comm);
 } // namespace ReverseAD
+
+#else // undef ENABLE_REVERSEAD_MPI
+namespace ReverseAD {
+  // a dummy class to avoid undefined errors
+  class SendRecvInfo {
+  };
+} // namespace ReverseAD
+#endif // ENABLE_REVERSEAD_MPI
+
 
 #endif // REVERSE_AD_MPI_H_

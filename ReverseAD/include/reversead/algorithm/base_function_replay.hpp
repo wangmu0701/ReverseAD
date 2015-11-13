@@ -3,8 +3,8 @@
 
 #include <map>
 
-#include "reversead/reversead_base.hpp"
-#include "reversead/opcodes.hpp"
+#include "reversead/common/reversead_base.hpp"
+#include "reversead/common/opcodes.hpp"
 #include "reversead/trace/abstract_trace.hpp"
 #include "reversead/tape/abstract_tape.hpp"
 

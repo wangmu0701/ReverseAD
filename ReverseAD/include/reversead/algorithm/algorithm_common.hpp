@@ -2,7 +2,7 @@
 #define ALGORITHM_COMMON_H_
 
 #include <iostream>
-#include "reversead/reversead_base.hpp"
+#include "reversead/common/reversead_base.hpp"
 
 namespace ReverseAD {
 

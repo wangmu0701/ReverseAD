@@ -1,10 +1,12 @@
+#include "reversead/common/reversead_config.h"
 
-#include "reversead/base_active.hpp"
-#include "reversead/reversead_base.hpp"
-#include "reversead/reversead_mpi.hpp"
+#ifdef ENABLE_REVERSEAD_MPI
+#include "mpi.h"
+
+#include "reversead/activetype/base_active.hpp"
+#include "reversead/common/reversead_base.hpp"
+#include "reversead/common/reversead_mpi.hpp"
 #include "reversead/trace/trivial_trace.hpp"
-
-#define MPI_LOCINT MPI_LONG_LONG
 
 namespace ReverseAD {
 
@@ -200,5 +202,6 @@ namespace ReverseAD {
     }
     return rc;
   }
-
 } // namespace ReverseAD
+
+#endif // ENABLE_REVERSEAD_MPI

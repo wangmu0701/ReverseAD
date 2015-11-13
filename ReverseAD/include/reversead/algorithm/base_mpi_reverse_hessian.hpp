@@ -1,7 +1,12 @@
 #ifndef BASE_MPI_REVERSE_HESSIAN_H_
 #define BASE_MPI_REVERSE_HESSIAN_H_
 
-#include "base_reverse_hessian.hpp"
+#include "reversead/common/reversead_config.h"
+
+#ifdef ENABLE_REVERSEAD_MPI
+
+#include "mpi.h"
+#include "reversead/algorithm/base_reverse_hessian.hpp"
 
 namespace ReverseAD {
 
@@ -189,9 +194,10 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base> {
 
   // protected members
   AbstractTape<SendRecvInfo>* comm_tape;
-
 };
 
 } // namespace ReverseAD
+
+#endif // ENABLE_REVERSEAD_MPI
 
 #endif // BASE_REVERSE_HESSIAN_H_

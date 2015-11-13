@@ -4,8 +4,8 @@
 
 #include <vector>
 #include <iostream>
-#include "reversead/logger.hpp"
 #include "reversead/tape/abstract_tape.hpp"
+#include "reversead/util/logger.hpp"
 
 #define INITIAL_TAPE_VECTOR_SIZE 65536
 

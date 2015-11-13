@@ -3,8 +3,8 @@
 
 #include <math.h>
 #include <iostream>
-#include "reversead/reversead_base.hpp"
-#include "reversead/opcodes.hpp"
+#include "reversead/common/reversead_base.hpp"
+#include "reversead/common/opcodes.hpp"
 
 //#define REVERSEAD_BASE_ACTIVE_DEBUG
 

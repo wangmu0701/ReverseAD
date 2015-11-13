@@ -3,8 +3,7 @@
 
 #include "reversead/algorithm/trivial_adjoint.hpp"
 #include "reversead/algorithm/trivial_hessian.hpp"
-#include "reversead/reversead_base.hpp"
-#include "reversead/logger.hpp"
+#include "reversead/util/logger.hpp"
 
 namespace ReverseAD {
 

@@ -3,8 +3,8 @@
 
 #include <map>
 
-#include "reversead/logger.hpp"
-#include "abstract_serializable.hpp"
+#include "reversead/algorithm/abstract_serializable.hpp"
+#include "reversead/util/logger.hpp"
 
 namespace ReverseAD {
 

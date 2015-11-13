@@ -3,8 +3,8 @@
 
 #include <map>
 
-#include "abstract_serializable.hpp"
-#include "trivial_adjoint.hpp"
+#include "reversead/algorithm/abstract_serializable.hpp"
+#include "reversead/algorithm/trivial_adjoint.hpp"
 
 namespace ReverseAD {
 

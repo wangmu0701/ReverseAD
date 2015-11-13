@@ -1,8 +1,9 @@
 #ifndef ABSTRACT_TRACE_H_
 #define ABSTRACT_TRACE_H_
 
-#include "reversead/logger.hpp"
-#include "reversead/reversead_base.hpp"
+
+#include "reversead/common/reversead_base.hpp"
+#include "reversead/util/logger.hpp"
 
 namespace ReverseAD {
 

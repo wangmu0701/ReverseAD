@@ -1,8 +1,8 @@
 #ifndef TRIVIAL_TRACE_H_
 #define TRIVIAL_TRACE_H_
 
-#include "reversead/reversead_base.hpp"
-#include "reversead/reversead_mpi.hpp"
+#include "reversead/common/reversead_base.hpp"
+#include "reversead/common/reversead_mpi.hpp"
 #include "reversead/tape/trivial_tape.hpp"
 #include "reversead/trace/abstract_trace.hpp"
 
