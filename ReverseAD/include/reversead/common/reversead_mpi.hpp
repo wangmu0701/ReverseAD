@@ -16,21 +16,18 @@
 namespace ReverseAD {
   class SendRecvInfo {
    public:
-    SendRecvInfo(int comm_op, int count, int peer, int tag, MPI_Comm comm,
-      locint* locs) {
+    SendRecvInfo(int comm_op, int count, int peer, int tag, MPI_Comm comm) {
       this->comm_op = comm_op;
       this->count = count;
       this->peer = peer;
       this->tag = tag;
       this->comm = comm;
-      this->locs = locs;
     }
     int comm_op;
     int count;
     int peer;
     int tag;
     MPI_Comm comm;
-    locint* locs;
     friend std::ostream& operator<<(std::ostream& os,const SendRecvInfo& info) {
       if (info.comm_op == COMM_RMPI_SEND) {
         os << "sending " << info.count << " numbers to " << info.peer << std::endl;
@@ -47,6 +44,7 @@ namespace ReverseAD {
   void RMPI_Finalize();
   
   void trace_put(const SendRecvInfo& sr_info);
+  void trace_put_comm_loc(const locint& comm_loc);
 
   int RMPI_Send_ind(adouble* buf,
                     int count,

@@ -31,6 +31,9 @@ namespace ReverseAD {
   void trace_put(const SendRecvInfo& sr_info) {
     global_trace->put_sr_info(sr_info);
   }
+  void trace_put_comm_loc(const locint& comm_loc) {
+    global_trace->put_comm_loc(comm_loc);
+  }
 
   int RMPI_Send_ind(adouble* buf,
                     int count,
@@ -92,18 +95,17 @@ namespace ReverseAD {
     if (datatype == RMPI_ADOUBLE) {
       adouble* dummy_dep = (adouble*)buf;
       double* send_buf = new double[count];
-      locint* send_loc = new locint[count];
       for (int i = 0; i < count; i++) {
         dummy_dep[i] >>= send_buf[i];
-        send_loc[i] = dummy_dep[i].getLoc();
       }
       if (is_tracing) {
+        for (int i = 0; i < count; i++) {
+          trace_put_comm_loc(dummy_dep[i].getLoc());
+        }
         trace_put(rmpi_send);
-        SendRecvInfo info(COMM_RMPI_SEND, count, dest, tag, comm, send_loc);
+        SendRecvInfo info(COMM_RMPI_SEND, count, dest, tag, comm);
         trace_put(info);
         global_trace->increase_dummy_dep(count);
-      } else {
-        delete[] send_loc;
       }
       rc = MPI_Send((void*)send_buf, count, MPI_DOUBLE, dest, tag, comm);
       delete[] send_buf;
@@ -124,20 +126,19 @@ namespace ReverseAD {
     if (datatype == RMPI_ADOUBLE) {
       adouble* dummy_ind = (adouble*) buf;
       double* recv_buf = new double[count];
-      locint* recv_loc = new locint[count];
       rc = MPI_Recv((void*)recv_buf, count, MPI_DOUBLE, src, tag, comm, status);
       if (rc != MPI_SUCCESS) {return rc;}
       for (int i = 0; i < count; i++) {
         dummy_ind[i].markDummyInd(recv_buf[i]);
-        recv_loc[i] = dummy_ind[i].getLoc();
       }
       if (is_tracing) {
+        for (int i = 0; i < count; i++) {
+          trace_put_comm_loc(dummy_ind[i].getLoc());
+        }
         trace_put(rmpi_recv);
-        SendRecvInfo info(COMM_RMPI_RECV, count, src, tag, comm, recv_loc);
+        SendRecvInfo info(COMM_RMPI_RECV, count, src, tag, comm);
         trace_put(info);
         global_trace->increase_dummy_ind(count);
-      } else {
-        delete[] recv_loc;
       }
       delete[] recv_buf;
     } else {

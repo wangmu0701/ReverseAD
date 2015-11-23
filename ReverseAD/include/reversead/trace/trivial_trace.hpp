@@ -1,6 +1,7 @@
 #ifndef TRIVIAL_TRACE_H_
 #define TRIVIAL_TRACE_H_
 
+#include "reversead/common/reversead_config.h"
 #include "reversead/common/reversead_base.hpp"
 #include "reversead/common/reversead_mpi.hpp"
 #include "reversead/tape/trivial_tape.hpp"
@@ -15,13 +16,20 @@ class TrivialTrace : public AbstractTrace {
     op_tape = new TrivialTape<opbyte>();
     loc_tape = new TrivialTape<locint>();
     val_tape = new TrivialTape<double>();
+#ifdef ENABLE_REVERSEAD_MPI
     sr_info_tape = new TrivialTape<SendRecvInfo>();
+    comm_loc_tape = new TrivialTape<locint>();
+#else
+    sr_info_tape = nullptr;
+    comm_loc_tape = nullptr;
+#endif
   }
   ~TrivialTrace() {
     delete op_tape;
     delete loc_tape;
     delete val_tape;
     delete sr_info_tape;
+    delete comm_loc_tape;
   }
 
   // Write
@@ -38,18 +46,28 @@ class TrivialTrace : public AbstractTrace {
   inline void put_sr_info(const SendRecvInfo& sr_info) {
     sr_info_tape->put(sr_info);
   }
+  inline void put_comm_loc(const locint& comm_loc) {
+    std::cout << "trace->put_comm_loc : " << comm_loc << std::endl;
+    comm_loc_tape->put(comm_loc);
+  }
   inline void init_comm_forward() {
     sr_info_tape->init_forward();
+    comm_loc_tape->init_forward();
   }
   inline void end_comm_forward() {
     sr_info_tape->end_forward();
+    comm_loc_tape->end_forward();
   }
   inline bool has_next_sr_info_f() {
     return sr_info_tape->has_next_f();
   }
   inline SendRecvInfo get_next_sr_info_f() {
     return sr_info_tape->get_next_f();
-  } 
+  }
+  inline locint get_next_comm_loc_f() {
+    return comm_loc_tape->get_next_f();
+  }
+ 
   // forward sweep
   inline void init_forward() {
     op_tape->init_forward();
@@ -104,6 +122,8 @@ class TrivialTrace : public AbstractTrace {
     if (sr_info_tape) {
       std::cout << "SendRecvInfo tape:" << std::endl;
       sr_info_tape->dump_tape();
+      std::cout << "Comm Info tape:" << std::endl;
+      comm_loc_tape->dump_tape();
     }
   }
    
@@ -114,12 +134,19 @@ class TrivialTrace : public AbstractTrace {
     loc_tape->dump_tape(logger);
     logger << "Val tape:" << std::endl;
     val_tape->dump_tape(logger);
+    if (sr_info_tape) {
+      std::cout << "SendRecvInfo tape:" << std::endl;
+      sr_info_tape->dump_tape();
+      std::cout << "Comm Info tape:" << std::endl;
+      comm_loc_tape->dump_tape();
+    }
   }
  private:
   TrivialTape<opbyte> *op_tape;
   TrivialTape<locint> *loc_tape;
   TrivialTape<double> *val_tape;
   TrivialTape<SendRecvInfo> *sr_info_tape;
+  TrivialTape<locint> *comm_loc_tape;
 };
 
 } // namespace ReverseAD

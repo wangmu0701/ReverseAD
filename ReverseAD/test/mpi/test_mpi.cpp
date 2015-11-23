@@ -37,6 +37,9 @@ int main(int argc, char** argv) {
     RMPI_Send(&t1, 1, RMPI_ADOUBLE, 0, 0, MPI_COMM_WORLD);
   }
   ReverseAD::TrivialTrace* trace = ReverseAD::trace_off();
+  if (rank == 0) {
+    trace->dump_trace();
+  }
   BaseMpiReverseHessian<double> hessian(trace);
   hessian.compute_mpi();
 

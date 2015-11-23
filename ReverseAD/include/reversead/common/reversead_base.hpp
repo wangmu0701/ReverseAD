@@ -35,7 +35,7 @@ namespace ReverseAD {
 
   void trace_declare_ind();
   void trace_declare_dep();
-  void trace_put(opbyte);  
+  void trace_put(opbyte);
   void trace_put(opbyte, locint, locint);
   void trace_put(opbyte, locint, locint, locint);
   void trace_put(opbyte, locint, double);

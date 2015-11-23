@@ -52,22 +52,28 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base> {
   }
  protected:
   void forward_global_hessian() {
+    std::vector<locint> temp_loc_vec;
     trace->init_comm_forward();
     while(trace->has_next_sr_info_f()) {
       SendRecvInfo sr_info = trace->get_next_sr_info_f();
       //log.info << sr_info;
       if (sr_info.comm_op == COMM_RMPI_SEND) {
         int total_buf_size = 0;
+        locint dummy_ind;
         for (int i = 0; i < sr_info.count; i++) {
-          total_buf_size += dep_deriv[sr_info.locs[i]].byte_size();
+          dummy_ind = trace->get_next_comm_loc_f();
+          temp_loc_vec.push_back(dummy_ind);
+          total_buf_size += dep_deriv[dummy_ind].byte_size();
         }
         char* buf = new char[total_buf_size];
         total_buf_size = 0;
         for (int i = 0; i < sr_info.count; i++) {
-          dep_deriv[sr_info.locs[i]].write_to_byte(&buf[total_buf_size]);
-          total_buf_size += dep_deriv[sr_info.locs[i]].byte_size();
-          dep_deriv.erase(sr_info.locs[i]);
+          dummy_ind = temp_loc_vec[i];
+          dep_deriv[dummy_ind].write_to_byte(&buf[total_buf_size]);
+          total_buf_size += dep_deriv[dummy_ind].byte_size();
+          dep_deriv.erase(dummy_ind);
         }
+        temp_loc_vec.clear();
         MPI_Send(&total_buf_size, 1, MPI_INT, sr_info.peer,
                  sr_info.tag, sr_info.comm);
         MPI_Send((void*)buf, total_buf_size, MPI_CHAR, sr_info.peer,
@@ -86,7 +92,7 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base> {
           total_buf_size += local_deriv.byte_size();
           //local_deriv.debug(log.info);
           // we only remove things from reverse_live_set during forward
-          locint dummy_ind = sr_info.locs[i];
+          locint dummy_ind = trace->get_next_comm_loc_f();
           //log.info << "dummy_ind = " << dummy_ind << std::endl;
           std::set<locint> dep_set = std::move(reverse_live[dummy_ind]);
           reverse_live.erase(dummy_ind);
