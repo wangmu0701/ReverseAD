@@ -7,6 +7,7 @@
 #include "reversead/common/reversead_base.hpp"
 #include "reversead/common/reversead_mpi.hpp"
 #include "reversead/trace/trivial_trace.hpp"
+#include "reversead/util/temp_memory_allocator.hpp"
 
 namespace ReverseAD {
 
@@ -15,15 +16,18 @@ namespace ReverseAD {
   extern TrivialTrace* global_trace;
   extern bool is_tracing;
   extern int rank;
-   
+  TempMemoryAllocator* temp_memory_allocator;
+ 
   void RMPI_Init(int* argc, char** argv[]) {
     MPI_Init(argc, argv);
     MPI_Type_contiguous(1, MPI_DOUBLE, &RMPI_ADOUBLE);
     MPI_Type_commit(&RMPI_ADOUBLE);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    temp_memory_allocator = new TempMemoryAllocator();
   }
 
   void RMPI_Finalize() {
+    delete temp_memory_allocator;
     if (RMPI_ADOUBLE != MPI_DATATYPE_NULL) {MPI_Type_free(&RMPI_ADOUBLE);}
     MPI_Finalize();
   }
@@ -41,8 +45,10 @@ namespace ReverseAD {
                     int tag,
                     MPI_Comm comm) {
     int rc = MPI_SUCCESS;
-    double* send_val = new double[count];
-    locint* send_loc = new locint[count];
+    char* temp_buf = (char*)temp_memory_allocator->get_temp_memory(
+      (sizeof(double) + sizeof(locint)) * count);
+    double* send_val = (double*)(temp_buf);
+    locint* send_loc = (locint*)(temp_buf + sizeof(double) * count);
     for (int i = 0; i < count; i++) {
       send_val[i] = buf[i].getVal();
       send_loc[i] = buf[i].getLoc();
@@ -55,8 +61,7 @@ namespace ReverseAD {
     if (rc != MPI_SUCCESS) {
       log.fatal << "Sending locs in Send_ind error." << std::endl;
     }
-    delete[] send_val;
-    delete[] send_loc;
+    temp_memory_allocator->return_temp_memory((void*)temp_buf);
     return rc;
   }
 
@@ -66,8 +71,10 @@ namespace ReverseAD {
                     int tag,
                     MPI_Comm comm) {
     int rc= MPI_SUCCESS;
-    double* recv_val = new double[count];
-    locint* recv_loc = new locint[count];
+    char* temp_buf = (char*)temp_memory_allocator->get_temp_memory(
+      (sizeof(double) + sizeof(locint)) * count);
+    double* recv_val = (double*)(temp_buf);
+    locint* recv_loc = (locint*)(temp_buf + sizeof(double) * count);
     rc = MPI_Recv((void*)recv_val, count, MPI_DOUBLE, src, tag, comm, MPI_STATUS_IGNORE);
     if (rc != MPI_SUCCESS) {
       log.fatal << "Recving vals in Send_ind error." << std::endl;
@@ -80,8 +87,7 @@ namespace ReverseAD {
       buf[i].markRemoteInd(recv_val[i], recv_loc[i]);
     }
     global_trace->increase_dummy_ind(count);
-    delete[] recv_val;
-    delete[] recv_loc;
+    temp_memory_allocator->return_temp_memory((void*)temp_buf);
     return rc;
   }
 
@@ -94,7 +100,8 @@ namespace ReverseAD {
     int rc = 0;
     if (datatype == RMPI_ADOUBLE) {
       adouble* dummy_dep = (adouble*)buf;
-      double* send_buf = new double[count];
+      double* send_buf =
+        (double*)temp_memory_allocator->get_temp_memory(sizeof(double) * count);
       for (int i = 0; i < count; i++) {
         dummy_dep[i] >>= send_buf[i];
       }
@@ -108,7 +115,7 @@ namespace ReverseAD {
         global_trace->increase_dummy_dep(count);
       }
       rc = MPI_Send((void*)send_buf, count, MPI_DOUBLE, dest, tag, comm);
-      delete[] send_buf;
+      temp_memory_allocator->return_temp_memory((void*)send_buf);
     } else {
       rc = MPI_Send(buf, count, datatype, dest, tag, comm);
     }
@@ -125,7 +132,8 @@ namespace ReverseAD {
     int rc = 0;
     if (datatype == RMPI_ADOUBLE) {
       adouble* dummy_ind = (adouble*) buf;
-      double* recv_buf = new double[count];
+      double* recv_buf =
+        (double*)temp_memory_allocator->get_temp_memory(sizeof(double) * count);
       rc = MPI_Recv((void*)recv_buf, count, MPI_DOUBLE, src, tag, comm, status);
       if (rc != MPI_SUCCESS) {return rc;}
       for (int i = 0; i < count; i++) {
@@ -140,7 +148,7 @@ namespace ReverseAD {
         trace_put(info);
         global_trace->increase_dummy_ind(count);
       }
-      delete[] recv_buf;
+      temp_memory_allocator->return_temp_memory((void*)recv_buf);
     } else {
       rc = MPI_Recv(buf, count, datatype, src, tag, comm, status);
     }
