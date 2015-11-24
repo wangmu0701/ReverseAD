@@ -4,7 +4,7 @@
 #include "mpi.h"
 
 #include "reversead/activetype/base_active.hpp"
-#include "reversead/common/reversead_base.hpp"
+#include "reversead/common/reversead_type.hpp"
 #include "reversead/common/reversead_mpi.hpp"
 #include "reversead/trace/trivial_trace.hpp"
 #include "reversead/util/temp_memory_allocator.hpp"
@@ -13,7 +13,7 @@ namespace ReverseAD {
 
   MPI_Datatype RMPI_ADOUBLE;
 
-  extern TrivialTrace* global_trace;
+  extern void* global_trace;
   extern bool is_tracing;
   extern int rank;
   TempMemoryAllocator* temp_memory_allocator;
@@ -33,10 +33,10 @@ namespace ReverseAD {
   }
 
   void trace_put(const SendRecvInfo& sr_info) {
-    global_trace->put_sr_info(sr_info);
+    ((TrivialTrace<double>*)global_trace)->put_sr_info(sr_info);
   }
   void trace_put_comm_loc(const locint& comm_loc) {
-    global_trace->put_comm_loc(comm_loc);
+    ((TrivialTrace<double>*)global_trace)->put_comm_loc(comm_loc);
   }
 
   int RMPI_Send_ind(adouble* buf,
@@ -86,7 +86,7 @@ namespace ReverseAD {
     for (int i = 0; i < count; i++) {
       buf[i].markRemoteInd(recv_val[i], recv_loc[i]);
     }
-    global_trace->increase_dummy_ind(count);
+    ((TrivialTrace<double>*)global_trace)->increase_dummy_ind(count);
     temp_memory_allocator->return_temp_memory((void*)temp_buf);
     return rc;
   }
@@ -105,14 +105,15 @@ namespace ReverseAD {
       for (int i = 0; i < count; i++) {
         dummy_dep[i] >>= send_buf[i];
       }
+
       if (is_tracing) {
         for (int i = 0; i < count; i++) {
           trace_put_comm_loc(dummy_dep[i].getLoc());
         }
-        trace_put(rmpi_send);
+        trace_put<double>(rmpi_send);
         SendRecvInfo info(COMM_RMPI_SEND, count, dest, tag, comm);
         trace_put(info);
-        global_trace->increase_dummy_dep(count);
+        ((TrivialTrace<double>*)global_trace)->increase_dummy_dep(count);
       }
       rc = MPI_Send((void*)send_buf, count, MPI_DOUBLE, dest, tag, comm);
       temp_memory_allocator->return_temp_memory((void*)send_buf);
@@ -143,10 +144,10 @@ namespace ReverseAD {
         for (int i = 0; i < count; i++) {
           trace_put_comm_loc(dummy_ind[i].getLoc());
         }
-        trace_put(rmpi_recv);
+        trace_put<double>(rmpi_recv);
         SendRecvInfo info(COMM_RMPI_RECV, count, src, tag, comm);
         trace_put(info);
-        global_trace->increase_dummy_ind(count);
+        ((TrivialTrace<double>*)global_trace)->increase_dummy_ind(count);
       }
       temp_memory_allocator->return_temp_memory((void*)recv_buf);
     } else {

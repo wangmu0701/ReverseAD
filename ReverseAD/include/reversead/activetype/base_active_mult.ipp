@@ -1,7 +1,7 @@
   // mult operator
   friend BaseActive<Base> operator*(const BaseActive<Base>& lhs, const BaseActive<Base>& rhs) {
     BaseActive<Base> res(lhs.val * rhs.val);
-    trace_put(mult_a_a, res.loc, lhs.loc, rhs.loc, lhs.val, rhs.val);
+    trace_put<Base>(mult_a_a, res.loc, lhs.loc, rhs.loc, lhs.val, rhs.val);
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     log.info << "L(" << &res <<")[" << res.loc << "] = " 
               << "L("<< &lhs << ")["<<lhs.loc<<"] * L(" << &rhs << ")[" << rhs.loc << "]" << std::endl;
@@ -10,7 +10,7 @@
   }
   friend BaseActive<Base> operator*(const BaseActive<Base>& lhs, const Base& val) {
     BaseActive<Base> res(lhs.val * val);
-    trace_put(mult_d_a, res.loc, lhs.loc, val);
+    trace_put<Base>(mult_d_a, res.loc, lhs.loc, val);
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     log.info << "L(" << &res <<")[" << res.loc << "] = " 
               << "L("<< &lhs << ")["<<lhs.loc<<"] * const(" << val << ")" << std::endl;
@@ -19,7 +19,7 @@
   }
   friend BaseActive<Base> operator*(const Base& val, const BaseActive<Base>& rhs) {
     BaseActive<Base> res(val * rhs.val);
-    trace_put(mult_d_a, res.loc, rhs.loc, val);
+    trace_put<Base>(mult_d_a, res.loc, rhs.loc, val);
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     log.info << "L(" << &res <<")[" << res.loc << "] = " 
               << "const("<< val << ") * L(" << &rhs << ")[" << rhs.loc << "]" << std::endl;
@@ -31,7 +31,7 @@
   // R-value mult
   friend BaseActive<Base>&& operator*(BaseActive<Base>&& lhs, const BaseActive<Base>& rhs) {
     locint resloc = get_next_loc();
-    trace_put(mult_a_a, resloc, lhs.loc, rhs.loc, lhs.val, rhs.val);
+    trace_put<Base>(mult_a_a, resloc, lhs.loc, rhs.loc, lhs.val, rhs.val);
     lhs.val *= rhs.val;
     lhs.loc = resloc;
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
@@ -42,7 +42,7 @@
   }
   friend BaseActive<Base>&& operator*(const BaseActive<Base>& lhs, BaseActive<Base>&& rhs) {
     locint resloc = get_next_loc();
-    trace_put(mult_a_a, resloc, lhs.loc, rhs.loc, lhs.val, rhs.val);
+    trace_put<Base>(mult_a_a, resloc, lhs.loc, rhs.loc, lhs.val, rhs.val);
     rhs.val *= lhs.val;
     rhs.loc = resloc;
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
@@ -53,7 +53,7 @@
   }
   friend BaseActive<Base>&& operator*(BaseActive<Base>&& lhs, BaseActive<Base>&& rhs) {
     locint resloc = get_next_loc();
-    trace_put(mult_a_a, resloc, lhs.loc, rhs.loc, lhs.val, rhs.val);
+    trace_put<Base>(mult_a_a, resloc, lhs.loc, rhs.loc, lhs.val, rhs.val);
     lhs.val *= rhs.val;
     lhs.loc = resloc;
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
@@ -65,7 +65,7 @@
   friend BaseActive<Base>&& operator*(BaseActive<Base>&& lhs, const Base& val) {
     lhs.val *= val;
     locint resloc = get_next_loc();
-    trace_put(mult_d_a, resloc, lhs.loc, val);
+    trace_put<Base>(mult_d_a, resloc, lhs.loc, val);
     lhs.loc = resloc;
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     log.info << "R(" << &lhs <<")[" << lhs.loc << "] = " 
@@ -76,7 +76,7 @@
   friend BaseActive<Base>&& operator*(const Base& val, BaseActive<Base>&& rhs) {
     rhs.val *= val;
     locint resloc = get_next_loc();
-    trace_put(mult_d_a, resloc, rhs.loc, val);
+    trace_put<Base>(mult_d_a, resloc, rhs.loc, val);
     rhs.loc = resloc;
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     log.info << "R(" << &rhs <<")[" << resloc << "] = " 

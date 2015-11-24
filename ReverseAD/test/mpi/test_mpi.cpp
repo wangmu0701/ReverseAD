@@ -17,10 +17,11 @@ int main(int argc, char** argv) {
   if (rank == 0) {
     ReverseAD::logging_on();
   }
-  ReverseAD::trace_on();
+  ReverseAD::trace_on<double>();
   if (rank == 0) {
     adouble v0;
     v0 <<= 2.0;
+    std::cout << "WTF" << std::endl;
     RMPI_Send(&v0, 1, RMPI_ADOUBLE, 1, 0, MPI_COMM_WORLD);
     adouble v1;
     RMPI_Recv(&v1, 1, RMPI_ADOUBLE, 1, 0, MPI_COMM_WORLD, NULL);
@@ -36,7 +37,7 @@ int main(int argc, char** argv) {
     adouble t1 = t0 * t0;
     RMPI_Send(&t1, 1, RMPI_ADOUBLE, 0, 0, MPI_COMM_WORLD);
   }
-  ReverseAD::TrivialTrace* trace = ReverseAD::trace_off();
+  ReverseAD::TrivialTrace<double>* trace = ReverseAD::trace_off<double>();
   if (rank == 0) {
     trace->dump_trace();
   }

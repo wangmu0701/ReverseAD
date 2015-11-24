@@ -1,21 +1,24 @@
 #ifndef TRIVIAL_TRACE_H_
 #define TRIVIAL_TRACE_H_
 
+#include <iostream>
+
 #include "reversead/common/reversead_config.h"
-#include "reversead/common/reversead_base.hpp"
-#include "reversead/common/reversead_mpi.hpp"
+#include "reversead/common/reversead_type.hpp"
 #include "reversead/tape/trivial_tape.hpp"
 #include "reversead/trace/abstract_trace.hpp"
 
 namespace ReverseAD {
 
-class TrivialTrace : public AbstractTrace {
+template<typename Base>
+class TrivialTrace : public AbstractTrace<Base> {
  public:
   // Default c-tor and d-tor
   TrivialTrace() {
     op_tape = new TrivialTape<opbyte>();
     loc_tape = new TrivialTape<locint>();
-    val_tape = new TrivialTape<double>();
+    val_tape = new TrivialTape<Base>();
+    coval_tape = new TrivialTape<double>();
 #ifdef ENABLE_REVERSEAD_MPI
     sr_info_tape = new TrivialTape<SendRecvInfo>();
     comm_loc_tape = new TrivialTape<locint>();
@@ -28,6 +31,7 @@ class TrivialTrace : public AbstractTrace {
     delete op_tape;
     delete loc_tape;
     delete val_tape;
+    delete coval_tape;
     delete sr_info_tape;
     delete comm_loc_tape;
   }
@@ -39,8 +43,11 @@ class TrivialTrace : public AbstractTrace {
   inline void put_loc(const locint& loc) {
     loc_tape->put(loc);
   }
-  inline void put_val(const double& val) {
+  inline void put_val(const Base& val) {
     val_tape->put(val);
+  }
+  inline void put_coval(const double& coval) {
+    coval_tape->put(coval);
   }
 
   inline void put_sr_info(const SendRecvInfo& sr_info) {
@@ -73,11 +80,13 @@ class TrivialTrace : public AbstractTrace {
     op_tape->init_forward();
     loc_tape->init_forward();
     val_tape->init_forward();
+    coval_tape->init_forward();
   }
   inline void end_forward() {
     op_tape->end_forward();
     loc_tape->end_forward();
     val_tape->end_forward();
+    coval_tape->end_forward();
   }
   inline opbyte get_next_op_f() {
     return op_tape->get_next_f();
@@ -85,8 +94,11 @@ class TrivialTrace : public AbstractTrace {
   inline locint get_next_loc_f() {
     return loc_tape->get_next_f();
   }
-  inline double get_next_val_f() {
+  inline Base get_next_val_f() {
     return val_tape->get_next_f();
+  }
+  inline double get_next_coval_f() {
+    return coval_tape->get_next_f();
   }
 
   // reverse sweep
@@ -94,11 +106,13 @@ class TrivialTrace : public AbstractTrace {
     op_tape->init_reverse();
     loc_tape->init_reverse();
     val_tape->init_reverse();
+    coval_tape->init_reverse();
   }
   inline void end_reverse() {
     op_tape->end_reverse();
     loc_tape->end_reverse();
     val_tape->end_reverse();
+    coval_tape->end_reverse();
   }
   inline opbyte get_next_op_r() {
     return op_tape->get_next_r();
@@ -106,9 +120,11 @@ class TrivialTrace : public AbstractTrace {
   inline locint get_next_loc_r() {
     return loc_tape->get_next_r();
   }
-
-  inline double get_next_val_r() {
+  inline Base get_next_val_r() {
     return val_tape->get_next_r();
+  }
+  inline double get_next_coval_r() {
+    return coval_tape->get_next_r();
   }
 
   // for debug
@@ -119,6 +135,8 @@ class TrivialTrace : public AbstractTrace {
     loc_tape->dump_tape();
     std::cout << "Val tape:" << std::endl;
     val_tape->dump_tape();
+    std::cout << "Const tape:" << std::endl;
+    coval_tape->dump_tape();
     if (sr_info_tape) {
       std::cout << "SendRecvInfo tape:" << std::endl;
       sr_info_tape->dump_tape();
@@ -134,6 +152,8 @@ class TrivialTrace : public AbstractTrace {
     loc_tape->dump_tape(logger);
     logger << "Val tape:" << std::endl;
     val_tape->dump_tape(logger);
+    logger << "Const tape:" << std::endl;
+    coval_tape->dump_tape(logger);
     if (sr_info_tape) {
       std::cout << "SendRecvInfo tape:" << std::endl;
       sr_info_tape->dump_tape();
@@ -144,7 +164,8 @@ class TrivialTrace : public AbstractTrace {
  private:
   TrivialTape<opbyte> *op_tape;
   TrivialTape<locint> *loc_tape;
-  TrivialTape<double> *val_tape;
+  TrivialTape<Base> *val_tape;
+  TrivialTape<double> *coval_tape;
   TrivialTape<SendRecvInfo> *sr_info_tape;
   TrivialTape<locint> *comm_loc_tape;
 };

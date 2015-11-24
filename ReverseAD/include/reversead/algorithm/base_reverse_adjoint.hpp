@@ -22,7 +22,7 @@ class BaseReverseAdjoint {
   //typedef map<locint, Base> type_adjoint;
   typedef TrivialAdjoint<locint, Base> type_adjoint;
 
-  BaseReverseAdjoint(AbstractTrace* trace) {
+  BaseReverseAdjoint(AbstractTrace<Base>* trace) {
     this->trace = trace;
   }
   Base** compute(Base* adjoint_dep, int ind_num, int dep_num) {
@@ -180,7 +180,7 @@ class BaseReverseAdjoint {
   }
   
  private:
-  AbstractTrace* trace;
+  AbstractTrace<Base>* trace;
 };
 
 } // namespace ReverseAD

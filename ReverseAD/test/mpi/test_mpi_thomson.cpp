@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
   if (rank == 0) {
     //ReverseAD::logging_on();
   }
-  ReverseAD::trace_on();
+  ReverseAD::trace_on<double>();
   adouble* x = new adouble[size*N*2];
   adouble* p = new adouble[size*N*3];
   adouble tad = 0;
@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
     tad = compute_thomson_function(x, p, rank, size);
     RMPI_Reduce(&tad, NULL, 1, RMPI_ADOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   }
-  ReverseAD::TrivialTrace* trace = ReverseAD::trace_off();
+  ReverseAD::TrivialTrace<double>* trace = ReverseAD::trace_off<double>();
   BaseMpiReverseHessian<double> hessian(trace);
   struct timeval tv1, tv2;
   if (rank == 0) {

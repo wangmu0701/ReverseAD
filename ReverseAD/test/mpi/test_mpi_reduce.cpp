@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
   if (rank == 0) {
     ReverseAD::logging_on();
   }
-  ReverseAD::trace_on();
+  ReverseAD::trace_on<double>();
   if (rank == 0) {
     get_timing();
     adouble* x = new adouble[size * N];
@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
     std::cout << "yad.val = " << yad.getVal() << std::endl;
     RMPI_Reduce(&yad, NULL, 1, RMPI_ADOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   }
-  ReverseAD::TrivialTrace* trace = ReverseAD::trace_off();
+  ReverseAD::TrivialTrace<double>* trace = ReverseAD::trace_off<double>();
   BaseMpiReverseHessian<double> hessian(trace);
   struct timeval tv1, tv2;
   if (rank == 0) {

@@ -24,7 +24,7 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base> {
   using BaseReverseHessian<Base>::reverse_live;
   using BaseReverseHessian<Base>::trace;
 
-  BaseMpiReverseHessian(AbstractTrace* trace)
+  BaseMpiReverseHessian(AbstractTrace<Base>* trace)
     : BaseReverseHessian<Base>(trace) {
   }
 

@@ -15,7 +15,7 @@ namespace ReverseAD {
 template <typename Base>
 class BaseFunctionReplay {
  public:
-  BaseFunctionReplay(AbstractTrace* trace) {
+  BaseFunctionReplay(AbstractTrace<Base>* trace) {
     this->trace = trace;
   }
 
@@ -119,7 +119,7 @@ class BaseFunctionReplay {
   inline locint get_next_res() {return trace->get_next_loc_f();}
   inline locint get_next_arg() {return trace->get_next_loc_f();}
 
-  AbstractTrace* trace;  
+  AbstractTrace<Base>* trace;  
 };
 
 } // namespace ReverseAD

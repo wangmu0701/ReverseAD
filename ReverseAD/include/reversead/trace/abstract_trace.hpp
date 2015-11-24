@@ -2,11 +2,12 @@
 #define ABSTRACT_TRACE_H_
 
 
-#include "reversead/common/reversead_base.hpp"
+#include "reversead/common/reversead_type.hpp"
 #include "reversead/util/logger.hpp"
 
 namespace ReverseAD {
 
+template<typename Base>
 class AbstractTrace {
  public:
   AbstractTrace() {
@@ -19,21 +20,24 @@ class AbstractTrace {
 
   virtual void put_op(const opbyte&) = 0;
   virtual void put_loc(const locint&) = 0;
-  virtual void put_val(const double&) = 0;
+  virtual void put_val(const Base&) = 0;
+  virtual void put_coval(const double&) = 0;
   
   // forward sweep
   virtual void init_forward() = 0;
   virtual void end_forward() = 0;
   virtual opbyte get_next_op_f() = 0;
   virtual locint get_next_loc_f() = 0;
-  virtual double get_next_val_f() = 0;
+  virtual Base get_next_val_f() = 0;
+  virtual double get_next_coval_f() = 0;
 
   // reverse sweep
   virtual void init_reverse() = 0;
   virtual void end_reverse() = 0;
   virtual opbyte get_next_op_r() = 0;
   virtual locint get_next_loc_r() = 0;
-  virtual double get_next_val_r() = 0;
+  virtual Base get_next_val_r() = 0;
+  virtual double get_next_coval_r() = 0;
 
   // communication trace
   virtual void put_sr_info(const SendRecvInfo&) = 0;

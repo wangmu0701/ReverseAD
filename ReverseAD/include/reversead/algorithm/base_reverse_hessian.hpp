@@ -38,7 +38,7 @@ class BaseReverseHessian : public BaseReverseMode<Base> {
   using BaseReverseMode<Base>::dep_index_map;
   using BaseReverseMode<Base>::indep_index_map;
 
-  BaseReverseHessian(AbstractTrace* trace) : BaseReverseMode<Base>(trace) {}
+  BaseReverseHessian(AbstractTrace<Base>* trace) : BaseReverseMode<Base>(trace) {}
 
   void init_dep_deriv(SingleDeriv& deriv, locint dep) {
     (*deriv.adjoint_vals)[dep] = 1.0;

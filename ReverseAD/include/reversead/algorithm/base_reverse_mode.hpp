@@ -30,7 +30,7 @@ class BaseReverseMode {
   typedef typename SingleDerivative<Base>::type_hessian type_hessian;
   typedef SingleDerivative<Base> SingleDeriv;
 
-  BaseReverseMode(AbstractTrace* trace) {
+  BaseReverseMode(AbstractTrace<Base>* trace) {
     this->trace = trace;
   }
 
@@ -51,7 +51,7 @@ class BaseReverseMode {
   virtual void process_sac(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) = 0;
   virtual void init_dep_deriv(SingleDeriv& deriv, locint dep) = 0;
 
-  AbstractTrace* trace;
+  AbstractTrace<Base>* trace;
   std::map<locint, std::set<locint> > reverse_live;
   std::map<locint, SingleDeriv> dep_deriv;
   std::map<locint, locint> indep_index_map;

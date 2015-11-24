@@ -16,7 +16,7 @@ int main() {
   }
   ReverseAD::logging_on();
   ReverseAD::get_timing();
-  ReverseAD::trace_on();
+  ReverseAD::trace_on<double>();
   yad = 0;
   for (int i = 0; i < N; i++) {
     xad[i] <<= x[i];
@@ -27,7 +27,7 @@ int main() {
   }
   yad >>= y;
   std::cout << "yad = " << yad.getVal() << std::endl;
-  ReverseAD::TrivialTrace* trace = ReverseAD::trace_off();
+  ReverseAD::TrivialTrace<double>* trace = ReverseAD::trace_off<double>();
   double time_elapsed = ReverseAD::get_timing();
   std::cout << "overloaded function time = " << time_elapsed << std::endl;
 
