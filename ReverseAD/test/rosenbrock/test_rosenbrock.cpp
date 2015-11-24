@@ -2,6 +2,8 @@
 
 #include "reversead/reversead.hpp"
 
+using ReverseAD::locint;
+
 #define N 4
 
 int main() {
@@ -34,6 +36,15 @@ int main() {
   std::cout << " ry = " << ry[0] << std::endl;
   ReverseAD::BaseReverseHessian<double> hessian(trace);
   hessian.compute(N, 1);
+  int *size;
+  locint **rind;
+  locint **cind;
+  double** values;
+  hessian.retrieve_hessian_sparse_format(&size, &rind, &cind, &values);
+  std::cout << "hessian size = "<<size[0] << std::endl;
+  for(int i = 0; i < size[0]; i++) {
+    std::cout << "H["<<rind[0][i]<<","<<cind[0][i]<<"] = "<<values[0][i] << std::endl;
+  }
   delete[] x;
   delete[] xad;
 }

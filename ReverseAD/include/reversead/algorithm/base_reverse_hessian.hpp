@@ -75,11 +75,6 @@ class BaseReverseHessian : public BaseReverseMode<Base> {
         (*cind)[dep][l] = indep_index_map[y];
         l++;
       }
-      log.info << "Dep : " << dep + 1 << std::endl;
-      for(int i=0; i<size;i++) {
-        log.info << "H["<<(*rind)[i]<<","<<(*cind)[i]<<"] = "
-                 << (*values)[i] << std::endl;
-      }
     }
   }
 

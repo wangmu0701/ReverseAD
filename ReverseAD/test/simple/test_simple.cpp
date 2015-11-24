@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include "reversead/reversead.hpp"
-#include "reversead/algorithm/base_reverse_hessian.hpp"
 
 using ReverseAD::locint;
 
@@ -13,10 +12,10 @@ int main() {
   yad = 0;
   a <<= 2.0;
   b <<= 3.0;
-  //c <<= 3.0;
-  //d <<= 4.0;
-  yad = a * b;
-  //yad = sin(a) + sqrt(b) + c / d + 1.0/c;
+  c <<= 3.0;
+  d <<= 4.0;
+  //yad = a * b;
+  yad = sin(a) + sqrt(b) + c / d + 1.0/c;
   yad >>= y;
   std::cout << "yad = " << yad.getVal() << std::endl;
   ReverseAD::TrivialTrace* trace = ReverseAD::trace_off();
