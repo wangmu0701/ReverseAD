@@ -14,19 +14,14 @@
 #include "reversead/tape/abstract_tape.hpp"
 #include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/base_reverse_mode.hpp"
+#include "reversead/algorithm/base_reverse_adjoint.hpp"
 #include "single_derivative.hpp"
 
-#define COMBINE_D_1 info.dx += info.dy;
-#define COMBINE_D_2 info.pxx += 2.0 * info.pxy + info.pyy;\
-                    info.pxy = 0.0; info.pyy = 0.0;\
-                    COMBINE_D_1
-
-#define PSEUDO_BINARY if (info.x == info.y) {info.y = NULL_LOC; COMBINE_D_2}
 
 namespace ReverseAD {
 
 template <typename Base>
-class BaseReverseHessian : public BaseReverseMode<Base> {
+class BaseReverseHessian : public BaseReverseAdjoint<Base> {
  public:
   typedef typename SingleDerivative<Base>::type_adjoint type_adjoint;
   typedef typename SingleDerivative<Base>::type_hessian type_hessian;
@@ -38,7 +33,7 @@ class BaseReverseHessian : public BaseReverseMode<Base> {
   using BaseReverseMode<Base>::dep_index_map;
   using BaseReverseMode<Base>::indep_index_map;
 
-  BaseReverseHessian(AbstractTrace<Base>* trace) : BaseReverseMode<Base>(trace) {}
+  BaseReverseHessian(AbstractTrace<Base>* trace) : BaseReverseAdjoint<Base>(trace) {}
 
   void init_dep_deriv(SingleDeriv& deriv, locint dep) {
     (*deriv.adjoint_vals)[dep] = 1.0;
@@ -47,7 +42,10 @@ class BaseReverseHessian : public BaseReverseMode<Base> {
   void process_sac(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) {
     Base w = deriv.adjoint_vals->get_and_erase(info.r);
     type_adjoint r = deriv.hessian_vals->get_and_erase(info.r);
-    compute_adjoint_sac(info, *(deriv.adjoint_vals), w);
+    
+    // in template, name resolve will not look in base class
+    BaseReverseAdjoint<Base>::compute_adjoint_sac(
+      info, *(deriv.adjoint_vals), w);
     compute_hessian_sac(info, *(deriv.hessian_vals),w,r);
   }
 
@@ -71,21 +69,10 @@ class BaseReverseHessian : public BaseReverseMode<Base> {
       int l =0;
       while(has_next) {
         has_next = h_enum.get_next(x, y, (*values)[dep][l]);
-        (*rind)[dep][l] = indep_index_map[x];
-        (*cind)[dep][l] = indep_index_map[y];
+        (*rind)[dep][l] = indep_index_map[x] - 1;
+        (*cind)[dep][l] = indep_index_map[y] - 1;
         l++;
       }
-    }
-  }
-
-  void compute_adjoint_sac(const DerivativeInfo<locint, Base>& info,
-                           type_adjoint& adjoint_vals,
-                           Base& w) {
-    if (info.x != NULL_LOC) {
-      adjoint_vals[info.x] += w * info.dx;
-    }
-    if (info.y != NULL_LOC) {
-      adjoint_vals[info.y] += w * info.dy;
     }
   }
 

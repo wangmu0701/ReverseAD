@@ -21,11 +21,16 @@ int main() {
   ReverseAD::TrivialTrace<double>* trace = ReverseAD::trace_off<double>();
   trace->dump_trace();
   ReverseAD::BaseReverseHessian<double> hessian(trace);
+  hessian.compute(4, 1);
+  double** adjoints;
+  hessian.retrieve_adjoint(&adjoints);
+  for(int i = 0; i < 4; i++) {
+    std::cout << "A[" << i << "] = " << adjoints[0][i] << std::endl;
+  }
   int *size;
   locint **rind;
   locint **cind;
   double** values;
-  hessian.compute(4, 1);
   hessian.retrieve_hessian_sparse_format(&size, &rind, &cind, &values);
   std::cout << "hessian size = "<<size[0] << std::endl;
   for(int i = 0; i < size[0]; i++) {

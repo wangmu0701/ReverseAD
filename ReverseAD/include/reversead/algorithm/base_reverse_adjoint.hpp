@@ -1,6 +1,9 @@
 #ifndef BASE_REVERSE_ADJOINT_H_
 #define BASE_REVERSE_ADJOINT_H_
 
+#include <math.h>
+
+#include <set>
 #include <vector>
 #include <map>
 #include <iostream>
@@ -9,180 +12,95 @@
 #include "reversead/common/opcodes.hpp"
 #include "reversead/trace/abstract_trace.hpp"
 #include "reversead/tape/abstract_tape.hpp"
-#include "reversead/algorithm/trivial_adjoint.hpp"
-
-using std::vector;
-using std::map;
+#include "reversead/algorithm/algorithm_common.hpp"
+#include "reversead/algorithm/base_reverse_mode.hpp"
+#include "single_derivative.hpp"
 
 namespace ReverseAD {
 
 template <typename Base>
-class BaseReverseAdjoint {
+class BaseReverseAdjoint : public BaseReverseMode<Base> {
  public:
-  //typedef map<locint, Base> type_adjoint;
-  typedef TrivialAdjoint<locint, Base> type_adjoint;
+  typedef typename SingleDerivative<Base>::type_adjoint type_adjoint;
+  typedef SingleDerivative<Base> SingleDeriv;
 
-  BaseReverseAdjoint(AbstractTrace<Base>* trace) {
-    this->trace = trace;
+  using BaseReverseMode<Base>::trace;
+  using BaseReverseMode<Base>::dep_deriv;
+  using BaseReverseMode<Base>::reverse_live;
+  using BaseReverseMode<Base>::dep_index_map;
+  using BaseReverseMode<Base>::indep_index_map;
+
+  BaseReverseAdjoint(AbstractTrace<Base>* trace) : BaseReverseMode<Base>(trace) {}
+
+  void init_dep_deriv(SingleDeriv& deriv, locint dep) {
+    (*deriv.adjoint_vals)[dep] = 1.0;
   }
-  Base** compute(Base* adjoint_dep, int ind_num, int dep_num) {
-    Base** adjoint_ind = new Base*[dep_num];
-    for (int i = 0; i < dep_num; i++) {
-      adjoint_ind[i] = new Base[ind_num];
+
+  void process_sac(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) {
+    Base w = deriv.adjoint_vals->get_and_erase(info.r);
+    compute_adjoint_sac(info, *(deriv.adjoint_vals), w);
+  }
+
+  void retrieve_adjoint(Base*** values) {
+    int dep_size = dep_deriv.size();
+    (*values) = new Base*[dep_size];
+    for (auto& kv : dep_deriv) {
+      locint dep = dep_index_map[kv.first] - 1;
+      int size = kv.second.adjoint_vals->get_size();
+      (*values)[dep] = new Base[size];
+      for (int i = 0; i < size; i++) {(*values)[dep][i] = 0.0;}
+      typename type_adjoint::enumerator a_enum = kv.second.adjoint_vals->get_enumerator();
+      bool has_next = a_enum.has_next();
+      locint x;
+      Base w;
+      while (has_next) {
+        has_next = a_enum.get_next(x, w);
+        (*values)[dep][indep_index_map[x] - 1] = w;
+      } 
     }
-    vector<type_adjoint> adjoint_vals(dep_num);
-   
-    int ind_count = ind_num - 1;
-    int dep_count = 0;
-
-    locint res;
-    locint arg1;
-    locint arg2;
-    double coval;
-    Base arg1_val;
-    Base arg2_val;
-
-    trace->init_reverse();
-    opbyte op = trace->get_next_op_r();
-
-    while (op != start_of_tape) {
-      switch (op) {
-        case start_of_tape:
-        case end_of_tape:
-          break;
-        case assign_ind:
-          if (ind_count < 0) {
-            log.warning << "more independents found on tape than : " << ind_num << std::endl;
-            return nullptr;
-          }
-          res = trace->get_next_loc_r();;
-          coval = trace->get_next_val_r();
-          for (int i = 0; i < dep_num; i++) {
-            adjoint_ind[i][ind_count] = adjoint_vals[i][res];
-          }
-          ind_count--;
-          break;
-        case assign_dep:
-          if (dep_count >= dep_num) {
-            log.warning << "more dependents found on tape than : " << ind_num << std::endl;
-            return nullptr;
-          }
-          res = trace->get_next_loc_r();
-          coval = trace->get_next_val_r();
-          adjoint_vals[dep_count][res] = adjoint_dep[dep_count];
-          log.info << "a[" << res << "] = " << adjoint_vals[dep_count][res] << std::endl;
-          dep_count++; 
-          break;
-        case assign_d:
-          res = trace->get_next_loc_r();
-          coval = trace->get_next_val_r();
-          for (type_adjoint& adjoint : adjoint_vals) {
-            adjoint.erase(res);
-          }
-          break;
-        case assign_a:
-          res = trace->get_next_loc_r();
-          arg1 = trace->get_next_loc_r();
-          log.info << "assign_a : " << res << " = " << arg1 << std::endl;
-          for (type_adjoint& adjoint : adjoint_vals) {
-            Base w = adjoint[res];
-            adjoint.erase(res);
-            adjoint[arg1] += w;
-            log.info << "res = " << res << " w = " << w << std::endl;
-            log.info << "a[" << arg1 << "] = " << adjoint[arg1] << std::endl;
-          }
-          break;
-        case plus_a_a:
-          res = trace->get_next_loc_r();
-          arg2 = trace->get_next_loc_r();
-          arg1 = trace->get_next_loc_r();
-          log.info << "plus_a_a : " << res << " = " << arg1 << " + " << arg2<< std::endl;
-          for (type_adjoint& adjoint : adjoint_vals) {
-            Base w = adjoint[res];
-            adjoint.erase(res);
-            adjoint[arg1] += w;
-            adjoint[arg2] += w;
-            log.info << "res = " << res << " w = " << w << std::endl;
-            log.info << "a[" << arg1 << "] = " << adjoint[arg1] << std::endl;
-            log.info << "a[" << arg2 << "] = " << adjoint[arg2] << std::endl;
-          }
-          break;
-        case minus_a_a:
-          res = trace->get_next_loc_r();
-          arg2 = trace->get_next_loc_r();
-          arg1 = trace->get_next_loc_r();
-          for (type_adjoint& adjoint : adjoint_vals) {
-            Base w = adjoint[res];
-            adjoint.erase(res);
-            adjoint[arg2] += w;
-            adjoint[arg1] -= w;
-          }
-          break;
-        case minus_a_d:
-          res = trace->get_next_loc_r();
-          arg1 = trace->get_next_loc_r();
-          coval = trace->get_next_val_r();
-          for (type_adjoint& adjoint : adjoint_vals) {
-            Base w = adjoint[res];
-            adjoint.erase(res);
-            adjoint[arg1] += w;
-          }
-          break;
-        case minus_d_a:
-          res = trace->get_next_loc_r();
-          arg1 = trace->get_next_loc_r();
-          coval = trace->get_next_val_r();
-          for (type_adjoint& adjoint : adjoint_vals) {
-            Base w = adjoint[res];
-            adjoint.erase(res);
-            adjoint[arg1] -= w;
-          }
-          break;
-        case plus_d_a:
-          res = trace->get_next_loc_r();
-          coval = trace->get_next_val_r();
-          arg1 = trace->get_next_loc_r();
-          for (type_adjoint& adjoint : adjoint_vals) {
-            Base w = adjoint[res];
-            adjoint.erase(res);
-            adjoint[arg1] += w;
-          }
-          break;
-        case mult_a_a:
-          res = trace->get_next_loc_r();
-          arg2 = trace->get_next_loc_r();
-          arg1 = trace->get_next_loc_r();
-          arg2_val = trace->get_next_val_r();
-          arg1_val = trace->get_next_val_r();
-          for (type_adjoint& adjoint : adjoint_vals) {
-            Base w = adjoint[res];
-            adjoint.erase(res);
-            adjoint[arg1] += w * arg2_val;
-            adjoint[arg2] += w * arg1_val;           
-          }
-          break;
-        case mult_d_a:
-          res = trace->get_next_loc_r();
-          arg1 = trace->get_next_loc_r();
-          coval = trace->get_next_val_r();
-          for (type_adjoint& adjoint : adjoint_vals) {
-            Base w = adjoint[res];
-            adjoint.erase(res);
-            adjoint[arg1] += w * coval;
-          }
-          break;
-        default:
-          log.warning << "Unrecongized opcode : " << (int)op << std::endl; 
+  }
+/*
+  void retrieve_hessian_sparse_format(int** ssize, locint*** rind, locint*** cind, Base*** values) {
+    int dep_size = dep_deriv.size();
+    (*ssize) = new int[dep_size];
+    (*rind) = new locint*[dep_size];
+    (*cind) = new locint*[dep_size];
+    (*values) = new Base*[dep_size];
+    for (auto& kv : dep_deriv) {
+      locint dep = dep_index_map[kv.first] - 1;
+      int size = kv.second.hessian_vals->get_size();
+      (*ssize)[dep] = size;
+      (*rind)[dep] = new locint[size];
+      (*cind)[dep] = new locint[size];
+      (*values)[dep] = new Base[size];
+      typename type_hessian::enumerator h_enum = kv.second.hessian_vals->get_enumerator();
+      bool has_next = h_enum.has_next();
+      locint x,y;
+      Base w;
+      int l =0;
+      while(has_next) {
+        has_next = h_enum.get_next(x, y, (*values)[dep][l]);
+        (*rind)[dep][l] = indep_index_map[x];
+        (*cind)[dep][l] = indep_index_map[y];
+        l++;
       }
-      op = trace->get_next_op_r();
     }
-    return adjoint_ind;
   }
-  
- private:
-  AbstractTrace<Base>* trace;
+*/
+
+  void compute_adjoint_sac(const DerivativeInfo<locint, Base>& info,
+                           type_adjoint& adjoint_vals,
+                           Base& w) {
+    if (info.x != NULL_LOC) {
+      adjoint_vals[info.x] += w * info.dx;
+    }
+    if (info.y != NULL_LOC) {
+      adjoint_vals[info.y] += w * info.dy;
+    }
+  }
+
 };
 
 } // namespace ReverseAD
 
-#endif // BASE_REVERSE_HESSIAN_H_
+#endif // REVERSEAD_BASE_REVERSE_ADJOINT_H_

@@ -38,7 +38,7 @@ class BaseReverseMode {
     double time = get_timing();
     reverse_local_computation(ind_num, dep_num);
     time = get_timing();
-    log.warning << "reverse local hessian timing : " << time << std::endl;
+    log.warning << "reverse local compute timing : " << time << std::endl;
     for (auto& kv : dep_deriv) {
       log.info << "Dep : " << kv.first << std::endl;
       kv.second.debug(log.info);

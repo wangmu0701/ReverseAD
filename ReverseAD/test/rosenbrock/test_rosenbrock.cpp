@@ -36,6 +36,13 @@ int main() {
   std::cout << " ry = " << ry[0] << std::endl;
   ReverseAD::BaseReverseHessian<double> hessian(trace);
   hessian.compute(N, 1);
+
+  double** adjoints;
+  hessian.retrieve_adjoint(&adjoints);
+  for(int i = 0; i < 4; i++) {
+    std::cout << "A[" << i << "] = " << adjoints[0][i] << std::endl;
+  }
+
   int *size;
   locint **rind;
   locint **cind;
