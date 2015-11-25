@@ -1,6 +1,6 @@
   // sincos operator
   friend BaseActive<Base> sin(const BaseActive<Base>& rhs) {
-    BaseActive<Base> res(sin(rhs.val));
+    BaseActive<Base> res(sin(rhs.val), get_next_loc());
     trace_put_ollb<Base>(sin_a, res.loc, rhs.loc, rhs.val);
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     log.info << "L(" << &res << ")[" << res.loc << "] = "
@@ -9,7 +9,7 @@
     return res;
   }
   friend BaseActive<Base> cos(const BaseActive<Base>& rhs) {
-    BaseActive<Base> res(cos(rhs.val));
+    BaseActive<Base> res(cos(rhs.val), get_next_loc());
     trace_put_ollb<Base>(cos_a, res.loc, rhs.loc, rhs.val);
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     log.info << "L(" << &res << ")[" << res.loc << "] = "
@@ -18,7 +18,7 @@
     return res;
   }
   friend BaseActive<Base> sqrt(const BaseActive<Base>& rhs) {
-    BaseActive<Base> res(sqrt(rhs.val));
+    BaseActive<Base> res(sqrt(rhs.val), get_next_loc());
     trace_put_ollb<Base>(sqrt_a, res.loc, rhs.loc, rhs.val);
     return res;
   }

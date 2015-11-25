@@ -61,7 +61,7 @@ class AbstractTrace {
   void increase_dummy_dep(int size) {num_dummy_dep += size;}
   int get_num_dummy_ind() {return num_dummy_ind;}
   int get_num_dummy_dep() {return num_dummy_dep;}
- private:
+ protected:
   int num_ind;
   int num_dep;
   int num_dummy_ind;

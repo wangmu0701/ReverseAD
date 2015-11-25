@@ -2,6 +2,7 @@
 #define TRIVIAL_TRACE_H_
 
 #include <iostream>
+#include <memory>
 
 #include "reversead/common/reversead_config.h"
 #include "reversead/common/reversead_type.hpp"
@@ -12,28 +13,47 @@ namespace ReverseAD {
 
 template<typename Base>
 class TrivialTrace : public AbstractTrace<Base> {
+  using AbstractTrace<Base>::num_ind;
+  using AbstractTrace<Base>::num_dep;
+  using AbstractTrace<Base>::num_dummy_ind;
+  using AbstractTrace<Base>::num_dummy_dep;
+
  public:
+  TrivialTrace(TrivialTrace* other,
+               std::shared_ptr<TrivialTape<Base>> val_tape) {
+    this->op_tape = other->op_tape;
+    this->loc_tape = other->loc_tape;
+    this->val_tape = val_tape;
+    this->coval_tape = other->coval_tape;
+    this->num_ind = other->num_ind;
+    this->num_dep = other->num_dep;
+#ifdef ENABLE_REVERSEAD_MPI
+    this->sr_info_tape = other->sr_info_tape;
+    this->comm_loc_tape = other->comm_loc_tape;
+    this->num_dummy_ind = other->num_dummy_ind;
+    this->num_dummy_dep = other->num_dummy_dep;
+#endif
+  }
   // Default c-tor and d-tor
   TrivialTrace() {
-    op_tape = new TrivialTape<opbyte>();
-    loc_tape = new TrivialTape<locint>();
-    val_tape = new TrivialTape<Base>();
-    coval_tape = new TrivialTape<double>();
+    op_tape = std::make_shared<TrivialTape<opbyte>>();
+    loc_tape = std::make_shared<TrivialTape<locint>>();
+    val_tape = std::make_shared<TrivialTape<Base>>();
+    coval_tape = std::make_shared<TrivialTape<double>>();
 #ifdef ENABLE_REVERSEAD_MPI
-    sr_info_tape = new TrivialTape<SendRecvInfo>();
-    comm_loc_tape = new TrivialTape<locint>();
-#else
-    sr_info_tape = nullptr;
-    comm_loc_tape = nullptr;
+    sr_info_tape = std::make_shared<TrivialTape<SendRecvInfo>>();
+    comm_loc_tape = std::make_shared<TrivialTape<locint>>();
 #endif
   }
   ~TrivialTrace() {
-    delete op_tape;
-    delete loc_tape;
-    delete val_tape;
-    delete coval_tape;
-    delete sr_info_tape;
-    delete comm_loc_tape;
+    op_tape.reset();
+    loc_tape.reset();
+    val_tape.reset();
+    coval_tape.reset();
+#ifdef ENABLE_REVERSEAD_MPI
+    sr_info_tape.reset();
+    comm_loc_tape.reset();
+#endif
   }
 
   // Write
@@ -162,12 +182,12 @@ class TrivialTrace : public AbstractTrace<Base> {
     }
   }
  private:
-  TrivialTape<opbyte> *op_tape;
-  TrivialTape<locint> *loc_tape;
-  TrivialTape<Base> *val_tape;
-  TrivialTape<double> *coval_tape;
-  TrivialTape<SendRecvInfo> *sr_info_tape;
-  TrivialTape<locint> *comm_loc_tape;
+  std::shared_ptr<TrivialTape<opbyte>> op_tape;
+  std::shared_ptr<TrivialTape<locint>> loc_tape;
+  std::shared_ptr<TrivialTape<Base>> val_tape;
+  std::shared_ptr<TrivialTape<double>> coval_tape;
+  std::shared_ptr<TrivialTape<SendRecvInfo>> sr_info_tape;
+  std::shared_ptr<TrivialTape<locint>> comm_loc_tape;
 };
 
 } // namespace ReverseAD

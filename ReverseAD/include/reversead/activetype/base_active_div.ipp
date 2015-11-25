@@ -1,6 +1,6 @@
   // div operator
   friend BaseActive<Base> operator/(const BaseActive<Base>& lhs, const BaseActive<Base>& rhs) {
-    BaseActive<Base> res(lhs.val / rhs.val);
+    BaseActive<Base> res(lhs.val / rhs.val, get_next_loc());
     trace_put_olllbb<Base>(div_a_a, res.loc, lhs.loc, rhs.loc, lhs.val, rhs.val);
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     log.info << "L(" << &res <<")[" << res.loc << "] = " 
@@ -9,7 +9,7 @@
     return res;
   }
   friend BaseActive<Base> operator/(const BaseActive<Base>& lhs, const double& val) {
-    BaseActive<Base> res(lhs.val / val);
+    BaseActive<Base> res(lhs.val / val, get_next_loc());
     trace_put_olld<Base>(mult_d_a, res.loc, lhs.loc, 1.0/val);
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     log.info << "L(" << &res <<")[" << res.loc << "] = " 
@@ -18,7 +18,7 @@
     return res;
   }
   friend BaseActive<Base> operator/(const double& val, const BaseActive<Base>& rhs) {
-    BaseActive<Base> res(val / rhs.val);
+    BaseActive<Base> res(val / rhs.val, get_next_loc());
     trace_put_ollbd<Base>(div_d_a, res.loc, rhs.loc, rhs.val, val);
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     log.info << "L(" << &res <<")[" << res.loc << "] = " 

@@ -28,6 +28,16 @@ class BaseActive {
   inline Base getVal() {return val;}
   inline locint getLoc() {return loc;}
  private:
+  // Private c-tor is only used internally for operators returning a L-value
+  // For example, plus_d_a, with a L-value.
+  BaseActive(const Base& val, const locint& loc) {
+    this->val = val;
+    this->loc = loc;
+#ifdef REVERSEAD_BASE_ACTIVE_DEBUG
+    log.info << "Private c-tor: " << this <<"["<<this->loc<<"]" << " = " << val << std::endl;
+#endif
+  }
+
   Base val;
   locint loc;
 };  

@@ -12,7 +12,7 @@ int main() {
   double* x = new double[N];
   double y;
   for (int i = 0; i < N; i++) {
-    x[i] = i+1;
+    x[i] = i + 1;
   }
   ReverseAD::logging_on();
   ReverseAD::get_timing();
@@ -32,9 +32,12 @@ int main() {
   std::cout << "overloaded function time = " << time_elapsed << std::endl;
 
   ReverseAD::BaseFunctionReplay<double> replay(trace);
-  double* ry = replay.replay(x, N, 1);
+  //double* ry = replay.replay(x, N, 1);
+  double* ry = new double[1];
+  for (int i=0; i<N; i++) {x[i]=x[i]+1;}
+  ReverseAD::TrivialTrace<double>* new_trace = replay.replay(ry,x,N, 1); 
   std::cout << " ry = " << ry[0] << std::endl;
-  ReverseAD::BaseReverseHessian<double> hessian(trace);
+  ReverseAD::BaseReverseHessian<double> hessian(new_trace);
   hessian.compute(N, 1);
 
   double** adjoints;
