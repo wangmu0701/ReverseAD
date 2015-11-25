@@ -2,6 +2,7 @@
 #define REVERSEAD_TYPE_H_
 
 #include <cstdint>
+#include <iostream>
 
 #include "reversead/common/reversead_config.h"
 

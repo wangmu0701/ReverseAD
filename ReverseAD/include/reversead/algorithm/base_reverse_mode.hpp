@@ -38,7 +38,7 @@ class BaseReverseMode {
     double time = get_timing();
     reverse_local_computation(ind_num, dep_num);
     time = get_timing();
-    log.warning << "reverse local compute timing : " << time << std::endl;
+    log.info << "reverse local compute timing : " << time << std::endl;
     for (auto& kv : dep_deriv) {
       log.info << "Dep : " << kv.first << std::endl;
       kv.second.debug(log.info);
@@ -77,8 +77,8 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
     int dep_count = trace->get_num_dep();
 
     locint res;
-    double vx, vy, coval;
-
+    Base vx, vy;
+    double coval;
     trace->init_reverse();
     opbyte op = trace->get_next_op_r();
 
@@ -91,13 +91,13 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           break;
         case assign_ind:
           res = trace->get_next_loc_r();;
-          coval = trace->get_next_val_r();
+          trace->get_next_val_r();
           indep_index_map[res] = ind_count;
           ind_count--;
           break;
         case assign_dep:
           res = trace->get_next_loc_r();
-          coval = trace->get_next_val_r();
+          trace->get_next_val_r();
           init_dep_deriv(dep_deriv[res], res);
           reverse_live[res].insert(res);
           dep_index_map[res] = dep_count;
@@ -105,7 +105,7 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           break;
         case assign_d:
           info.r = trace->get_next_loc_r();
-          coval = trace->get_next_val_r();
+          trace->get_next_coval_r();
           break;
         case assign_a:
           info.r = trace->get_next_loc_r();
@@ -123,7 +123,7 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
         case plus_d_a:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
-          coval = trace->get_next_val_r();
+          trace->get_next_coval_r();
           info.dx = 1.0;
           break;
         case minus_a_a:
@@ -137,13 +137,13 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
         case minus_a_d:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
-          coval = trace->get_next_val_r();
+          trace->get_next_coval_r();
           info.dx = 1.0;
           break;
         case minus_d_a:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
-          coval = trace->get_next_val_r();
+          trace->get_next_coval_r();
           info.dx = -1.0;
           break;
         case mult_a_a:
@@ -158,7 +158,7 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
         case mult_d_a:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
-          info.dx = trace->get_next_val_r();
+          info.dx = trace->get_next_coval_r();
           break;
         case div_a_a:
           info.r = trace->get_next_loc_r();
@@ -176,9 +176,9 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
           vx = trace->get_next_val_r();
-          coval = trace->get_next_val_r();
-          info.dx = -1.0 / (vx*vx);
-          info.pxx = 2.0 / (vx*vx*vx);
+          coval = trace->get_next_coval_r();
+          info.dx = -coval / (vx*vx);
+          info.pxx = 2.0 * coval / (vx*vx*vx);
           break;
         case sin_a:
           info.r = trace->get_next_loc_r();

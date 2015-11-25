@@ -44,6 +44,7 @@ AC_CONFIG_FILES(Makefile
                 ReverseAD/include/reversead/util/Makefile
                 ReverseAD/include/reversead/common/reversead_config.h
                 ReverseAD/test/Makefile
+                ReverseAD/test/regression/Makefile
                 ReverseAD/test/algorithm/Makefile
                 ReverseAD/test/tape/Makefile
                 ReverseAD/test/trace/Makefile

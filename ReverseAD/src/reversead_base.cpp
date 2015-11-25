@@ -22,7 +22,6 @@ namespace ReverseAD {
   locint get_next_ind_loc() {
     locint ret = curr_ind_loc++;
     ret = (ret << RANK_SHIFT) | (rank & RANK_BASE);
-    std::cout << "ind_loc = " << curr_ind_loc << std::endl;
     return ret;
   }
 

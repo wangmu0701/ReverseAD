@@ -110,7 +110,7 @@ namespace ReverseAD {
         for (int i = 0; i < count; i++) {
           trace_put_comm_loc(dummy_dep[i].getLoc());
         }
-        trace_put<double>(rmpi_send);
+        trace_put_o<double>(rmpi_send);
         SendRecvInfo info(COMM_RMPI_SEND, count, dest, tag, comm);
         trace_put(info);
         ((TrivialTrace<double>*)global_trace)->increase_dummy_dep(count);
@@ -144,7 +144,7 @@ namespace ReverseAD {
         for (int i = 0; i < count; i++) {
           trace_put_comm_loc(dummy_ind[i].getLoc());
         }
-        trace_put<double>(rmpi_recv);
+        trace_put_o<double>(rmpi_recv);
         SendRecvInfo info(COMM_RMPI_RECV, count, src, tag, comm);
         trace_put(info);
         ((TrivialTrace<double>*)global_trace)->increase_dummy_ind(count);

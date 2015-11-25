@@ -36,9 +36,8 @@ namespace ReverseAD {
 
   template <typename Base>
   TrivialTrace<Base>* trace_off() {
-    std::cout << "off ind_loc = " << curr_ind_loc << std::endl;
-    log.warning << "number of indepent = " << curr_ind_loc - 1 << std::endl;
-    log.warning << "number of intermediate = " << (curr_loc-BASE_LOC) << std::endl;
+    log.info << "number of indepent = " << curr_ind_loc - 1 << std::endl;
+    log.info << "number of intermediate = " << (curr_loc-BASE_LOC) << std::endl;
     if (curr_loc >= BASE_LOC * 2) {
       log.fatal << "Overflow in intermedite indexing" << std::endl;
     }
@@ -57,15 +56,19 @@ namespace ReverseAD {
     ((TrivialTrace<Base>*)global_trace)->declare_dep();
   }
 
+  // o: opbyte
+  // l: locint
+  // d: double cons
+  // b: Base type value
   template <typename Base>
-  void trace_put(opbyte op) {
+  void trace_put_o(opbyte op) {
     if (is_tracing) {
       ((TrivialTrace<Base>*)global_trace)->put_op(op);
     }
   }
   
   template <typename Base>
-  void trace_put(opbyte op, locint res, locint arg) {
+  void trace_put_oll(opbyte op, locint res, locint arg) {
     if (is_tracing) {
       ((TrivialTrace<Base>*)global_trace)->put_op(op);
       ((TrivialTrace<Base>*)global_trace)->put_loc(arg);
@@ -74,7 +77,7 @@ namespace ReverseAD {
   }
 
   template <typename Base>
-  void trace_put(opbyte op, locint res, locint arg1, locint arg2) {
+  void trace_put_olll(opbyte op, locint res, locint arg1, locint arg2) {
     if (is_tracing) {
       ((TrivialTrace<Base>*)global_trace)->put_op(op);
       ((TrivialTrace<Base>*)global_trace)->put_loc(arg1);
@@ -84,7 +87,15 @@ namespace ReverseAD {
   }
 
   template <typename Base>
-  void trace_put(opbyte op, locint res, double val) {
+  void trace_put_old(opbyte op, locint res, double coval) {
+    if (is_tracing) {
+      ((TrivialTrace<Base>*)global_trace)->put_op(op);
+      ((TrivialTrace<Base>*)global_trace)->put_coval(coval);
+      ((TrivialTrace<Base>*)global_trace)->put_loc(res);
+    }
+  }
+  template <typename Base>
+  void trace_put_olb(opbyte op, locint res, Base val) {
     if (is_tracing) {
       ((TrivialTrace<Base>*)global_trace)->put_op(op);
       ((TrivialTrace<Base>*)global_trace)->put_val(val);
@@ -93,7 +104,17 @@ namespace ReverseAD {
   }
   
   template <typename Base>
-  void trace_put(opbyte op, locint res, locint arg, double val) {
+  void trace_put_olld(opbyte op, locint res, locint arg, double coval) {
+    if (is_tracing) {
+      ((TrivialTrace<Base>*)global_trace)->put_op(op);
+      ((TrivialTrace<Base>*)global_trace)->put_coval(coval);
+      ((TrivialTrace<Base>*)global_trace)->put_loc(arg);
+      ((TrivialTrace<Base>*)global_trace)->put_loc(res);
+    }
+  }
+  
+  template <typename Base>
+  void trace_put_ollb(opbyte op, locint res, locint arg, Base val) {
     if (is_tracing) {
       ((TrivialTrace<Base>*)global_trace)->put_op(op);
       ((TrivialTrace<Base>*)global_trace)->put_val(val);
@@ -103,19 +124,19 @@ namespace ReverseAD {
   }
   
   template <typename Base>
-  void trace_put(opbyte op, locint res, locint arg1,
-                 double val1, double val2) {
+  void trace_put_ollbd(opbyte op, locint res, locint arg,
+                 Base val, double coval) {
     if (is_tracing) {
       ((TrivialTrace<Base>*)global_trace)->put_op(op);
-      ((TrivialTrace<Base>*)global_trace)->put_val(val1);
-      ((TrivialTrace<Base>*)global_trace)->put_val(val2);
-      ((TrivialTrace<Base>*)global_trace)->put_loc(arg1);
+      ((TrivialTrace<Base>*)global_trace)->put_val(val);
+      ((TrivialTrace<Base>*)global_trace)->put_coval(coval);
+      ((TrivialTrace<Base>*)global_trace)->put_loc(arg);
       ((TrivialTrace<Base>*)global_trace)->put_loc(res);
     }
   }
 
   template <typename Base>
-  void trace_put(opbyte op, locint res, locint arg1, locint arg2,
+  void trace_put_olllbb(opbyte op, locint res, locint arg1, locint arg2,
                  double val1, double val2) {
     if (is_tracing) {
       ((TrivialTrace<Base>*)global_trace)->put_op(op);

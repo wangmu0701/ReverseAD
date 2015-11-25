@@ -1,7 +1,7 @@
 if ENABLE_REVERSEAD_MPI
-SUBDIRS = rosenbrock simple mpi
+SUBDIRS = regression rosenbrock simple mpi
 else 
-SUBDIRS = rosenbrock simple
+SUBDIRS = regression rosenbrock simple
 endif
 
 test:

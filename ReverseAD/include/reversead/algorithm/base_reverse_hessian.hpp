@@ -65,7 +65,6 @@ class BaseReverseHessian : public BaseReverseAdjoint<Base> {
       typename type_hessian::enumerator h_enum = kv.second.hessian_vals->get_enumerator();
       bool has_next = h_enum.has_next();
       locint x,y;
-      Base w;
       int l =0;
       while(has_next) {
         has_next = h_enum.get_next(x, y, (*values)[dep][l]);
