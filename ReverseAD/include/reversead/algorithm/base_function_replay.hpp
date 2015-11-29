@@ -26,8 +26,8 @@ class BaseFunctionReplay {
                                     Base* dep_val, int dep_num) {
     return replay(trace,
                   dep_val, dep_num,
-                  nullptr, trace->get_num_ind(),
-                  nullptr, trace->get_num_param(),
+                  (Base*)nullptr, trace->get_num_ind(),
+                  (Base*)nullptr, trace->get_num_param(),
                   true, // reset_dep,
                   false, // reset_ind,
                   false); // reset_param
@@ -36,9 +36,9 @@ class BaseFunctionReplay {
   static TrivialTrace<Base>* replay_ind(TrivialTrace<Base>* trace,
                                     Base* ind_val, int ind_num) {
     return replay(trace,
-                  nullptr, trace->get_num_dep(),
+                  (Base*)nullptr, trace->get_num_dep(),
                   ind_val, ind_num,
-                  nullptr, trace->get_num_param(),
+                  (Base*)nullptr, trace->get_num_param(),
                   false, // reset_dep,
                   true, // reset_ind,
                   false); // reset_param
@@ -50,7 +50,7 @@ class BaseFunctionReplay {
     return replay<Base>(trace,
                   dep_val, dep_num,
                   ind_val, ind_num,
-                  nullptr, trace->get_num_param(),
+                  (Base*)nullptr, trace->get_num_param(),
                   true, // reset_dep,
                   true, // reset_ind,
                   false); // reset_param
@@ -60,8 +60,8 @@ class BaseFunctionReplay {
   static TrivialTrace<Base>* replay_param(TrivialTrace<Base>* trace,
                                           Base* param_val, int param_num) {
     return replay<Base>(trace,
-                  nullptr, trace->get_num_dep(),
-                  nullptr, trace->get_num_ind(),
+                  (Base*)nullptr, trace->get_num_dep(),
+                  (Base*)nullptr, trace->get_num_ind(),
                   param_val, param_num,
                   false, // reset_dep,
                   false, // reset_ind,
@@ -73,7 +73,7 @@ class BaseFunctionReplay {
                                     Base* ind_val, int ind_num,
                                     Base* param_val, int param_num) {
     return replay(trace,
-                  nullptr, trace->get_num_dep(),
+                  (Base*)nullptr, trace->get_num_dep(),
                   ind_val, ind_num,
                   param_val, param_num,
                   false, // reset_dep,
@@ -142,7 +142,7 @@ class BaseFunctionReplay {
         case assign_ind:
           if (ind_count >= ind_num) {
             log.warning << "more independents found on tape than : " << ind_num << std::endl;
-            return NULL;
+            return nullptr;
           }
           res = trace->get_next_loc_f();
           val = trace->get_next_val_f();
@@ -158,7 +158,7 @@ class BaseFunctionReplay {
         case assign_dep:
           if (dep_count >= dep_num) {
             log.warning << "more dependents found on tape than : " << ind_num << std::endl;
-            return NULL;
+            return nullptr;
           }
           res = trace->get_next_loc_f();
           trace->get_next_val_f();
@@ -182,7 +182,7 @@ class BaseFunctionReplay {
           break;
         case assign_d:
           res = trace->get_next_loc_f();
-          val_map[res] = trace->get_next_val_f();
+          val_map[res] = trace->get_next_coval_f();
           break;
         case assign_a:
           arg1 = trace->get_next_loc_f();
@@ -237,7 +237,6 @@ class BaseFunctionReplay {
           res = trace->get_next_loc_f();
           val1 = val_map[arg1];
           val_map[res] = val1 * coval;
-          val_tape->put(val1);
           break;
         case div_a_a:
           arg1 = trace->get_next_loc_f();

@@ -20,17 +20,17 @@ int main() {
   }
   double vp = 1.0;
   yad[0] = 0;
-/*
-  for (int i=0; i<N-1; i++) {
-    a1 = xad[i]*xad[i]-xad[i+1];
-    a2 = xad[i] - 1.;
-    yad[0] = yad[0] + 100*a1*a1 + a2*a2;
-  }
-*/  
+
+  //for (int i=0; i<N-1; i++) {
+    //a1 = xad[i]*xad[i]-xad[i+1];
+    //a2 = xad[i] - 1.;
+    //yad[0] = yad[0] + 100*a1*a1 + a2*a2;
+  //}
+ 
   //a1 = xad[0]*xad[0]-xad[1];
   //a2 = xad[0] -1;
   yad[0] = 100*xad[0]*xad[0];
-  yad[0] = yad[0] * adouble::markParam(vp);
+  //yad[0] = yad[0] * adouble::markParam(vp);
   //d <<= 4.0;
   //yad[1] = a * c;
   //yad = sin(a) + sqrt(b) + c / d + 1.0/c;
@@ -49,7 +49,12 @@ int main() {
     //ReverseAD::BaseFunctionReplay::replay(trace, y, M, x, N, &vp, 1);
   std::cout << "new y[0] = " << y[0] << std::endl;
   //std::cout << "new y[1] = " << y[0] << std::endl;
-  ReverseAD::BaseReverseHessian<double> hessian(trace);
+
+  ReverseAD::TrivialTrace<double>* new_trace =
+    ReverseAD::BaseFunctionReplay::replay_ind<double> (trace, x, N);
+  new_trace->dump_trace();
+
+  ReverseAD::BaseReverseHessian<double> hessian(new_trace);
   hessian.compute(N, M);
   int size_j;
   locint* rind_j;
