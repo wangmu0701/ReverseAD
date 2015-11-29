@@ -23,6 +23,8 @@ enum OPCODES {
   sin_a,
   cos_a,
   sqrt_a,
+  exp_a,
+  pow_a,
   rmpi_send,
   rmpi_recv
 };

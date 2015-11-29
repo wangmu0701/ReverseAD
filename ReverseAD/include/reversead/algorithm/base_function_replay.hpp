@@ -284,6 +284,14 @@ class BaseFunctionReplay {
           val_map[res] = sqrt(val1);
           val_tape->put(val1);
           break;
+        case exp_a:
+          arg1 = trace->get_next_loc_f();
+          res = trace->get_next_loc_f();
+          trace->get_next_val_f(); 
+          val1 = val_map[arg1]; 
+          val_map[res] = exp(val1);
+          val_tape->put(val1);
+          break;
         case rmpi_send:
         case rmpi_recv:
           break;

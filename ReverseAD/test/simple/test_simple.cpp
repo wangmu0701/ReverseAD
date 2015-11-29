@@ -4,40 +4,52 @@
 
 using ReverseAD::locint;
 
-#define N 4
-#define M 2
+#define N 2
+#define M 1
 
 int main() {
-  adouble a,b,c,d;
-  adouble yad[M];
+  double x[4] = {-1.2, 1.0, -1.2, 1.0};
   double y[M];
+  adouble yad[M];
+  adouble xad[N];
+  adouble a1, a2;
   ReverseAD::logging_on();
   ReverseAD::trace_on<double>();
-  double vp = 3.0;
-  adouble p = adouble::markParam(vp);
-  a <<= 2.0;
-  b <<= 3.0;
-  c <<= 3.0;
-  d <<= 4.0;
-  yad[0] = a * b * c * d * p;
-  yad[1] = a * c;
+  for (int i=0; i<N; i++) {
+    xad[i] <<= x[i];
+  }
+  double vp = 1.0;
+  yad[0] = 0;
+/*
+  for (int i=0; i<N-1; i++) {
+    a1 = xad[i]*xad[i]-xad[i+1];
+    a2 = xad[i] - 1.;
+    yad[0] = yad[0] + 100*a1*a1 + a2*a2;
+  }
+*/  
+  //a1 = xad[0]*xad[0]-xad[1];
+  //a2 = xad[0] -1;
+  yad[0] = 100*xad[0]*xad[0];
+  yad[0] = yad[0] * adouble::markParam(vp);
+  //d <<= 4.0;
+  //yad[1] = a * c;
   //yad = sin(a) + sqrt(b) + c / d + 1.0/c;
   //yad = (2*a)/(1/a);
   //yad = a*a;
   //yad = p * a;
   yad[0] >>= y[0];
-  yad[1] >>= y[1];
+  //yad[1] >>= y[1];
   std::cout << "yad[0] = " << yad[0].getVal() << std::endl;
-  std::cout << "yad[1] = " << yad[1].getVal() << std::endl;
+  //std::cout << "yad[1] = " << yad[1].getVal() << std::endl;
   ReverseAD::TrivialTrace<double>* trace = ReverseAD::trace_off<double>();
   trace->dump_trace();
-  vp = 5.0;
-  double x[4] = {1.0, 2.0, 3.0, 4.0};
-  ReverseAD::TrivialTrace<double>* new_trace =
-    ReverseAD::BaseFunctionReplay::replay(trace, y, M, x, N, &vp, 1);
+  //vp = 5.0;
+
+  //ReverseAD::TrivialTrace<double>* new_trace =
+    //ReverseAD::BaseFunctionReplay::replay(trace, y, M, x, N, &vp, 1);
   std::cout << "new y[0] = " << y[0] << std::endl;
-  std::cout << "new y[1] = " << y[0] << std::endl;
-  ReverseAD::BaseReverseHessian<double> hessian(new_trace);
+  //std::cout << "new y[1] = " << y[0] << std::endl;
+  ReverseAD::BaseReverseHessian<double> hessian(trace);
   hessian.compute(N, M);
   int size_j;
   locint* rind_j;

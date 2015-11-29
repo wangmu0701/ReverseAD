@@ -14,7 +14,7 @@
 #include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/single_derivative.hpp"
 
-#define COMBINE_D_1 info.dx += info.dy;
+#define COMBINE_D_1 info.dx += info.dy; info.dy = 0;
 #define COMBINE_D_2 info.pxx += 2.0 * info.pxy + info.pyy;\
                     info.pxy = 0.0; info.pyy = 0.0;\
                     COMBINE_D_1
@@ -104,6 +104,9 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           dep_count--; 
           break;
         case assign_param:
+          info.r = trace->get_next_loc_r();
+          trace->get_next_param_r();
+          break;
         case assign_d:
           info.r = trace->get_next_loc_r();
           trace->get_next_coval_r();
@@ -206,6 +209,13 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
             info.dx = 0.0;
             info.pxx = 0.0;
           }
+          break;
+        case exp_a:
+          info.r = trace->get_next_loc_r();
+          info.x = trace->get_next_loc_r();
+          vx = trace->get_next_val_r();
+          info.dx = exp(vx);
+          info.pxx = info.dx;
           break;
         case rmpi_send:
         case rmpi_recv:

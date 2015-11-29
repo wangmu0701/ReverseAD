@@ -115,7 +115,7 @@ class BaseReverseHessian : public BaseReverseAdjoint<Base> {
             hessian_vals[info.x][info.x] += info.dx * info.dx * pw;
             //hessian_vals.increase(info.x, info.x, info.dx*info.dx*pw);
             if (info.x > info.y) {
-              hessian_vals[info.x][info.y] += info.dx * info.dx * pw;
+              hessian_vals[info.x][info.y] += info.dx * info.dy * pw;
             } else {
               hessian_vals[info.y][info.x] += info.dx * info.dy * pw;
             }
