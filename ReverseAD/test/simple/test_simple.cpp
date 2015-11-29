@@ -3,7 +3,8 @@
 #include "reversead/reversead.hpp"
 
 using ReverseAD::locint;
-#define N 1
+
+#define N 4
 
 int main() {
   adouble a,b,c,d;
@@ -11,21 +12,25 @@ int main() {
   double y;
   ReverseAD::logging_on();
   ReverseAD::trace_on<double>();
+  double vp = 3.0;
+  adouble p = adouble::markParam(vp);
   a <<= 2.0;
-  //b <<= 3.0;
-  //c <<= 3.0;
-  //d <<= 4.0;
-  //yad = a * b * c * d;
+  b <<= 3.0;
+  c <<= 3.0;
+  d <<= 4.0;
+  yad = a * b * c * d * p;
   //yad = sin(a) + sqrt(b) + c / d + 1.0/c;
   //yad = (2*a)/(1/a);
-  yad = a*a;
+  //yad = a*a;
+  //yad = p * a;
   yad >>= y;
   std::cout << "yad = " << yad.getVal() << std::endl;
   ReverseAD::TrivialTrace<double>* trace = ReverseAD::trace_off<double>();
   trace->dump_trace();
-  ReverseAD::BaseFunctionReplay<double> replayer(trace);
+  vp = 5.0;
   double x[4] = {1.0, 2.0, 3.0, 4.0};
-  ReverseAD::TrivialTrace<double>* new_trace = replayer.replay(&y, x, N, 1);
+  ReverseAD::TrivialTrace<double>* new_trace =
+    ReverseAD::BaseFunctionReplay::replay(trace, &y, 1, x, N, &vp, 1);
   std::cout << "new y = " << y << std::endl;
   ReverseAD::BaseReverseHessian<double> hessian(new_trace);
   hessian.compute(N, 1);

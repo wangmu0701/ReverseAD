@@ -103,6 +103,7 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           dep_index_map[res] = dep_count;
           dep_count--; 
           break;
+        case assign_param:
         case assign_d:
           info.r = trace->get_next_loc_r();
           trace->get_next_coval_r();
@@ -213,7 +214,6 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           log.warning << "Unrecongized opcode : " << (int)op << std::endl; 
       }
       if (info.r != NULL_LOC) {
-        //info.debug();
         std::set<locint> dep_set = std::move(reverse_live[info.r]);
         reverse_live.erase(info.r);
         for (const locint& dep : dep_set) {

@@ -17,6 +17,7 @@ test_rosenbrock
 test_simple
 test_identity
 test_square
+test_param
 test_mpi
 test_mpi_reduce
 test_mpi_thomson

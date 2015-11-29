@@ -15,23 +15,121 @@ using std::map;
 
 namespace ReverseAD {
 
-template <typename Base>
+
+// The old trace is not deleted.
 class BaseFunctionReplay {
  public:
-  BaseFunctionReplay(TrivialTrace<Base>* trace) {
-    this->trace = trace;
+
+  // the same trace will be returned.
+  template <typename Base>
+  static TrivialTrace<Base>* replay_dep(TrivialTrace<Base>* trace,
+                                    Base* dep_val, int dep_num) {
+    return replay(trace,
+                  dep_val, dep_num,
+                  nullptr, trace->get_num_ind(),
+                  nullptr, trace->get_num_param(),
+                  true, // reset_dep,
+                  false, // reset_ind,
+                  false); // reset_param
+  }
+  template <typename Base>
+  static TrivialTrace<Base>* replay_ind(TrivialTrace<Base>* trace,
+                                    Base* ind_val, int ind_num) {
+    return replay(trace,
+                  nullptr, trace->get_num_dep(),
+                  ind_val, ind_num,
+                  nullptr, trace->get_num_param(),
+                  false, // reset_dep,
+                  true, // reset_ind,
+                  false); // reset_param
+  }
+  template <typename Base>
+  static TrivialTrace<Base>* replay_ind(TrivialTrace<Base>* trace,
+                                    Base* dep_val, int dep_num,
+                                    Base* ind_val, int ind_num) {
+    return replay<Base>(trace,
+                  dep_val, dep_num,
+                  ind_val, ind_num,
+                  nullptr, trace->get_num_param(),
+                  true, // reset_dep,
+                  true, // reset_ind,
+                  false); // reset_param
   }
 
-  TrivialTrace<Base>* replay(Base* dep_val, Base* ind_val, int ind_num, int dep_num) {
+  template <typename Base>
+  static TrivialTrace<Base>* replay_param(TrivialTrace<Base>* trace,
+                                          Base* param_val, int param_num) {
+    return replay<Base>(trace,
+                  nullptr, trace->get_num_dep(),
+                  nullptr, trace->get_num_ind(),
+                  param_val, param_num,
+                  false, // reset_dep,
+                  false, // reset_ind,
+                  true); // reset_param
+  }
+
+  template <typename Base>
+  static TrivialTrace<Base>* replay(TrivialTrace<Base>* trace,
+                                    Base* ind_val, int ind_num,
+                                    Base* param_val, int param_num) {
+    return replay(trace,
+                  nullptr, trace->get_num_dep(),
+                  ind_val, ind_num,
+                  param_val, param_num,
+                  false, // reset_dep,
+                  true, // reset_ind,
+                  true); // reset_param
+  }
+
+  template <typename Base>
+  static TrivialTrace<Base>* replay(TrivialTrace<Base>* trace,
+                                    Base* dep_val, int dep_num,
+                                    Base* ind_val, int ind_num,
+                                    Base* param_val, int param_num) {
+    return replay(trace,
+                  dep_val, dep_num,
+                  ind_val, ind_num,
+                  param_val, param_num,
+                  true, // reset_dep,
+                  true, // reset_ind,
+                  true); // reset_param
+  }
+
+ private:
+  template <typename Base>
+  static TrivialTrace<Base>* replay(TrivialTrace<Base>* trace,
+                                    Base* dep_val, int dep_num,
+                                    Base* ind_val, int ind_num,
+                                    Base* param_val, int param_num,
+                                    bool reset_dep,
+                                    bool reset_ind,
+                                    bool reset_param) {
     map<locint, Base> val_map;
     trace->init_forward();
     opbyte op = trace->get_next_op_f();
     int ind_count = 0;
     int dep_count = 0;
-
+    int param_count = 0;
+    if (reset_param && param_num != trace->get_num_param()) {
+      log.fatal << "Number of parameter (" << param_num << ") does NOT"
+                << " match the record on the trace (" << trace->get_num_param()
+                << ")." << std::endl;
+    }
+    if (reset_ind && ind_num != trace->get_num_ind()) {
+      log.fatal << "Number of independents (" << ind_num << ") does NOT"
+                << " match the record on the trace (" << trace->get_num_ind()
+                << ")." << std::endl;
+    }
+    if (reset_dep && dep_num != trace->get_num_dep()) {
+      log.fatal << "Number of dependents (" << dep_num << ") does NOT"
+                << " match the record on the trace (" << trace->get_num_dep()
+                << ")." << std::endl;
+    }
     std::shared_ptr<TrivialTape<Base>> val_tape =
       std::make_shared<TrivialTape<Base>>();
- 
+    std::shared_ptr<TrivialTape<Base>> param_tape =
+      std::make_shared<TrivialTape<Base>>();
+
     locint res;
     locint arg1;
     locint arg2;
@@ -47,8 +145,14 @@ class BaseFunctionReplay {
             return NULL;
           }
           res = trace->get_next_loc_f();
-          trace->get_next_val_f();
-          val_map[res] = ind_val[ind_count++];
+          val = trace->get_next_val_f();
+          if (reset_ind) {
+            // reset: value from function call
+            val_map[res] = ind_val[ind_count++];
+          } else {
+            // no reset: value from trace
+            val_map[res] = val;
+          }
           val_tape->put(val_map[res]);
           break;
         case assign_dep:
@@ -59,8 +163,22 @@ class BaseFunctionReplay {
           res = trace->get_next_loc_f();
           trace->get_next_val_f();
           val = val_map[res];
-          dep_val[dep_count++] = val;
+          if (reset_dep) {
+            dep_val[dep_count++] = val;
+          }
           val_tape->put(val); 
+          break;
+        case assign_param:
+          res = trace->get_next_loc_f();
+          val = trace->get_next_param_f();
+          if (reset_param) {
+            // reset: value from function call
+            val_map[res] = param_val[param_count++];
+            param_tape->put(val_map[res]);
+          } else {
+            // no reset: value from trace
+            val_map[res] = val;
+          }
           break;
         case assign_d:
           res = trace->get_next_loc_f();
@@ -174,10 +292,20 @@ class BaseFunctionReplay {
       }
       op = trace->get_next_op_f();
     }
-    return new TrivialTrace<Base>(trace, val_tape);
+    TrivialTrace<Base>* ret = nullptr;
+    if (reset_param) {
+      // a new set of param values
+      ret = new TrivialTrace<Base>(trace, val_tape, param_tape);
+    } else if (reset_ind) {
+      // a new set of ind values
+      ret = new TrivialTrace<Base>(trace, val_tape);
+    } else {
+      // just compute values of deps
+      ret = trace;
+    }
+    return ret;
   }
 
-  TrivialTrace<Base>* trace;  
 };
 
 } // namespace ReverseAD

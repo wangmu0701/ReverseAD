@@ -17,13 +17,32 @@ class TrivialTrace : public AbstractTrace<Base> {
   using AbstractTrace<Base>::num_dep;
   using AbstractTrace<Base>::num_dummy_ind;
   using AbstractTrace<Base>::num_dummy_dep;
+  using AbstractTrace<Base>::num_param;
 
  public:
   TrivialTrace(TrivialTrace* other,
-               std::shared_ptr<TrivialTape<Base>> val_tape) {
+               const std::shared_ptr<TrivialTape<Base>>& val_tape,
+               const std::shared_ptr<TrivialTape<Base>>& param_tape) {
     this->op_tape = other->op_tape;
     this->loc_tape = other->loc_tape;
     this->val_tape = val_tape;
+    this->param_tape = param_tape;
+    this->coval_tape = other->coval_tape;
+    this->num_ind = other->num_ind;
+    this->num_dep = other->num_dep;
+#ifdef ENABLE_REVERSEAD_MPI
+    this->sr_info_tape = other->sr_info_tape;
+    this->comm_loc_tape = other->comm_loc_tape;
+    this->num_dummy_ind = other->num_dummy_ind;
+    this->num_dummy_dep = other->num_dummy_dep;
+#endif
+  }
+  TrivialTrace(TrivialTrace* other,
+               const std::shared_ptr<TrivialTape<Base>>& val_tape) {
+    this->op_tape = other->op_tape;
+    this->loc_tape = other->loc_tape;
+    this->val_tape = val_tape;
+    this->param_tape = other->param_tape;
     this->coval_tape = other->coval_tape;
     this->num_ind = other->num_ind;
     this->num_dep = other->num_dep;
@@ -39,6 +58,7 @@ class TrivialTrace : public AbstractTrace<Base> {
     op_tape = std::make_shared<TrivialTape<opbyte>>();
     loc_tape = std::make_shared<TrivialTape<locint>>();
     val_tape = std::make_shared<TrivialTape<Base>>();
+    param_tape = std::make_shared<TrivialTape<Base>>();
     coval_tape = std::make_shared<TrivialTape<double>>();
 #ifdef ENABLE_REVERSEAD_MPI
     sr_info_tape = std::make_shared<TrivialTape<SendRecvInfo>>();
@@ -49,6 +69,7 @@ class TrivialTrace : public AbstractTrace<Base> {
     op_tape.reset();
     loc_tape.reset();
     val_tape.reset();
+    param_tape.reset();
     coval_tape.reset();
 #ifdef ENABLE_REVERSEAD_MPI
     sr_info_tape.reset();
@@ -65,6 +86,10 @@ class TrivialTrace : public AbstractTrace<Base> {
   }
   inline void put_val(const Base& val) {
     val_tape->put(val);
+  }
+  inline void put_param(const Base& param) {
+    num_param++;
+    param_tape->put(param);
   }
   inline void put_coval(const double& coval) {
     coval_tape->put(coval);
@@ -100,12 +125,14 @@ class TrivialTrace : public AbstractTrace<Base> {
     op_tape->init_forward();
     loc_tape->init_forward();
     val_tape->init_forward();
+    param_tape->init_forward();
     coval_tape->init_forward();
   }
   inline void end_forward() {
     op_tape->end_forward();
     loc_tape->end_forward();
     val_tape->end_forward();
+    param_tape->end_forward();
     coval_tape->end_forward();
   }
   inline opbyte get_next_op_f() {
@@ -117,6 +144,9 @@ class TrivialTrace : public AbstractTrace<Base> {
   inline Base get_next_val_f() {
     return val_tape->get_next_f();
   }
+  inline Base get_next_param_f() {
+    return param_tape->get_next_f();
+  }
   inline double get_next_coval_f() {
     return coval_tape->get_next_f();
   }
@@ -126,12 +156,14 @@ class TrivialTrace : public AbstractTrace<Base> {
     op_tape->init_reverse();
     loc_tape->init_reverse();
     val_tape->init_reverse();
+    param_tape->init_reverse();
     coval_tape->init_reverse();
   }
   inline void end_reverse() {
     op_tape->end_reverse();
     loc_tape->end_reverse();
     val_tape->end_reverse();
+    param_tape->end_reverse();
     coval_tape->end_reverse();
   }
   inline opbyte get_next_op_r() {
@@ -142,6 +174,9 @@ class TrivialTrace : public AbstractTrace<Base> {
   }
   inline Base get_next_val_r() {
     return val_tape->get_next_r();
+  }
+  inline Base get_next_param_r() {
+    return param_tape->get_next_r();
   }
   inline double get_next_coval_r() {
     return coval_tape->get_next_r();
@@ -155,6 +190,8 @@ class TrivialTrace : public AbstractTrace<Base> {
     loc_tape->dump_tape();
     std::cout << "Val tape:" << std::endl;
     val_tape->dump_tape();
+    std::cout << "Param tape:" << std::endl;
+    param_tape->dump_tape();
     std::cout << "Const tape:" << std::endl;
     coval_tape->dump_tape();
     if (sr_info_tape) {
@@ -172,6 +209,8 @@ class TrivialTrace : public AbstractTrace<Base> {
     loc_tape->dump_tape(logger);
     logger << "Val tape:" << std::endl;
     val_tape->dump_tape(logger);
+    logger << "Param tape:" << std::endl;
+    param_tape->dump_tape(logger);
     logger << "Const tape:" << std::endl;
     coval_tape->dump_tape(logger);
     if (sr_info_tape) {
@@ -185,6 +224,7 @@ class TrivialTrace : public AbstractTrace<Base> {
   std::shared_ptr<TrivialTape<opbyte>> op_tape;
   std::shared_ptr<TrivialTape<locint>> loc_tape;
   std::shared_ptr<TrivialTape<Base>> val_tape;
+  std::shared_ptr<TrivialTape<Base>> param_tape;
   std::shared_ptr<TrivialTape<double>> coval_tape;
   std::shared_ptr<TrivialTape<SendRecvInfo>> sr_info_tape;
   std::shared_ptr<TrivialTape<locint>> comm_loc_tape;

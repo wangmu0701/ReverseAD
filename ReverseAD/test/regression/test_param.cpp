@@ -7,12 +7,22 @@ using ReverseAD::locint;
 double myEps = 1.E-10;
 
 void check_answer(ReverseAD::TrivialTrace<double>* trace,
+                  double vx,
+                  double vp,
                   bool& done) {
-      ReverseAD::BaseReverseHessian<double> hessian(trace);
+      double vy;
+      ReverseAD::TrivialTrace<double>* new_trace = 
+        ReverseAD::BaseFunctionReplay::replay(trace, &vy, 1, &vx, 1, &vp, 1);
+      ReverseAD::BaseReverseHessian<double> hessian(new_trace);
+      if (fabs(vy - vx * vp) > myEps ) {
+        std::cout << "1" << std::endl;
+        done = true;
+      }
       hessian.compute(1,1);
       double** adjoints;
       hessian.retrieve_adjoint(&adjoints);
-      if (fabs(adjoints[0][0]-1.0) > myEps) {
+      if (fabs(adjoints[0][0]-vp) > myEps) {
+        std::cout << "2" << std::endl;
         done = true;
       }
       int *size;
@@ -21,13 +31,16 @@ void check_answer(ReverseAD::TrivialTrace<double>* trace,
       double** values;
       hessian.retrieve_hessian_sparse_format(&size, &rind, &cind, &values);
       if (size[0] > 1) {
+        std::cout << "4" << std::endl;
         done = true;
       } else if (size[0] == 1) {
         if (fabs(values[0][0]-0.0) > myEps) {
+          std::cout << "3" << std::endl;
           done = true;
         }
       }
       if (done) {
+        std::cout << "vy = " << vy << std::endl;
         std::cout << "A[0] = " << adjoints[0][0] << std::endl;
         std::cout << "H[0] = " << values[0][0] << std::endl;
       }
@@ -38,37 +51,31 @@ int main() {
   const char* testLine;
   while(!done) {
     double vx = 2.0;
+    double vp = 3.0;
     adouble x, y;
     ReverseAD::trace_on<double>();
     x <<= vx;
+    adouble p = adouble::markParam(vp);
     switch(testCase) {
     case 0:
-      y = x;
-      testLine = "y=x";
+      y = x * p;
+      testLine = "y=x * p";
       break;
     case 1:
-      y = x+x-x;
-      testLine = "y=x+x-x";
+      y = x*p+p-p;
+      testLine = "y=x*p+x-x";
       break;
     case 2:
-      y = -2+(2+((x+2)-2));
-      testLine = "-2+(2+((x+2)-2))";
+      y = (p+((x+2)-2)*p)-p;
+      testLine = "(p+((x+2)-2)*p)-p";
       break;
     case 3:
-      y = (2*x)/2;
-      testLine = "y=(2*x)/2";
+      y = (p*x*p)/p;
+      testLine = "y=(p*x*p)/p";
       break;
     case 4:
-      y = (x*x)/x;
-      testLine = "y=(x*x)/x";
-      break;
-    case 5:
-      y = sqrt(x*x);
-      testLine = "y=sqrt(x*x)";
-      break;
-    case 6:
-      y = (2/x)*x*(x*0.5);
-      testLine = "y=(2/x)*x*(x*0.5)";
+      y = (2/x)*p*(x*0.5)*x;
+      testLine = "y=(2/x)*p*(x*0.5)*x";
       break;
     default:
       done = true;
@@ -78,13 +85,8 @@ int main() {
     y >>= vy;
     if (!done) {
       ReverseAD::TrivialTrace<double>* trace = ReverseAD::trace_off<double>();
-      check_answer(trace, done);
-      vx = 4;
-      ReverseAD::TrivialTrace<double>* new_trace =
-        ReverseAD::BaseFunctionReplay::replay_ind<double>(trace, &vy, 1, &vx, 1);
-      if (vy != vx) {done = true;}
-      check_answer(trace, done);
-      check_answer(new_trace, done);
+      check_answer(trace, vx, vp, done);
+      check_answer(trace, 3.0, 4.0, done);
       if (done) {
         std::cout << "test " << testLine << " fail!" << std::endl;
         exit(-1);

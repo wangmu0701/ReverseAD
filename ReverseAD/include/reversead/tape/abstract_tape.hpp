@@ -10,15 +10,15 @@ class AbstractTape {
   virtual void clear() = 0;
   // put a Type data to the tape
   virtual void put(Type) = 0;
+  
+  // number of current elements
+  virtual int size() = 0;
 
   // forward sweep
   virtual void init_forward() = 0;
   virtual void end_forward() = 0;
   virtual bool has_next_f() = 0;
   virtual Type get_next_f() = 0;
-
-  // The new feature
-  virtual void rewrite_curr_f(Type) = 0;
 
   // reverse sweep
   virtual void init_reverse() = 0;

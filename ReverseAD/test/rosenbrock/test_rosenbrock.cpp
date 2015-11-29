@@ -31,11 +31,11 @@ int main() {
   double time_elapsed = ReverseAD::get_timing();
   std::cout << "overloaded function time = " << time_elapsed << std::endl;
 
-  ReverseAD::BaseFunctionReplay<double> replay(trace);
   //double* ry = replay.replay(x, N, 1);
   double* ry = new double[1];
   for (int i=0; i<N; i++) {x[i]=x[i]+1;}
-  ReverseAD::TrivialTrace<double>* new_trace = replay.replay(ry,x,N, 1); 
+  ReverseAD::TrivialTrace<double>* new_trace =
+    ReverseAD::BaseFunctionReplay::replay_ind(trace, ry,1 ,x, N); 
   std::cout << " ry = " << ry[0] << std::endl;
   ReverseAD::BaseReverseHessian<double> hessian(new_trace);
   hessian.compute(N, 1);

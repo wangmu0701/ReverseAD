@@ -8,6 +8,7 @@ enum OPCODES {
   end_of_tape,
   assign_ind,
   assign_dep,
+  assign_param,
   assign_a,
   assign_d,
   plus_a_a,

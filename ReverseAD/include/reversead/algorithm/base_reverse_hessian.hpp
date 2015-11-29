@@ -42,7 +42,6 @@ class BaseReverseHessian : public BaseReverseAdjoint<Base> {
   void process_sac(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) {
     Base w = deriv.adjoint_vals->get_and_erase(info.r);
     type_adjoint r = deriv.hessian_vals->get_and_erase(info.r);
-    
     // in template, name resolve will not look in base class
     BaseReverseAdjoint<Base>::compute_adjoint_sac(
       info, *(deriv.adjoint_vals), w);
@@ -124,7 +123,7 @@ class BaseReverseHessian : public BaseReverseAdjoint<Base> {
             hessian_vals[info.y][info.y] += info.dy * info.dy * pw;
             //hessian_vals.increase(info.y, info.y, info.dy*info.dy*pw);
           } 
-        } else { // info.y == NULL_LOC
+        } else if (info.x != NULL_LOC){
           if (p != info.r) {
             if (p == info.x) {
               hessian_vals[p][p] += 2 * info.dx * pw;
@@ -144,6 +143,7 @@ class BaseReverseHessian : public BaseReverseAdjoint<Base> {
         }
       } // pw != 0.0
     } // while (has_next)
+
     if (w != 0.0) {
       if (info.pxx != 0.0) {
         hessian_vals[info.x][info.x] += info.pxx * w;

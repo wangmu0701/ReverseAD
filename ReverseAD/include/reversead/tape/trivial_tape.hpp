@@ -18,6 +18,7 @@ class TrivialTape : public AbstractTape<Type> {
 
   void clear();
   void put(Type data);
+  int size();
   
   void init_forward();
   void end_forward();
@@ -52,6 +53,10 @@ void TrivialTape<Type>::clear() {
 template <typename Type>
 void TrivialTape<Type>::put(Type data) {
   data_.push_back(data);
+}
+template <typename Type>
+int TrivialTape<Type>::size() {
+  return data_.size();
 }
 
 template <typename Type>

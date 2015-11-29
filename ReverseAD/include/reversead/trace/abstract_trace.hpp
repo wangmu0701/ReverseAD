@@ -15,12 +15,14 @@ class AbstractTrace {
     num_dep = 0;
     num_dummy_ind = 0;
     num_dummy_dep = 0;
+    num_param = 0;
   }
   virtual ~AbstractTrace() {}
 
   virtual void put_op(const opbyte&) = 0;
   virtual void put_loc(const locint&) = 0;
   virtual void put_val(const Base&) = 0;
+  virtual void put_param(const Base&) = 0;
   virtual void put_coval(const double&) = 0;
   
   // forward sweep
@@ -29,6 +31,7 @@ class AbstractTrace {
   virtual opbyte get_next_op_f() = 0;
   virtual locint get_next_loc_f() = 0;
   virtual Base get_next_val_f() = 0;
+  virtual Base get_next_param_f() = 0;
   virtual double get_next_coval_f() = 0;
 
   // reverse sweep
@@ -37,6 +40,7 @@ class AbstractTrace {
   virtual opbyte get_next_op_r() = 0;
   virtual locint get_next_loc_r() = 0;
   virtual Base get_next_val_r() = 0;
+  virtual Base get_next_param_r() = 0;
   virtual double get_next_coval_r() = 0;
 
   // communication trace
@@ -61,11 +65,13 @@ class AbstractTrace {
   void increase_dummy_dep(int size) {num_dummy_dep += size;}
   int get_num_dummy_ind() {return num_dummy_ind;}
   int get_num_dummy_dep() {return num_dummy_dep;}
+  int get_num_param() {return num_param;}
  protected:
   int num_ind;
   int num_dep;
   int num_dummy_ind;
   int num_dummy_dep;
+  int num_param;
 };
 
 } // namespace ReverseAD

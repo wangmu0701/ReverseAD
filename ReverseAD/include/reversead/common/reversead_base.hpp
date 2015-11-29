@@ -102,7 +102,15 @@ namespace ReverseAD {
       ((TrivialTrace<Base>*)global_trace)->put_loc(res);
     }
   }
-  
+  template <typename Base>
+  void trace_put_olp(opbyte op, locint res, Base param) {
+    if (is_tracing) {
+      ((TrivialTrace<Base>*)global_trace)->put_op(op);
+      ((TrivialTrace<Base>*)global_trace)->put_param(param);
+      ((TrivialTrace<Base>*)global_trace)->put_loc(res);
+    }
+  }
+ 
   template <typename Base>
   void trace_put_olld(opbyte op, locint res, locint arg, double coval) {
     if (is_tracing) {

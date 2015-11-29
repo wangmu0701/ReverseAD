@@ -27,6 +27,14 @@ class BaseActive {
 
   inline Base getVal() {return val;}
   inline locint getLoc() {return loc;}
+  static BaseActive<Base> markParam(const Base& param) {
+    BaseActive res(param, get_next_loc());
+#ifdef REVERSEAD_BASE_ACTIVE_DEBUG
+    log.info << "markParam : " << &res <<"["<<res.getLoc()<<"]" << " = " << param << std::endl;
+#endif
+    trace_put_olp<Base>(assign_param, res.getLoc(), param);
+    return res;
+  }
  private:
   // Private c-tor is only used internally for operators returning a L-value
   // For example, plus_d_a, with a L-value.

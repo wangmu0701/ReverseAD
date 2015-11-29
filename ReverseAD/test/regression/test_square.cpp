@@ -9,10 +9,9 @@ double myEps = 1.E-10;
 void check_answer(ReverseAD::TrivialTrace<double>* trace,
                   bool& done,
                   double vx) {
-      ReverseAD::BaseFunctionReplay<double> replayer(trace);
       double vy;
       ReverseAD::TrivialTrace<double>* new_trace =
-        replayer.replay(&vy, &vx, 1, 1);
+        ReverseAD::BaseFunctionReplay::replay_ind(trace, &vy,1, &vx, 1);
       if (fabs(vy - vx*vx) > myEps) {
         done = true;
       }
@@ -44,7 +43,6 @@ void check_answer(ReverseAD::TrivialTrace<double>* trace,
 int main() {
   bool done = false;
   int testCase = 0;
-  double myEps = 1.E-10;
   const char* testLine;
   while(!done) {
     adouble x, y;
