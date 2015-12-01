@@ -5,6 +5,8 @@
 using namespace Ipopt;
 using namespace ReverseAD;
 
+//#define SHOW_DEBUG_INFO
+
 #define N_SIZE 2
 
 /* Constructor. */
@@ -19,7 +21,7 @@ bool NlpProblem::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 {
   n = N_SIZE;
 
-  m = n-2;
+  m = 0;
 
   generate_tapes(n, m, nnz_jac_g, nnz_h_lag);
 
@@ -73,6 +75,8 @@ bool NlpProblem::get_starting_point(Index n, bool init_x, Number* x,
 
 template<class T> bool  NlpProblem::eval_obj(Index n, const T *x, T& obj_value)
 {
+/*
+// ROSENBROCK
   T a1, a2;
   obj_value = 0.;
   for (Index i=0; i<n-1; i++) {
@@ -80,12 +84,23 @@ template<class T> bool  NlpProblem::eval_obj(Index n, const T *x, T& obj_value)
     a2 = x[i] - 1.;
     obj_value = obj_value + 100.*a1*a1 + a2*a2;
   }
-
+*/
+/*
+// simple square
+  obj_value = 0;
+  for (Index i=0; i<n; i++) {
+    obj_value = obj_value + x[i]*x[i];
+  }
+*/
+  obj_value = (1.5 - x[0]+x[0]*x[1])*(1.5-x[0]+x[0]*x[1]);
+  obj_value = obj_value + (2.25 - x[0] + x[0]*x[1]*x[1])*(2.25-x[0]+x[0]*x[1]*x[1]);
+  obj_value = obj_value + (2.625 - x[0]+x[0]*x[1]*x[1]*x[1]) * (2.625 - x[0] + x[0]*x[1]*x[1]*x[1]);
   return true;
 }
 
 template<class T> bool  NlpProblem::eval_constraints(Index n, const T *x, Index m, T* g)
 {
+/*
   for (Index i=0; i<m; i++) {
 //    g[i] = 3.*pow(x[i+1],3.) + 2.*x[i+2] - 5.
 //           + sin(x[i+1]-x[i+2])*sin(x[i+1]+x[i+2]) + 4.*x[i+1]
@@ -94,7 +109,7 @@ template<class T> bool  NlpProblem::eval_constraints(Index n, const T *x, Index 
            + sin(x[i+1]-x[i+2])*sin(x[i+1]+x[i+2]) + 4.*x[i+1]
            - x[i]*exp(x[i]-x[i+1]) - 3.;
   }
-
+*/
   return true;
 }
 
@@ -121,7 +136,9 @@ bool NlpProblem::eval_grad_f(Index n, const Number* x, bool new_x, Number* grad_
  
   for (int i=0; i<n; i++) {
     tmp_x[i] = x[i];
+#ifdef SHOW_DEBUG_INFO
     std::cout << "x["<<i<<"] = " << x[i] << std::endl;
+#endif
   }
   TrivialTrace<double>* new_trace =
     BaseFunctionReplay::replay_ind<double>(trace_f, tmp_x, n);
@@ -130,7 +147,9 @@ bool NlpProblem::eval_grad_f(Index n, const Number* x, bool new_x, Number* grad_
   adjoint.retrieve_adjoint(&grad_f_val);
   for(int i=0; i<n; i++) {
     grad_f[i] = grad_f_val[0][i];
+#ifdef SHOW_DEBUG_INFO
     std::cout << "G["<<i<<"] = "<< grad_f[i] << std::endl;
+#endif
   }
   delete[] grad_f_val[0];
   delete[] grad_f_val;
@@ -157,7 +176,9 @@ bool NlpProblem::eval_jac_g(Index n, const Number* x, bool new_x,
       {
 	iRow[idx] = rind_g[idx];
 	jCol[idx] = cind_g[idx];
+#ifdef SHOW_DEBUG_INFO
         std::cout << "A["<<rind_g[idx]<<","<<cind_g[idx]<<"]" << std::endl;
+#endif
       }
   }
   else {
@@ -167,17 +188,21 @@ bool NlpProblem::eval_jac_g(Index n, const Number* x, bool new_x,
     delete[] jacval;
     for(int i=0; i<n; i++) {
       tmp_x[i] = x[i];
+#ifdef SHOW_DEBUG_INFO
       std::cout << "x["<<i<<"] = "<<x[i] << std::endl;
+#endif
     }
     TrivialTrace<double>* new_trace = 
       BaseFunctionReplay::replay_ind<double>(trace_g, tmp_x, n);
-    BaseReverseAdjoint<Number> adjoint(trace_g);
+    BaseReverseAdjoint<Number> adjoint(new_trace);
     adjoint.compute(n, m);
     adjoint.retrieve_adjoint_sparse_format(&nnz_jac, &rind_g, &cind_g, &jacval); 
     for(Index idx=0; idx<nnz_jac; idx++)
       {
 	values[idx] = jacval[idx];
+#ifdef SHOW_DEBUG_INFO
         std::cout << "A["<<rind_g[idx]<<","<<cind_g[idx]<<"] = " << jacval[idx] << std::endl;
+#endif
       }
   }
 
@@ -195,12 +220,21 @@ bool NlpProblem::eval_h(Index n, const Number* x, bool new_x,
     // return the structure. This is a symmetric matrix, fill the lower left
     // triangle only.
 
-    // ReverseAD returns lower, ipopt need upper
+/*
     for(Index idx=0; idx<nnz_L[0]; idx++)
       {
 	iRow[idx] = cind_L[0][idx];
 	jCol[idx] = rind_L[0][idx];
       }
+*/
+    Index idx = 0;
+    for(Index i = 0; i<n; i++) {
+      for (Index j=0; j<=i; j++) {
+        iRow[idx] = i;
+        jCol[idx] = j;
+        idx++;
+      }
+    }
   }
   else {
     // return the values. This is a symmetric matrix, fill the lower left
@@ -214,15 +248,21 @@ bool NlpProblem::eval_h(Index n, const Number* x, bool new_x,
     delete[] hessval[0];
     delete[] hessval;
 
+#ifdef SHOW_DEBUG_INFO
     std::cout << "obj_factor = " << obj_factor << std::endl;
+#endif
     obj_lam[0] = obj_factor;
     for(Index idx = 0; idx<m ; idx++) {
       obj_lam[1+idx] = lambda[idx];
+#ifdef SHOW_DEBUG_INFO
       std::cout << "lambda["<<idx<<"] = " << lambda[idx] << std::endl; 
+#endif
     }
     for(Index idx = 0; idx<n; idx++) {
       tmp_x[idx] = x[idx];
+#ifdef SHOW_DEBUG_INFO
       std::cout << "x["<<idx<<"] = "<<tmp_x[idx]<< std::endl;
+#endif
     }
 
     TrivialTrace<double>* new_trace = 
@@ -231,11 +271,15 @@ bool NlpProblem::eval_h(Index n, const Number* x, bool new_x,
     BaseReverseHessian<double> hessian(new_trace);
     hessian.compute(n, 1);
     hessian.retrieve_hessian_sparse_format(&nnz_L, &cind_L, &rind_L, &hessval);
-     
-    for(Index idx = 0; idx <nnz_L[0] ; idx++)
+
+    Index l = 0;
+    for(Index i = 0; i <nnz_L[0] ; i++)
       {
-          values[idx] = hessval[0][idx];
-        std::cout << "H["<<cind_L[0][idx]<<","<<rind_L[0][idx]<<"] = " << hessval[0][idx] << std::endl;
+          l = (cind_L[0][i]*cind_L[0][i]+1)/2 + rind_L[0][i];
+          values[l] = hessval[0][i];
+#ifdef SHOW_DEBUG_INFO
+        std::cout << "H["<<cind_L[0][i]<<","<<rind_L[0][i]<<"] = " << hessval[0][i] << std::endl;
+#endif
       }
   }
   return true;
@@ -351,20 +395,24 @@ void NlpProblem::generate_tapes(Index n, Index m, Index& nnz_jac_g, Index& nnz_h
   adjoint.retrieve_adjoint_sparse_format(&nnz_jac, &rind_g, &cind_g, &jacval);
 
   nnz_jac_g = nnz_jac;
+#ifdef SHOW_DEBUG_INFO
   for (int i = 0; i < nnz_jac; i++) {
     std::cout << "A[" << rind_g[i] << "," << cind_g[i] << " ] = "
               << jacval[i] << std::endl;
   }
-  
+#endif  
   BaseReverseHessian<double> hessian(trace_L);
   hessian.compute(n, 1);
   hessian.retrieve_hessian_sparse_format(&nnz_L, &rind_L, &cind_L, &hessval);
 
+#ifdef SHOW_DEBUG_INFO
   for (int i = 0; i < nnz_L[0]; i++) {
     std::cout << "H[" << rind_L[0][i] << "," << cind_L[0][i] << " ] = "
               << hessval[0][i] << std::endl;
   }
-  nnz_h_lag = nnz_L[0];
+#endif
+
+  nnz_h_lag = (n*(n+1)) / 2;
   
   delete[] lam;
   delete[] g;

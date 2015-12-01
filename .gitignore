@@ -11,6 +11,7 @@
 .libs
 .deps
 machines
+ipopt_solver
 test_tape
 test_trace
 test_rosenbrock
