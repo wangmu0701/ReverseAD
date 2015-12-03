@@ -7,7 +7,7 @@ using namespace ReverseAD;
 
 //#define SHOW_DEBUG_INFO
 
-#define N_SIZE 2
+#define N_SIZE 6
 
 /* Constructor. */
 NlpProblem::NlpProblem()
@@ -75,7 +75,6 @@ bool NlpProblem::get_starting_point(Index n, bool init_x, Number* x,
 
 template<class T> bool  NlpProblem::eval_obj(Index n, const T *x, T& obj_value)
 {
-/*
 // ROSENBROCK
   T a1, a2;
   obj_value = 0.;
@@ -84,7 +83,6 @@ template<class T> bool  NlpProblem::eval_obj(Index n, const T *x, T& obj_value)
     a2 = x[i] - 1.;
     obj_value = obj_value + 100.*a1*a1 + a2*a2;
   }
-*/
 /*
 // simple square
   obj_value = 0;
@@ -92,9 +90,19 @@ template<class T> bool  NlpProblem::eval_obj(Index n, const T *x, T& obj_value)
     obj_value = obj_value + x[i]*x[i];
   }
 */
+/*
   obj_value = (1.5 - x[0]+x[0]*x[1])*(1.5-x[0]+x[0]*x[1]);
   obj_value = obj_value + (2.25 - x[0] + x[0]*x[1]*x[1])*(2.25-x[0]+x[0]*x[1]*x[1]);
   obj_value = obj_value + (2.625 - x[0]+x[0]*x[1]*x[1]*x[1]) * (2.625 - x[0] + x[0]*x[1]*x[1]*x[1]);
+*/
+/*
+  obj_value = (x[0] + 2.0*x[1]-7)*(x[0]+2.0*x[1]-7);
+  obj_value = obj_value + (2.0*x[0]+x[1]-5)*(2.0*x[0]+x[1]-5);
+*/
+/*
+  obj_value = sin(x[0]+x[1])+(x[0]-x[1])*(x[0]-x[1]);
+  obj_value = obj_value - 1.5*x[0] + 2.5*x[1] + 1;
+*/
   return true;
 }
 
