@@ -1,43 +1,20 @@
-#include "reversead/common/reversead_config.h"
-
-#ifdef ENABLE_REVERSEAD_MPI
 #include "mpi.h"
 
 #include "reversead/activetype/base_active.hpp"
 #include "reversead/common/reversead_type.hpp"
-#include "reversead/reverseadmpi/reversead_mpi.hpp"
+#include "reversead/rmpi/reversead_mpi.hpp"
 #include "reversead/trace/trivial_trace.hpp"
 #include "reversead/util/temp_memory_allocator.hpp"
 
 namespace ReverseAD {
 
-  MPI_Datatype RMPI_ADOUBLE;
+  extern MPI_Datatype RMPI_ADOUBLE;
 
   extern void* global_trace;
   extern bool is_tracing;
   extern int rank;
-  TempMemoryAllocator* temp_memory_allocator;
- 
-  void RMPI_Init(int* argc, char** argv[]) {
-    MPI_Init(argc, argv);
-    MPI_Type_contiguous(1, MPI_DOUBLE, &RMPI_ADOUBLE);
-    MPI_Type_commit(&RMPI_ADOUBLE);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    temp_memory_allocator = new TempMemoryAllocator();
-  }
 
-  void RMPI_Finalize() {
-    delete temp_memory_allocator;
-    if (RMPI_ADOUBLE != MPI_DATATYPE_NULL) {MPI_Type_free(&RMPI_ADOUBLE);}
-    MPI_Finalize();
-  }
-
-  void trace_put(const SendRecvInfo& sr_info) {
-    ((TrivialTrace<double>*)global_trace)->put_sr_info(sr_info);
-  }
-  void trace_put_comm_loc(const locint& comm_loc) {
-    ((TrivialTrace<double>*)global_trace)->put_comm_loc(comm_loc);
-  }
+  extern TempMemoryAllocator* temp_memory_allocator;
 
   int RMPI_Send_ind(adouble* buf,
                     int count,
@@ -156,62 +133,5 @@ namespace ReverseAD {
     return rc;
   }
 
-  int RMPI_Reduce(void* sendbuf,
-                  void* recvbuf,
-                  int count,
-                  MPI_Datatype datatype,
-                  MPI_Op op,
-                  int root,
-                  MPI_Comm comm) {
-    int rc = MPI_SUCCESS;
-    if (datatype == RMPI_ADOUBLE) {
-      adouble* t_buf = new adouble[count];
-      adouble* s_buf = (adouble*)sendbuf;
-      int size;
-      int myid;
-      MPI_Comm_size(comm, &size);
-      MPI_Comm_rank(comm, &myid);
-      int p = 1;
-      int mask, peer;
-      while(p < size) {
-        mask = p - 1;
-        if ((myid & mask) == 0) {
-          peer = myid ^ p;
-          if (peer < size) {
-            if ((myid & p) == 0) {
-              rc = RMPI_Recv((void*)t_buf, count, RMPI_ADOUBLE, peer, 0, comm,
-                             MPI_STATUS_IGNORE);
-              for (int i = 0; i < count; i++) {
-                if (op == MPI_SUM) {
-                  s_buf[i] = s_buf[i] + t_buf[i];
-                } else if (op == MPI_PROD) {
-                  s_buf[i] = s_buf[i] * t_buf[i];
-                } else {
-                  log.warning << "Unsupported reduction op!" << std::endl;
-                }
-              }
-            } else {
-              rc = RMPI_Send(sendbuf, count, RMPI_ADOUBLE, peer, 0, comm);
-            }
-          }
-        }
-        if (rc != MPI_SUCCESS) {
-          log.fatal << "RMPI_Reduce fail on : " << myid << std::endl;
-        }
-        p = p * 2;
-      }
-      if (myid == 0) {
-        adouble* r_buf = (adouble*) recvbuf;
-        for (int i = 0; i < count; i++) {
-          r_buf[i] = s_buf[i];
-        }
-      }
-      delete[] t_buf;
-    } else {
-      rc = MPI_Reduce(sendbuf, recvbuf, count, datatype, op, root, comm);
-    }
-    return rc;
-  }
 } // namespace ReverseAD
 
-#endif // ENABLE_REVERSEAD_MPI

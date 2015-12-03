@@ -12,7 +12,8 @@
 #include "reversead/algorithm/base_reverse_hessian.hpp"
 
 #ifdef ENABLE_REVERSEAD_MPI
-#include "reversead/reverseadmpi/reversead_mpi.hpp"
+#include "reversead/rmpi/reversead_mpi.hpp"
+#include "reversead/rmpi/rmpi_wrapper.hpp"
 #include "reversead/algorithm/base_mpi_reverse_hessian.hpp"
 #endif
 
