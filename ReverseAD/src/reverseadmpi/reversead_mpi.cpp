@@ -5,7 +5,7 @@
 
 #include "reversead/activetype/base_active.hpp"
 #include "reversead/common/reversead_type.hpp"
-#include "reversead/common/reversead_mpi.hpp"
+#include "reversead/reverseadmpi/reversead_mpi.hpp"
 #include "reversead/trace/trivial_trace.hpp"
 #include "reversead/util/temp_memory_allocator.hpp"
 
