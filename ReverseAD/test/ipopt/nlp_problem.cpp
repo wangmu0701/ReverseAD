@@ -7,7 +7,7 @@ using namespace ReverseAD;
 
 //#define SHOW_DEBUG_INFO
 
-#define N_SIZE 6
+#define N_SIZE 2
 
 /* Constructor. */
 NlpProblem::NlpProblem()
@@ -36,8 +36,10 @@ bool NlpProblem::get_bounds_info(Index n, Number* x_l, Number* x_u,
 {
   // none of the variables have bounds
   for (Index i=0; i<n; i++) {
-    x_l[i] = -1e20;
-    x_u[i] =  1e20;
+    //x_l[i] = -1e20;
+    //x_u[i] =  1e20;
+    x_l[i] = -3;
+    x_u[i] = 4;
   }
 
   // Set the bounds for the constraints
@@ -75,7 +77,8 @@ bool NlpProblem::get_starting_point(Index n, bool init_x, Number* x,
 
 template<class T> bool  NlpProblem::eval_obj(Index n, const T *x, T& obj_value)
 {
-// ROSENBROCK
+/*
+//Rosenbrock
   T a1, a2;
   obj_value = 0.;
   for (Index i=0; i<n-1; i++) {
@@ -83,6 +86,7 @@ template<class T> bool  NlpProblem::eval_obj(Index n, const T *x, T& obj_value)
     a2 = x[i] - 1.;
     obj_value = obj_value + 100.*a1*a1 + a2*a2;
   }
+*/
 /*
 // simple square
   obj_value = 0;
@@ -90,18 +94,33 @@ template<class T> bool  NlpProblem::eval_obj(Index n, const T *x, T& obj_value)
     obj_value = obj_value + x[i]*x[i];
   }
 */
-/*
+//Beale
   obj_value = (1.5 - x[0]+x[0]*x[1])*(1.5-x[0]+x[0]*x[1]);
   obj_value = obj_value + (2.25 - x[0] + x[0]*x[1]*x[1])*(2.25-x[0]+x[0]*x[1]*x[1]);
   obj_value = obj_value + (2.625 - x[0]+x[0]*x[1]*x[1]*x[1]) * (2.625 - x[0] + x[0]*x[1]*x[1]*x[1]);
-*/
 /*
+//Booth
   obj_value = (x[0] + 2.0*x[1]-7)*(x[0]+2.0*x[1]-7);
   obj_value = obj_value + (2.0*x[0]+x[1]-5)*(2.0*x[0]+x[1]-5);
 */
 /*
   obj_value = sin(x[0]+x[1])+(x[0]-x[1])*(x[0]-x[1]);
   obj_value = obj_value - 1.5*x[0] + 2.5*x[1] + 1;
+*/
+/*
+//Matyas
+  obj_value = 0.26 * (x[0]*x[0] + x[1]*x[1]) - 0.48*x[0]*x[1];
+*/
+/*
+//Quadratic + exp
+  obj_value = 0;
+  for (int i=0; i<n; i++){
+    obj_value = obj_value + (100-i)*x[i]*x[i] + exp(x[i]);
+  }
+*/
+/*
+//McCormick
+  obj_value = sin(x[0]+x[1])+(x[0]-x[1])*(x[0]-x[1])-1.5*x[0]+2.5*x[1];
 */
   return true;
 }
@@ -281,6 +300,9 @@ bool NlpProblem::eval_h(Index n, const Number* x, bool new_x,
     hessian.retrieve_hessian_sparse_format(&nnz_L, &cind_L, &rind_L, &hessval);
 
     Index l = 0;
+    for(Index i = 0; i < (n*(n+1))/2; i++) {
+      values[i] = 0;
+    }
     for(Index i = 0; i <nnz_L[0] ; i++)
       {
           l = (cind_L[0][i]*cind_L[0][i]+1)/2 + rind_L[0][i];
@@ -302,6 +324,9 @@ void NlpProblem::finalize_solution(SolverReturn status,
 			      IpoptCalculatedQuantities* ip_cq)
 {
 
+  for(int i = 0; i < n; i++) {
+    printf("x[%d] = %.5f\n", i, x[i]);
+  }
   printf("\n\nObjective value\n");
   printf("f(x*) = %e\n", obj_value);
 
