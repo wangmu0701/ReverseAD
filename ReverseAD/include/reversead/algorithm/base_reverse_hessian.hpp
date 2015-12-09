@@ -39,7 +39,7 @@ class BaseReverseHessian : public BaseReverseAdjoint<Base> {
     (*deriv.adjoint_vals)[dep] = 1.0;
   }
 
-  void process_sac(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) {
+  void accumulate_deriv(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) {
     Base w = deriv.adjoint_vals->get_and_erase(info.r);
     type_adjoint r = deriv.hessian_vals->get_and_erase(info.r);
     // in template, name resolve will not look in base class

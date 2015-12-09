@@ -36,9 +36,25 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
     (*deriv.adjoint_vals)[dep] = 1.0;
   }
 
-  void process_sac(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) {
+  virtual void accumulate_deriv(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) {
     Base w = deriv.adjoint_vals->get_and_erase(info.r);
     compute_adjoint_sac(info, *(deriv.adjoint_vals), w);
+  }
+
+  void process_sac(const DerivativeInfo<locint, Base>& info) {
+    if (info.r != NULL_LOC) {
+      std::set<locint> dep_set = std::move(reverse_live[info.r]);
+      reverse_live.erase(info.r);
+      for (const locint& dep : dep_set) {
+        accumulate_deriv(info, dep_deriv[dep]);
+        if (info.x != NULL_LOC) {
+          reverse_live[info.x].insert(dep);
+        }
+        if (info.y != NULL_LOC) {
+          reverse_live[info.y].insert(dep);
+        }
+      }
+    }
   }
 
   void retrieve_adjoint(Base*** values) {
@@ -87,34 +103,6 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
       } 
     }
   }
-/*
-  void retrieve_hessian_sparse_format(int** ssize, locint*** rind, locint*** cind, Base*** values) {
-    int dep_size = dep_deriv.size();
-    (*ssize) = new int[dep_size];
-    (*rind) = new locint*[dep_size];
-    (*cind) = new locint*[dep_size];
-    (*values) = new Base*[dep_size];
-    for (auto& kv : dep_deriv) {
-      locint dep = dep_index_map[kv.first] - 1;
-      int size = kv.second.hessian_vals->get_size();
-      (*ssize)[dep] = size;
-      (*rind)[dep] = new locint[size];
-      (*cind)[dep] = new locint[size];
-      (*values)[dep] = new Base[size];
-      typename type_hessian::enumerator h_enum = kv.second.hessian_vals->get_enumerator();
-      bool has_next = h_enum.has_next();
-      locint x,y;
-      Base w;
-      int l =0;
-      while(has_next) {
-        has_next = h_enum.get_next(x, y, (*values)[dep][l]);
-        (*rind)[dep][l] = indep_index_map[x];
-        (*cind)[dep][l] = indep_index_map[y];
-        l++;
-      }
-    }
-  }
-*/
 
   void compute_adjoint_sac(const DerivativeInfo<locint, Base>& info,
                            type_adjoint& adjoint_vals,

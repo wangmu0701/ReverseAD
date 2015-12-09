@@ -34,7 +34,7 @@ class BaseReverseMode {
     this->trace = trace;
   }
 
-  void compute(int ind_num, int dep_num) {
+  virtual void compute(int ind_num, int dep_num) {
     double time = get_timing();
     reverse_local_computation(ind_num, dep_num);
     time = get_timing();
@@ -48,7 +48,7 @@ class BaseReverseMode {
  protected:  
   void reverse_local_computation(int, int);
 
-  virtual void process_sac(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) = 0;
+  virtual void process_sac(const DerivativeInfo<locint, Base>& info) = 0;
   virtual void init_dep_deriv(SingleDeriv& deriv, locint dep) = 0;
 
   AbstractTrace<Base>* trace;
@@ -223,6 +223,8 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
         default:
           log.warning << "Unrecongized opcode : " << (int)op << std::endl; 
       }
+      process_sac(info);
+/*
       if (info.r != NULL_LOC) {
         std::set<locint> dep_set = std::move(reverse_live[info.r]);
         reverse_live.erase(info.r);
@@ -236,6 +238,7 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           }
         }
       } 
+*/
       op = trace->get_next_op_r();
     }
     return;
