@@ -26,6 +26,7 @@ test_mpi_thomson
 test_base_adouble
 test_base_function_replay
 test_base_reverse_adjoint
+nlp_problem.cpp
 compile
 Makefile
 Makefile.in

@@ -19,9 +19,9 @@ NlpProblem::~NlpProblem()
 bool NlpProblem::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
                          Index& nnz_h_lag, IndexStyleEnum& index_style)
 {
-  n = N_SIZE;
+  n = N_SIZE * 6;
 
-  m = 0;
+  m = N_SIZE * 5;
 
   generate_tapes(n, m, nnz_jac_g, nnz_h_lag);
 
@@ -36,10 +36,16 @@ bool NlpProblem::get_bounds_info(Index n, Number* x_l, Number* x_u,
 {
   // none of the variables have bounds
   for (Index i=0; i<n; i++) {
-    //x_l[i] = -1e20;
-    //x_u[i] =  1e20;
-    x_l[i] = -3;
-    x_u[i] = 4;
+    if (i < N_SIZE * 2) {  // C, T
+      x_l[i] = 0;
+      x_u[i] = 1;
+    } else if (i < N_SIZE * 3){ // U
+      x_l[i] = 0;
+      x_u[i] = 500;
+    } else { // W, cb, tb
+      x_l[i] = -1e20;
+      x_u[i] = 1e20;
+    }
   }
 
   // Set the bounds for the constraints
@@ -64,12 +70,16 @@ bool NlpProblem::get_starting_point(Index n, bool init_x, Number* x,
   assert(init_lambda == false);
 
   // set the starting point
-  for (Index i=0; i<n/2; i++) {
-    x[2*i] = -1.2;
-    x[2*i+1] = 1.;
-  }
-  if (n != 2*(n/2)) {
-    x[n-1] = -1.2;
+  for (Index i=0; i<n; i++) {
+    if (i < N_SIZE) { // C
+      x[i] = 0.1367+((0.0944-0.1367)*i)/N_SIZE;
+    } else if (i<N_SIZE*2) { // T
+      x[i] = 0.7293+((0.7766-0.7293)*(i-N_SIZE))/N_SIZE;
+    } else if (i<N_SIZE*3) { // U
+      x[i] = 250;
+    } else { // W, cb, tb
+      x[i] = 1;
+    }
   }
 
   return true;
@@ -77,66 +87,39 @@ bool NlpProblem::get_starting_point(Index n, bool init_x, Number* x,
 
 template<class T> bool  NlpProblem::eval_obj(Index n, const T *x, T& obj_value)
 {
-/*
-//Rosenbrock
-  T a1, a2;
-  obj_value = 0.;
-  for (Index i=0; i<n-1; i++) {
-    a1 = x[i]*x[i]-x[i+1];
-    a2 = x[i] - 1.;
-    obj_value = obj_value + 100.*a1*a1 + a2*a2;
-  }
-*/
-/*
-// simple square
+  const T* c = x;
+  const T* t = &x[N_SIZE];
+  const T* u = &x[N_SIZE*2];
   obj_value = 0;
-  for (Index i=0; i<n; i++) {
-    obj_value = obj_value + x[i]*x[i];
+  for (Index i = 0; i<N_SIZE; i++) {
+    obj_value = obj_value + 1000000*(0.0944-c[i])*(0.0944-c[i]);
+    obj_value = obj_value + 2000*(0.7766-t[i])*(0.7766-t[i]);
+    obj_value = obj_value + 0.001*(340 - u[i])*(340 - u[i]);
   }
-*/
-//Beale
-  obj_value = (1.5 - x[0]+x[0]*x[1])*(1.5-x[0]+x[0]*x[1]);
-  obj_value = obj_value + (2.25 - x[0] + x[0]*x[1]*x[1])*(2.25-x[0]+x[0]*x[1]*x[1]);
-  obj_value = obj_value + (2.625 - x[0]+x[0]*x[1]*x[1]*x[1]) * (2.625 - x[0] + x[0]*x[1]*x[1]*x[1]);
-/*
-//Booth
-  obj_value = (x[0] + 2.0*x[1]-7)*(x[0]+2.0*x[1]-7);
-  obj_value = obj_value + (2.0*x[0]+x[1]-5)*(2.0*x[0]+x[1]-5);
-*/
-/*
-  obj_value = sin(x[0]+x[1])+(x[0]-x[1])*(x[0]-x[1]);
-  obj_value = obj_value - 1.5*x[0] + 2.5*x[1] + 1;
-*/
-/*
-//Matyas
-  obj_value = 0.26 * (x[0]*x[0] + x[1]*x[1]) - 0.48*x[0]*x[1];
-*/
-/*
-//Quadratic + exp
-  obj_value = 0;
-  for (int i=0; i<n; i++){
-    obj_value = obj_value + (100-i)*x[i]*x[i] + exp(x[i]);
-  }
-*/
-/*
-//McCormick
-  obj_value = sin(x[0]+x[1])+(x[0]-x[1])*(x[0]-x[1])-1.5*x[0]+2.5*x[1];
-*/
+  obj_value = obj_value / N_SIZE; 
   return true;
 }
 
 template<class T> bool  NlpProblem::eval_constraints(Index n, const T *x, Index m, T* g)
 {
-/*
-  for (Index i=0; i<m; i++) {
-//    g[i] = 3.*pow(x[i+1],3.) + 2.*x[i+2] - 5.
-//           + sin(x[i+1]-x[i+2])*sin(x[i+1]+x[i+2]) + 4.*x[i+1]
-//           - x[i]*exp(x[i]-x[i+1]) - 3.;
-    g[i] = 3.*(x[i+1]*x[i+1]*x[i+1]) + 2.*x[i+2] - 5.
-           + sin(x[i+1]-x[i+2])*sin(x[i+1]+x[i+2]) + 4.*x[i+1]
-           - x[i]*exp(x[i]-x[i+1]) - 3.;
+  const T* c = x;
+  const T* t = &x[N_SIZE];
+  const T* u = &x[N_SIZE*2];
+  const T* w = &x[N_SIZE*3];
+  const T* cb = &x[N_SIZE*4];
+  const T* tb = &x[N_SIZE*5];
+
+  for (Index i = 0; i<N_SIZE-i; i++) {
+    g[i*2] = c[i+1]-c[i]-10*cb[i]/N_SIZE;
+    g[i*2+1] = t[i+1]-t[i]-10*tb[i]/N_SIZE;
   }
-*/
+  for (Index i = 0; i<N_SIZE; i++) {
+    g[N_SIZE*2-2+i*3] = cb[i] - ((1-c[i])/20 - 300*exp(w[i])*c[i]);
+    g[N_SIZE*2-2+i*3+1] = tb[i]-((0.3947-t[i])/20+300*exp(w[i])*c[i]-0.000195*u[i]*(t[i] - 0.3816)); 
+    g[N_SIZE*2-2+i*3+2] = w[i]*t[i]+1;
+  }
+  g[N_SIZE*5-2] = c[0] - 0.1367;
+  g[N_SIZE*5-1] = t[0] - 0.7293;
   return true;
 }
 
