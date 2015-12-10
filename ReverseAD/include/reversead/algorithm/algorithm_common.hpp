@@ -30,8 +30,8 @@ class DerivativeInfo {
     dx = 0.0; dy = 0.0;
     pxx = 0.0; pxy = 0.0; pyy = 0.0;
   }
-  void debug() {
-    std::cout << "opcode = " << opcode << " r = " << r
+  void debug() const {
+    std::cout << "opcode = " << (int)opcode << " r = " << r
               << " x = " << x << " y = " << y << std::endl;
     std::cout << "dx = " << dx << " dy = " << dy 
               << " pxx = " << pxx << " pxy = " << pxy
