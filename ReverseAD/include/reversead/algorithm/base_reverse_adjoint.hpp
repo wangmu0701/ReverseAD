@@ -30,32 +30,10 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
   using BaseReverseMode<Base>::dep_index_map;
   using BaseReverseMode<Base>::indep_index_map;
 
+  using BaseReverseMode<Base>::compute_adjoint_sac;
+
   BaseReverseAdjoint(AbstractTrace<Base>* trace) : BaseReverseMode<Base>(trace) {}
 
-  void init_dep_deriv(SingleDeriv& deriv, locint dep) {
-    (*deriv.adjoint_vals)[dep] = 1.0;
-  }
-
-  virtual void accumulate_deriv(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) {
-    Base w = deriv.adjoint_vals->get_and_erase(info.r);
-    compute_adjoint_sac(info, *(deriv.adjoint_vals), w);
-  }
-
-  void process_sac(const DerivativeInfo<locint, Base>& info) {
-    if (info.r != NULL_LOC) {
-      std::set<locint> dep_set = std::move(reverse_live[info.r]);
-      reverse_live.erase(info.r);
-      for (const locint& dep : dep_set) {
-        accumulate_deriv(info, dep_deriv[dep]);
-        if (info.x != NULL_LOC) {
-          reverse_live[info.x].insert(dep);
-        }
-        if (info.y != NULL_LOC) {
-          reverse_live[info.y].insert(dep);
-        }
-      }
-    }
-  }
 
   void retrieve_adjoint(Base*** values) {
     int dep_size = dep_deriv.size();
@@ -75,6 +53,7 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
       } 
     }
   }
+
   void retrieve_adjoint_sparse_format(int* ssize,
                                       locint** rind, locint** cind,
                                       Base** values) {
@@ -104,17 +83,32 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
     }
   }
 
-  void compute_adjoint_sac(const DerivativeInfo<locint, Base>& info,
-                           type_adjoint& adjoint_vals,
-                           Base& w) {
-    if (info.x != NULL_LOC) {
-      adjoint_vals[info.x] += w * info.dx;
-    }
-    if (info.y != NULL_LOC) {
-      adjoint_vals[info.y] += w * info.dy;
-    }
+
+ protected:
+  void init_dep_deriv(SingleDeriv& deriv, locint dep) {
+    (*deriv.adjoint_vals)[dep] = 1.0;
   }
 
+  virtual void accumulate_deriv(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) {
+    Base w = deriv.adjoint_vals->get_and_erase(info.r);
+    compute_adjoint_sac(info, *(deriv.adjoint_vals), w);
+  }
+
+  void process_sac(const DerivativeInfo<locint, Base>& info) {
+    if (info.r != NULL_LOC) {
+      std::set<locint> dep_set = std::move(reverse_live[info.r]);
+      reverse_live.erase(info.r);
+      for (const locint& dep : dep_set) {
+        accumulate_deriv(info, dep_deriv[dep]);
+        if (info.x != NULL_LOC) {
+          reverse_live[info.x].insert(dep);
+        }
+        if (info.y != NULL_LOC) {
+          reverse_live[info.y].insert(dep);
+        }
+      }
+    }
+  }
 };
 
 } // namespace ReverseAD

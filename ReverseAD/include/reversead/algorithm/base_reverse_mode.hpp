@@ -47,6 +47,13 @@ class BaseReverseMode {
 
  protected:  
   void reverse_local_computation(int, int);
+  void compute_adjoint_sac(const DerivativeInfo<locint, Base>& info,
+                           type_adjoint& adjoint_vals,
+                           const Base&);
+  void compute_hessian_sac(const DerivativeInfo<locint, Base>& info,
+                           type_hessian& hessian_vals,
+                           const Base&,
+                           const type_adjoint& r);
 
   virtual void process_sac(const DerivativeInfo<locint, Base>& info) = 0;
   virtual void init_dep_deriv(SingleDeriv& deriv, locint dep) = 0;
@@ -223,26 +230,89 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
         default:
           log.warning << "Unrecongized opcode : " << (int)op << std::endl; 
       }
+      // call to inherited virtual functions
       process_sac(info);
-/*
-      if (info.r != NULL_LOC) {
-        std::set<locint> dep_set = std::move(reverse_live[info.r]);
-        reverse_live.erase(info.r);
-        for (const locint& dep : dep_set) {
-          process_sac(info, dep_deriv[dep]);
-          if (info.x != NULL_LOC) {
-            reverse_live[info.x].insert(dep);
-          }
-          if (info.y != NULL_LOC) {
-            reverse_live[info.y].insert(dep);
-          }
-        }
-      } 
-*/
+
       op = trace->get_next_op_r();
     }
     return;
   }
+
+template <typename Base>
+void BaseReverseMode<Base>::compute_adjoint_sac(
+    const DerivativeInfo<locint, Base>& info,
+    type_adjoint& adjoint_vals,
+    const Base& w) {
+  if (info.x != NULL_LOC) {
+    adjoint_vals.increase(info.x, w * info.dx);
+  }
+  if (info.y != NULL_LOC) {
+    adjoint_vals.increase(info.y, w * info.dy);
+  }
+}
+
+template <typename Base>
+void BaseReverseMode<Base>::compute_hessian_sac(
+    const DerivativeInfo<locint, Base>& info,
+    type_hessian& hessian_vals,
+    const Base& w,
+    const type_adjoint& r) {
+
+    typename type_adjoint::enumerator r_enum =
+      r.get_enumerator();
+    bool has_next = r_enum.has_next();
+    locint p;
+    Base pw;
+    while (has_next) {
+      has_next = r_enum.get_next(p, pw);
+      //log.info << "p = " << p << "pw = " << pw << std::endl;
+      if (pw != 0.0) {
+        if (info.y != NULL_LOC) {
+          if (p != info.r) {
+            if (p == info.x) {
+              hessian_vals.increase(p, p, 2 * info.dx * pw);
+            } else {
+              hessian_vals.increase(info.x, p, info.dx * pw);
+            }
+            if (p == info.y) {
+              hessian_vals.increase(p, p, 2 * info.dy * pw);
+            } else {
+              hessian_vals.increase(info.y, p, info.dy * pw);
+            }
+          } else { // p == info.r
+            hessian_vals.increase(info.x, info.x, info.dx*info.dx*pw);
+            hessian_vals.increase(info.x, info.y, info.dx*info.dy*pw);
+            hessian_vals.increase(info.y, info.y, info.dy*info.dy*pw);
+          }
+        } else if (info.x != NULL_LOC){
+          if (p != info.r) {
+            if (p == info.x) {
+              hessian_vals.increase(p, p, 2 * info.dx * pw);
+            } else {
+              hessian_vals.increase(info.x, p, info.dx * pw);
+            }
+          } else {
+            hessian_vals.increase(info.x, info.x, info.dx * info.dx * pw);
+          }
+        }
+      } // pw != 0.0
+    } // while (has_next)
+
+    if (w != 0.0) {
+      if (info.pxx != 0.0) {
+        hessian_vals.increase(info.x, info.x, info.pxx * w);
+      }
+      if (info.pyy != 0.0) {
+        hessian_vals.increase(info.y, info.y, info.pyy * w);
+      }
+      if (info.pxy != 0.0) {
+        // already eliminate pseudo binary functions, menas info.x != info.y
+        hessian_vals.increase(info.x, info.y, w * info.pxy);
+      }
+    }
+  }
+
+
 } // namespace ReverseAD
 
 #endif // BASE_REVERSE_MODE_H_

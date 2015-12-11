@@ -6,18 +6,6 @@
 
 namespace ReverseAD {
 
-template <typename T>
-inline void T_SWAP(T& a, T& b) {
-  T c = std::move(a);
-  a = std::move(b);
-  b = std::move(c);
-}
-
-template <typename LocType>
-inline void MAX_SWAP(LocType& a, LocType& b) {
-  if (a < b) { T_SWAP(a,b);}
-}
-
 template <typename LocType, typename Base>
 class DerivativeInfo {
  public:

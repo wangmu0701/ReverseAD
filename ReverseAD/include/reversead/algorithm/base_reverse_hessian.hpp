@@ -33,19 +33,18 @@ class BaseReverseHessian : public BaseReverseAdjoint<Base> {
   using BaseReverseMode<Base>::dep_index_map;
   using BaseReverseMode<Base>::indep_index_map;
 
-  BaseReverseHessian(AbstractTrace<Base>* trace) : BaseReverseAdjoint<Base>(trace) {}
+  // in template, name resolve will not look in base class
+  using BaseReverseMode<Base>::compute_adjoint_sac;
+  using BaseReverseMode<Base>::compute_hessian_sac;
 
-  void init_dep_deriv(SingleDeriv& deriv, locint dep) {
-    (*deriv.adjoint_vals)[dep] = 1.0;
-  }
+  BaseReverseHessian(AbstractTrace<Base>* trace) : BaseReverseAdjoint<Base>(trace) {}
 
   void accumulate_deriv(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) {
     Base w = deriv.adjoint_vals->get_and_erase(info.r);
     type_adjoint r = deriv.hessian_vals->get_and_erase(info.r);
-    // in template, name resolve will not look in base class
-    BaseReverseAdjoint<Base>::compute_adjoint_sac(
-      info, *(deriv.adjoint_vals), w);
-    compute_hessian_sac(info, *(deriv.hessian_vals),w,r);
+
+    compute_adjoint_sac(info, *(deriv.adjoint_vals), w);
+    compute_hessian_sac(info, *(deriv.hessian_vals), w, r);
   }
 
   void retrieve_hessian_sparse_format(int** ssize, locint*** rind, locint*** cind, Base*** values) {
@@ -74,6 +73,7 @@ class BaseReverseHessian : public BaseReverseAdjoint<Base> {
     }
   }
 
+/*
   void compute_hessian_sac(const DerivativeInfo<locint, Base>& info,
                            type_hessian& hessian_vals,
                            Base& w,
@@ -164,6 +164,7 @@ class BaseReverseHessian : public BaseReverseAdjoint<Base> {
       }
     }
   }
+*/
 };
 
 } // namespace ReverseAD
