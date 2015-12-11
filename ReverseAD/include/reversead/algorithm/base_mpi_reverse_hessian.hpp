@@ -24,6 +24,9 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base> {
   using BaseReverseHessian<Base>::reverse_live;
   using BaseReverseHessian<Base>::trace;
 
+  using BaseReverseMode<Base>::compute_adjoint_deriv;
+  using BaseReverseMode<Base>::compute_hessian_deriv;
+
   BaseMpiReverseHessian(AbstractTrace<Base>* trace)
     : BaseReverseHessian<Base>(trace) {
   }
@@ -123,83 +126,6 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base> {
                           r);
   }
 
-  void compute_adjoint_deriv(type_adjoint& local_adjoint,
-                             type_adjoint& global_adjoint,
-                             Base& w) {
-    if (w != 0.0) {
-      locint v;
-      Base vw;
-      typename type_adjoint::enumerator l_enum = local_adjoint.get_enumerator();
-      bool has_next = l_enum.has_next();
-      while(has_next) {
-        has_next = l_enum.get_next(v, vw);
-        global_adjoint[v] += w * vw;
-      }
-    }
-  }
-
-  void compute_hessian_deriv(locint local_dep,
-                             type_adjoint& local_adjoint,
-                             type_hessian& local_hessian,
-                             type_hessian& global_hessian,
-                             Base& w,
-                             type_adjoint& r) {
-    locint p, v;
-    Base pw, vw;
-    if (r[local_dep] != 0.0) {
-      Base dw = r[local_dep];
-      typename type_adjoint::enumerator a_enum = local_adjoint.get_enumerator();
-      bool a_has_next = a_enum.has_next();
-      while(a_has_next) {
-        typename type_adjoint::enumerator a2_enum = a_enum;
-        a_has_next = a_enum.get_next(p, pw);
-        bool a2_has_next = true;
-        while(a2_has_next) {
-          a2_has_next = a2_enum.get_next(v, vw);
-          if (p >= v) {
-            global_hessian[p][v] += dw * pw * vw;
-          } else {
-            global_hessian[v][p] += dw * pw * vw;
-          }
-        }
-      }
-    }
-    r.erase(local_dep);
-    typename type_adjoint::enumerator r_enum = r.get_enumerator();
-    bool r_has_next = r_enum.has_next();
-    while(r_has_next) {
-      r_has_next = r_enum.get_next(p, pw);
-      typename type_adjoint::enumerator a_enum = local_adjoint.get_enumerator();
-      bool a_has_next = a_enum.has_next();
-      while(a_has_next) {
-        a_has_next = a_enum.get_next(v, vw);
-        if (p != v) {
-          if (p >= v) {
-            global_hessian[p][v] += pw * vw;
-          } else {
-            global_hessian[v][p] += pw * vw;
-          }
-        } else {
-          global_hessian[p][v] += 2.0 * pw * vw;
-        }
-      }
-    }
-    if (w != 0.0) {
-      typename type_hessian::enumerator h_enum = local_hessian.get_enumerator();
-      bool h_has_next = h_enum.has_next();
-      while(h_has_next) {
-        h_has_next = h_enum.get_next(p, v, pw);
-        if (p >= v) {
-          global_hessian[p][v] += w * pw;
-        } else {
-          global_hessian[v][p] += w * pw;
-        }
-      }
-    }
-  }
-
-  // protected members
-  AbstractTape<SendRecvInfo>* comm_tape;
 };
 
 } // namespace ReverseAD

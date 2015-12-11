@@ -57,7 +57,6 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
   void retrieve_adjoint_sparse_format(int* ssize,
                                       locint** rind, locint** cind,
                                       Base** values) {
-    int dep_size = dep_deriv.size();
     int total_size = 0;
     for (auto& kv : dep_deriv) {
       total_size += kv.second.adjoint_vals->get_size();
