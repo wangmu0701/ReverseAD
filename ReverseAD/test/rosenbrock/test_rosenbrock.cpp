@@ -4,7 +4,7 @@
 
 using ReverseAD::locint;
 
-#define N 4
+#define N 2
 
 int main() {
   adouble* xad = new adouble[N];
@@ -42,7 +42,7 @@ int main() {
 
   double** adjoints;
   hessian.retrieve_adjoint(&adjoints);
-  for(int i = 0; i < 4; i++) {
+  for(int i = 0; i < N; i++) {
     std::cout << "A[" << i << "] = " << adjoints[0][i] << std::endl;
   }
 

@@ -69,6 +69,7 @@ class BaseReverseMode {
                              type_adjoint& r);
 
   virtual void process_sac(const DerivativeInfo<locint, Base>& info) = 0;
+
   virtual void init_dep_deriv(SingleDeriv& deriv, locint dep) = 0;
 
   AbstractTrace<Base>* trace;
@@ -248,6 +249,10 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
 
       op = trace->get_next_op_r();
     }
+    // this is only for preaccumulation
+    info.clear();
+    info.opcode = op;
+    process_sac(info);
     return;
   }
 

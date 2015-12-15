@@ -33,7 +33,10 @@ class SingleDerivative : AbstractSerializable{
     }
     return ret;
   }
-
+  void clear() {
+    adjoint_vals->clear();
+    hessian_vals->clear();
+  }
   void write_to_byte(char* const buf) const {
     int buf_size = 0;
     adjoint_vals->write_to_byte(buf);

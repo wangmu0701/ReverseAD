@@ -36,6 +36,8 @@ class BaseReverseHessian : public BaseReverseAdjoint<Base> {
   // in template, name resolve will not look in base class
   using BaseReverseMode<Base>::compute_adjoint_sac;
   using BaseReverseMode<Base>::compute_hessian_sac;
+  using BaseReverseMode<Base>::compute_adjoint_deriv;
+  using BaseReverseMode<Base>::compute_hessian_deriv;
 
   BaseReverseHessian(AbstractTrace<Base>* trace) : BaseReverseAdjoint<Base>(trace) {}
 
@@ -72,6 +74,25 @@ class BaseReverseHessian : public BaseReverseAdjoint<Base> {
       }
     }
   }
+
+ protected:
+  virtual void process_single_deriv(locint local_dep,
+                                    SingleDeriv& local_deriv,
+                                    SingleDeriv& deriv) {
+    Base w = deriv.adjoint_vals->get_and_erase(local_dep);
+    type_adjoint r = deriv.hessian_vals->get_and_erase(local_dep);
+    // compute adjoint;
+    compute_adjoint_deriv(*(local_deriv.adjoint_vals),
+                          *(deriv.adjoint_vals),
+                          w);
+    // compute hessian;
+    compute_hessian_deriv(local_dep,
+                          *(local_deriv.adjoint_vals),
+                          *(local_deriv.hessian_vals),
+                          *(deriv.hessian_vals),
+                          w,
+                          r);
+  }  
 };
 
 } // namespace ReverseAD

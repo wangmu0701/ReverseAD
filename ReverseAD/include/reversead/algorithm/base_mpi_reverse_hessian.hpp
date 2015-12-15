@@ -24,9 +24,6 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base> {
   using BaseReverseHessian<Base>::reverse_live;
   using BaseReverseHessian<Base>::trace;
 
-  using BaseReverseMode<Base>::compute_adjoint_deriv;
-  using BaseReverseMode<Base>::compute_hessian_deriv;
-
   BaseMpiReverseHessian(AbstractTrace<Base>* trace)
     : BaseReverseHessian<Base>(trace) {
   }
@@ -102,30 +99,13 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base> {
           for (const locint& dep : dep_set) {
             //log.info << "processing : " << dummy_ind << std::endl;
             //dep_deriv[dep].debug(log.info);
-            process_single_deriv(dummy_ind, local_deriv, dep_deriv[dep]);
+            this->process_single_deriv(dummy_ind, local_deriv, dep_deriv[dep]);
             //dep_deriv[dep].debug(log.info);
           }
         }
       }
     }
   }
-
-  void process_single_deriv(locint local_dep, SingleDeriv& local_deriv, SingleDeriv& deriv) {
-    Base w = deriv.adjoint_vals->get_and_erase(local_dep);
-    type_adjoint r = deriv.hessian_vals->get_and_erase(local_dep);
-    // compute adjoint;
-    compute_adjoint_deriv(*(local_deriv.adjoint_vals),
-                          *(deriv.adjoint_vals),
-                          w);
-    // compute hessian;
-    compute_hessian_deriv(local_dep,
-                          *(local_deriv.adjoint_vals),
-                          *(local_deriv.hessian_vals),
-                          *(deriv.hessian_vals),
-                          w,
-                          r);
-  }
-
 };
 
 } // namespace ReverseAD

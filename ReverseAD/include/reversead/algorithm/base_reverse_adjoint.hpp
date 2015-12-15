@@ -31,9 +31,16 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
   using BaseReverseMode<Base>::indep_index_map;
 
   using BaseReverseMode<Base>::compute_adjoint_sac;
+  using BaseReverseMode<Base>::compute_adjoint_deriv;
 
-  BaseReverseAdjoint(AbstractTrace<Base>* trace) : BaseReverseMode<Base>(trace) {}
+  BaseReverseAdjoint(AbstractTrace<Base>* trace) :
+      BaseReverseMode<Base>(trace) {
+    preacc_enabled = false; // no preaccumulation as default
+  }
 
+  void enable_preacc() {
+    preacc_enabled = true;
+  }
 
   void retrieve_adjoint(Base*** values) {
     int dep_size = dep_deriv.size();
@@ -85,7 +92,7 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
 
  protected:
   void init_dep_deriv(SingleDeriv& deriv, locint dep) {
-    (*deriv.adjoint_vals)[dep] = 1.0;
+    deriv.adjoint_vals->increase(dep, 1.0);
   }
 
   virtual void accumulate_deriv(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) {
@@ -93,7 +100,22 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
     compute_adjoint_sac(info, *(deriv.adjoint_vals), w);
   }
 
-  void process_sac(const DerivativeInfo<locint, Base>& info) {
+  virtual void process_single_deriv(locint local_dep,
+                                    SingleDeriv& local_deriv,
+                                    SingleDeriv& deriv) {
+    Base w = deriv.adjoint_vals->get_and_erase(local_dep);
+    // compute adjoint;
+    compute_adjoint_deriv(*(local_deriv.adjoint_vals),
+                          *(deriv.adjoint_vals),
+                          w);
+  }
+
+  // here we can do something to enable preaccumulation
+  virtual void process_sac(const DerivativeInfo<locint, Base>& info) final {
+    if (preacc_enabled) {
+      compute_preacc(info);
+      return;
+    }
     if (info.r != NULL_LOC) {
       std::set<locint> dep_set = std::move(reverse_live[info.r]);
       reverse_live.erase(info.r);
@@ -108,6 +130,45 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
       }
     }
   }
+
+ // preaccumulation stuff
+ private:
+  bool preacc_enabled;
+  locint temp_local_dep;
+  SingleDeriv temp_local_deriv;
+  std::set<locint> temp_local_live;
+  void compute_preacc(const DerivativeInfo<locint, Base>& info) {
+    switch (info.opcode) {
+      case start_of_tape:
+      case assign_a:
+      case assign_d:
+        std::set<locint> dep_set = std::move(reverse_live[temp_local_dep]);
+        reverse_live.erase(temp_local_dep);
+        for (const locint& dep : dep_set) {
+          process_single_deriv(temp_local_dep, temp_local_deriv, dep_deriv[dep]);
+          for (const locint& p : temp_local_live) {
+            reverse_live[p].insert(dep);
+          }
+        }
+        temp_local_dep = info.r;
+        temp_local_live.clear();
+        temp_local_live.insert(info.r);
+        temp_local_deriv.clear();
+        temp_local_deriv.adjoint_vals->increase(info.r, 1.0);
+        break;
+    }
+    if (info.r != NULL_LOC) {
+      accumulate_deriv(info, temp_local_deriv);
+      temp_local_live.erase(info.r);
+      if (info.x != NULL_LOC) {
+        temp_local_live.insert(info.x);
+      }
+      if (info.y != NULL_LOC) {
+        temp_local_live.insert(info.y);
+      }
+    }
+  }
+
 };
 
 } // namespace ReverseAD

@@ -8,7 +8,7 @@ using ReverseAD::locint;
 #define M 1
 
 int main() {
-  double x[4] = {-1.2, 1.0, -1.2, 1.0};
+  double x[4] = {2, 3, 4, 5};
   double y[M];
   adouble yad[M];
   adouble xad[N];
@@ -27,9 +27,9 @@ int main() {
     //yad[0] = yad[0] + 100*a1*a1 + a2*a2;
   //}
  
-  //a1 = xad[0]*xad[0]-xad[1];
-  //a2 = xad[0] -1;
-  yad[0] = 100*xad[0]*xad[0];
+  a1 = xad[0]*xad[0]-xad[1];
+  a2 = xad[0] -1;
+  yad[0] = 100*a1*a1+a2*a2;
   //yad[0] = yad[0] * adouble::markParam(vp);
   //d <<= 4.0;
   //yad[1] = a * c;
@@ -55,6 +55,7 @@ int main() {
   new_trace->dump_trace();
 
   ReverseAD::BaseReverseHessian<double> hessian(new_trace);
+  hessian.enable_preacc();
   hessian.compute(N, M);
   int size_j;
   locint* rind_j;

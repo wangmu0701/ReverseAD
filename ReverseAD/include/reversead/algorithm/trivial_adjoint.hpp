@@ -21,6 +21,7 @@ class TrivialAdjoint : public AbstractSerializable {
   Base&& get_and_erase(LocType x);
   Base& operator[] (LocType x);
   void erase(LocType x);
+  void clear();
 
   void increase(const LocType& x, const Base& w) {
     _data[x] += w;
@@ -80,6 +81,11 @@ typename TrivialAdjoint<LocType, Base>::enumerator TrivialAdjoint<LocType, Base>
 
 template <typename LocType, typename Base>
 TrivialAdjoint<LocType, Base>::TrivialAdjoint() {
+  _data.clear();
+}
+
+template <typename LocType, typename Base>
+void TrivialAdjoint<LocType, Base>::clear() {
   _data.clear();
 }
 
