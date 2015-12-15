@@ -5,6 +5,7 @@
 using ReverseAD::RMPI_Send;
 using ReverseAD::RMPI_Recv;
 using ReverseAD::RMPI_ADOUBLE;
+using ReverseAD::BaseMpiReverseAdjoint;
 using ReverseAD::BaseMpiReverseHessian;
 
 int main(int argc, char** argv) {
@@ -42,6 +43,8 @@ int main(int argc, char** argv) {
   if (rank == 0) {
     trace->dump_trace();
   }
+  BaseMpiReverseAdjoint<double> adjoint(trace);
+  adjoint.compute_mpi();
   BaseMpiReverseHessian<double> hessian(trace);
   hessian.compute_mpi();
 

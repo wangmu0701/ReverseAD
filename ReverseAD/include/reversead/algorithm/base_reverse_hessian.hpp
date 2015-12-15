@@ -21,7 +21,7 @@
 namespace ReverseAD {
 
 template <typename Base>
-class BaseReverseHessian : public BaseReverseAdjoint<Base> {
+class BaseReverseHessian : public virtual BaseReverseAdjoint<Base> {
  public:
   typedef typename SingleDerivative<Base>::type_adjoint type_adjoint;
   typedef typename SingleDerivative<Base>::type_hessian type_hessian;

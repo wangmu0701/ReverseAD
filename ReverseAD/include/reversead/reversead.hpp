@@ -15,6 +15,7 @@
 #ifdef ENABLE_REVERSEAD_MPI
 #include "reversead/rmpi/reversead_mpi.hpp"
 #include "reversead/rmpi/rmpi_wrapper.hpp"
+#include "reversead/algorithm/base_mpi_reverse_adjoint.hpp"
 #include "reversead/algorithm/base_mpi_reverse_hessian.hpp"
 #endif
 

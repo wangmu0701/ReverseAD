@@ -1,5 +1,5 @@
-#ifndef REVERSEAD_BASE_MPI_REVERSE_HESSIAN_H_
-#define REVERSEAD_BASE_MPI_REVERSE_HESSIAN_H_
+#ifndef REVERSEAD_BASE_MPI_REVERSE_ADJOINT_H_
+#define REVERSEAD_BASE_MPI_REVERSE_ADJOINT_H_
 
 #include "reversead/common/reversead_config.h"
 
@@ -7,13 +7,11 @@
 
 #include "mpi.h"
 #include "reversead/algorithm/base_reverse_hessian.hpp"
-#include "reversead/algorithm/base_mpi_reverse_adjoint.hpp"
 
 namespace ReverseAD {
 
 template <typename Base>
-class BaseMpiReverseHessian : public BaseReverseHessian<Base>,
-                              public BaseMpiReverseAdjoint<Base> {
+class BaseMpiReverseAdjoint : public virtual BaseReverseAdjoint<Base> {
  public:
   typedef typename BaseReverseMode<Base>::type_adjoint type_adjoint;
   typedef typename BaseReverseMode<Base>::type_hessian type_hessian;
@@ -23,39 +21,30 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base>,
   using BaseReverseMode<Base>::reverse_live;
   using BaseReverseMode<Base>::trace;
 
-  using BaseMpiReverseAdjoint<Base>::forward_global_phase;
-
-  BaseMpiReverseHessian(AbstractTrace<Base>* trace)
-    : BaseReverseAdjoint<Base>(trace),
-      BaseReverseHessian<Base>(trace),
-      BaseMpiReverseAdjoint<Base>(trace) {
+  BaseMpiReverseAdjoint(AbstractTrace<Base>* trace)
+    : BaseReverseAdjoint<Base>(trace) {
   }
 
-  void compute_mpi() {
+  virtual void compute_mpi() {
     // here we should pass the correct num for ind and dep
     double time = get_timing();
     this->reverse_local_computation(trace->get_num_ind(), trace->get_num_dep());
     time = get_timing();
-    log.warning << "reverse  local hessian timing : " << time << std::endl;
-
+    log.warning << "reverse  local adjoint timing : " << time << std::endl;
     for (auto& kv : dep_deriv) {
       log.info << "Dep : " << kv.first << std::endl;
       kv.second.adjoint_vals->debug(log.info);
-      kv.second.hessian_vals->debug(log.info);
     }
-
     forward_global_phase();
     time = get_timing();
-    log.warning << "forward global hessian timing : " << time << std::endl;
+    log.warning << "forward global adjoint timing : " << time << std::endl;
     for (auto& kv : dep_deriv) {
       log.info << "Dep : " << kv.first << std::endl;
       kv.second.adjoint_vals->debug(log.info);
-      kv.second.hessian_vals->debug(log.info);
     }
   }
-/*
  protected:
-  void forward_global_hessian() {
+  virtual void forward_global_phase() {
     std::vector<locint> temp_loc_vec;
     trace->init_comm_forward();
     while(trace->has_next_sr_info_f()) {
@@ -110,11 +99,10 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base>,
       }
     }
   }
-*/
 };
 
 } // namespace ReverseAD
 
 #endif // ENABLE_REVERSEAD_MPI
 
-#endif // REVERSEAD_BASE_MPI_REVERSE_HESSIAN_H_
+#endif // REVERSEAD_BASE_MPI_REVERSE_ADJOINT_H_
