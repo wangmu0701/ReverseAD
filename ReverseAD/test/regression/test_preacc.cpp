@@ -14,13 +14,13 @@ void check_answer(ReverseAD::TrivialTrace<double>* trace,
       ReverseAD::TrivialTrace<double>* new_trace = 
         ReverseAD::BaseFunctionReplay::replay(trace, &vy, 1, &vx, 1, &vp, 1);
       ReverseAD::BaseReverseHessian<double> hessian(new_trace);
-      if (fabs(vy - vx * vp) > myEps ) {
+      if (fabs(vy - vx*vx*vp) > myEps ) {
         done = true;
       }
       hessian.compute(1,1);
       double** adjoints;
       hessian.retrieve_adjoint(&adjoints);
-      if (fabs(adjoints[0][0]-vp) > myEps) {
+      if (fabs(adjoints[0][0]-2*vx*vp) > myEps) {
         done = true;
       }
       int *size;
@@ -31,7 +31,7 @@ void check_answer(ReverseAD::TrivialTrace<double>* trace,
       if (size[0] > 1) {
         done = true;
       } else if (size[0] == 1) {
-        if (fabs(values[0][0]-0.0) > myEps) {
+        if (fabs(values[0][0]-2*vp) > myEps) {
           done = true;
         }
       }
@@ -48,34 +48,38 @@ int main() {
   while(!done) {
     double vx = 2.0;
     double vp = 3.0;
-    adouble x, y;
+    adouble x, y, t;
     ReverseAD::trace_on<double>();
     x <<= vx;
     adouble p = adouble::markParam(vp);
     switch(testCase) {
-    case 0:
-      y = x * p;
-      testLine = "y=x * p";
-      break;
-    case 1:
-      y = x*p+p-p;
-      testLine = "y=x*p+x-x";
-      break;
-    case 2:
-      y = (p+((x+2)-2)*p)-p;
-      testLine = "(p+((x+2)-2)*p)-p";
-      break;
-    case 3:
-      y = (p*x*p)/p;
-      testLine = "y=(p*x*p)/p";
-      break;
-    case 4:
-      y = (2/x)*p*(x*0.5)*x;
-      testLine = "y=(2/x)*p*(x*0.5)*x";
-      break;
-    default:
-      done = true;
-      break;
+      case 0:
+        y = x*x*p;
+        testLine = "y=x*x*p";
+        break;
+      case 1:
+        t = x*p;
+        y = t*x;
+        testLine = "t=x*p;y=t*x;";
+        break;
+      case 2:
+        t = x*x*p+x*p;
+        y = t-x*p;
+        testLine = "t=x*x*p+x*p;y=t-x*p";
+        break;
+      case 3:
+        t = x*x*x*p*p;
+        y = t/x/p;
+        testLine = "t=x*x*x*p*p;y=t/x/p";
+        break;
+      case 4:
+        t = (sin(x)*sin(x) + cos(x)*cos(x))*x;
+        y = t*x*p;
+        testLine = "t=(sin(x)^2+cos(x)^2)*x;y=t*x*p;";
+        break;
+      default:
+        done = true;
+        break;
     }
     double vy;
     y >>= vy;

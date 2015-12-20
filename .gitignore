@@ -21,6 +21,7 @@ test_generic
 test_identity
 test_square
 test_param
+test_preacc
 test_mpi
 test_mpi_reduce
 test_mpi_thomson

@@ -24,7 +24,7 @@ class BaseFunctionReplay {
   template <typename Base>
   static TrivialTrace<Base>* replay_dep(TrivialTrace<Base>* trace,
                                     Base* dep_val, int dep_num) {
-    return replay(trace,
+    return replay<Base, Base>(trace,
                   dep_val, dep_num,
                   (Base*)nullptr, trace->get_num_ind(),
                   (Base*)nullptr, trace->get_num_param(),
@@ -35,7 +35,7 @@ class BaseFunctionReplay {
   template <typename Base>
   static TrivialTrace<Base>* replay_ind(TrivialTrace<Base>* trace,
                                     Base* ind_val, int ind_num) {
-    return replay(trace,
+    return replay<Base, Base>(trace,
                   (Base*)nullptr, trace->get_num_dep(),
                   ind_val, ind_num,
                   (Base*)nullptr, trace->get_num_param(),
@@ -47,7 +47,7 @@ class BaseFunctionReplay {
   static TrivialTrace<Base>* replay_ind(TrivialTrace<Base>* trace,
                                     Base* dep_val, int dep_num,
                                     Base* ind_val, int ind_num) {
-    return replay<Base>(trace,
+    return replay<Base, Base>(trace,
                   dep_val, dep_num,
                   ind_val, ind_num,
                   (Base*)nullptr, trace->get_num_param(),
@@ -59,7 +59,7 @@ class BaseFunctionReplay {
   template <typename Base>
   static TrivialTrace<Base>* replay_param(TrivialTrace<Base>* trace,
                                           Base* param_val, int param_num) {
-    return replay<Base>(trace,
+    return replay<Base, Base>(trace,
                   (Base*)nullptr, trace->get_num_dep(),
                   (Base*)nullptr, trace->get_num_ind(),
                   param_val, param_num,
@@ -72,7 +72,7 @@ class BaseFunctionReplay {
   static TrivialTrace<Base>* replay(TrivialTrace<Base>* trace,
                                     Base* ind_val, int ind_num,
                                     Base* param_val, int param_num) {
-    return replay(trace,
+    return replay<Base, Base>(trace,
                   (Base*)nullptr, trace->get_num_dep(),
                   ind_val, ind_num,
                   param_val, param_num,
@@ -86,7 +86,7 @@ class BaseFunctionReplay {
                                     Base* dep_val, int dep_num,
                                     Base* ind_val, int ind_num,
                                     Base* param_val, int param_num) {
-    return replay(trace,
+    return replay<Base, Base>(trace,
                   dep_val, dep_num,
                   ind_val, ind_num,
                   param_val, param_num,
@@ -96,15 +96,15 @@ class BaseFunctionReplay {
   }
 
  private:
-  template <typename Base>
-  static TrivialTrace<Base>* replay(TrivialTrace<Base>* trace,
-                                    Base* dep_val, int dep_num,
-                                    Base* ind_val, int ind_num,
-                                    Base* param_val, int param_num,
+  template <typename OldBase, typename NewBase>
+  static TrivialTrace<NewBase>* replay(TrivialTrace<OldBase>* trace,
+                                    NewBase* dep_val, int dep_num,
+                                    NewBase* ind_val, int ind_num,
+                                    NewBase* param_val, int param_num,
                                     bool reset_dep,
                                     bool reset_ind,
                                     bool reset_param) {
-    map<locint, Base> val_map;
+    map<locint, NewBase> val_map;
     trace->init_forward();
     opbyte op = trace->get_next_op_f();
     int ind_count = 0;
@@ -125,15 +125,15 @@ class BaseFunctionReplay {
                 << " match the record on the trace (" << trace->get_num_dep()
                 << ")." << std::endl;
     }
-    std::shared_ptr<TrivialTape<Base>> val_tape =
-      std::make_shared<TrivialTape<Base>>();
-    std::shared_ptr<TrivialTape<Base>> param_tape =
-      std::make_shared<TrivialTape<Base>>();
+    std::shared_ptr<TrivialTape<NewBase>> val_tape =
+      std::make_shared<TrivialTape<NewBase>>();
+    std::shared_ptr<TrivialTape<NewBase>> param_tape =
+      std::make_shared<TrivialTape<NewBase>>();
 
     locint res;
     locint arg1;
     locint arg2;
-    Base val, val1, val2;
+    OldBase val, val1, val2;
     double coval;
     while (op != end_of_tape) {
       switch (op) {
@@ -299,13 +299,13 @@ class BaseFunctionReplay {
       }
       op = trace->get_next_op_f();
     }
-    TrivialTrace<Base>* ret = nullptr;
+    TrivialTrace<NewBase>* ret = nullptr;
     if (reset_param) {
       // a new set of param values
-      ret = new TrivialTrace<Base>(trace, val_tape, param_tape);
+      ret = new TrivialTrace<NewBase>(trace, val_tape, param_tape);
     } else if (reset_ind) {
       // a new set of ind values
-      ret = new TrivialTrace<Base>(trace, val_tape);
+      ret = new TrivialTrace<NewBase>(trace, val_tape);
     } else {
       // just compute values of deps
       ret = trace;
