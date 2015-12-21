@@ -10,7 +10,7 @@
 
 namespace ReverseAD {
 
-  extern Log log; 
+  extern Log logger; 
   extern void* global_trace;
   extern bool is_tracing;
   extern locint curr_loc;
@@ -36,10 +36,10 @@ namespace ReverseAD {
 
   template <typename Base>
   TrivialTrace<Base>* trace_off() {
-    log.info << "number of indepent = " << curr_ind_loc - 1 << std::endl;
-    log.info << "number of intermediate = " << (curr_loc-BASE_LOC) << std::endl;
+    logger.info << "number of indepent = " << curr_ind_loc - 1 << std::endl;
+    logger.info << "number of intermediate = " << (curr_loc-BASE_LOC) << std::endl;
     if (curr_loc >= BASE_LOC * 2) {
-      log.fatal << "Overflow in intermedite indexing" << std::endl;
+      logger.fatal << "Overflow in intermedite indexing" << std::endl;
     }
     ((TrivialTrace<Base>*)global_trace)->put_op(end_of_tape);
     is_tracing = false;

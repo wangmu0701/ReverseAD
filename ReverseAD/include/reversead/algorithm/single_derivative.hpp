@@ -45,11 +45,11 @@ class SingleDerivative : AbstractSerializable{
   }
   
   void debug() const {
-    debug(log.info);
+    debug(logger.info);
   }
-  void debug(Logger& logger) const {
-    adjoint_vals->debug(log.info);
-    hessian_vals->debug(log.info);
+  void debug(Logger& loggerger) const {
+    adjoint_vals->debug(logger.info);
+    hessian_vals->debug(logger.info);
   }
   type_adjoint* adjoint_vals;
   type_hessian* hessian_vals;

@@ -22,9 +22,16 @@ enum OPCODES {
   div_d_a,
   sin_a,
   cos_a,
+  tan_a,
+  asin_a,
+  acos_a,
+  atan_a,
+  pow_a_a,
+  pow_a_d,
+  pow_d_a,
   sqrt_a,
   exp_a,
-  pow_a,
+  log_a,
   rmpi_send,
   rmpi_recv
 };

@@ -41,7 +41,7 @@ namespace ReverseAD {
                 } else if (op == MPI_PROD) {
                   s_buf[i] = s_buf[i] * t_buf[i];
                 } else {
-                  log.warning << "Unsupported reduction op!" << std::endl;
+                  logger.warning << "Unsupported reduction op!" << std::endl;
                 }
               }
             } else {
@@ -50,7 +50,7 @@ namespace ReverseAD {
           }
         }
         if (rc != MPI_SUCCESS) {
-          log.fatal << "RMPI_Reduce fail on : " << myid << std::endl;
+          logger.fatal << "RMPI_Reduce fail on : " << myid << std::endl;
         }
         p = p * 2;
       }

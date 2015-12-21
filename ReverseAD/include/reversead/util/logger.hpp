@@ -49,6 +49,12 @@ class Log {
   Logger info;
   Logger warning;
   Logger fatal;
+
+  template <typename Base>
+  void ParameterOutOfBound(const Base& val, const char* const opname) {
+    warning << "Parameter : " << val << " out of bound for " << opname
+            << std::endl;
+  }
 };
 
 double get_timing();

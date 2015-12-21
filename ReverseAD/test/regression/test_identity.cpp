@@ -35,7 +35,7 @@ void check_answer(ReverseAD::TrivialTrace<double>* trace,
 int main() {
   bool done = false;
   int testCase = 0;
-  const char* testLine;
+  const char* testLine = nullptr;
   while(!done) {
     double vx = 2.0;
     adouble x, y;
@@ -69,6 +69,48 @@ int main() {
     case 6:
       y = (2/x)*x*(x*0.5);
       testLine = "y=(2/x)*x*(x*0.5)";
+      break;
+    // tests for trigonometric functions
+    case 7:
+      y = (sin(x)*sin(x) + cos(x)*cos(x))*x;
+      testLine = "y=(sin(x)^2 + cos(x)^2) * x";
+      break;
+    case 8:
+      y = asin(sin(x/10))*10;
+      testLine = "y=asin(sin(x/10))*10";
+      break;
+    case 9:
+      y = acos(cos(x/20))*20;
+      testLine = "y=acos(cos(x/20))*20";
+      break;
+    case 10:
+      y = tan(atan(x/5))*5;
+      testLine = "y=tan(atan(x/5))*5";
+      break;
+    case 11:
+      y = atan(sin(x/10)/cos(x/10))*10;
+      testLine = "y=atan(sin(x/10)/cos(x/10))*10";
+      break;
+    // pow, sqrt, exp, log
+    case 12:
+      y = exp(log(x));
+      testLine = "y=exp(log(x))";
+      break;
+    case 13:
+      y = exp(2*log(sqrt(x)));
+      testLine = "y=exp(2*log(sqrt(x)))";
+      break;
+    case 14:
+      y = pow(x, 1);
+      testLine = "y=pow(x, 1)";
+      break;
+    case 15:
+      y = pow(sqrt(x), 2);
+      testLine = "y=pow(sqrt(x), 2)";
+      break;
+    case 16:
+      y = pow(1, x) * x;
+      testLine = "y=pow(1,x)*x";
       break;
     default:
       done = true;

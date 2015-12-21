@@ -38,10 +38,10 @@ class BaseReverseMode {
     double time = get_timing();
     reverse_local_computation(ind_num, dep_num);
     time = get_timing();
-    log.info << "reverse local compute timing : " << time << std::endl;
+    logger.info << "reverse local compute timing : " << time << std::endl;
     for (auto& kv : dep_deriv) {
-      log.info << "Dep : " << kv.first << std::endl;
-      kv.second.debug(log.info);
+      logger.info << "Dep : " << kv.first << std::endl;
+      kv.second.debug(logger.info);
     }
   }
 
@@ -85,12 +85,12 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
     DerivativeInfo<locint, Base> info;
  
     if (ind_num != trace->get_num_ind()) {
-      log.warning << "The given number of independent variables (" << ind_num << ")"
+      logger.warning << "The given number of independent variables (" << ind_num << ")"
                   << " does not match the record on the trace (" << trace->get_num_ind()
                   << "). Will proceed with the trace. " << std::endl;
     }
     if (dep_num != trace->get_num_dep()) {
-      log.warning << "The given number of dependent variables (" << ind_num << ")"
+      logger.warning << "The given number of dependent variables (" << ind_num << ")"
                   << " does not match the record on the trace (" << trace->get_num_dep()
                   << "). Will proceed with the trace. " << std::endl;
     }
@@ -219,6 +219,38 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           info.dx = -sin(vx);
           info.pxx = -cos(vx);
           break;
+        case tan_a:
+          info.r = trace->get_next_loc_r();
+          info.x = trace->get_next_loc_r();
+          vx = trace->get_next_val_r();
+          vy = cos(vx);
+          info.dx = 1.0 / (vy * vy);
+          info.pxx = 2.0 * tan(vx) / (vy * vy);
+          break;
+        case asin_a:
+          info.r = trace->get_next_loc_r();
+          info.x = trace->get_next_loc_r();
+          vx = trace->get_next_val_r();
+          vy = sqrt(1.0 - vx * vx);
+          info.dx = 1.0 / vy;
+          info.pxx = vx / (vy * vy * vy);
+          break;
+        case acos_a:
+          info.r = trace->get_next_loc_r();
+          info.x = trace->get_next_loc_r();
+          vx = trace->get_next_val_r();
+          vy = -sqrt(1.0 - vx * vx);
+          info.dx = 1.0 / vy;
+          info.pxx = vx / (vy * vy * vy);
+          break;
+        case atan_a:
+          info.r = trace->get_next_loc_r();
+          info.x = trace->get_next_loc_r();
+          vx = trace->get_next_val_r();
+          vy = 1.0 + vx * vx;
+          info.dx = 1.0 / vy;
+          info.pxx = -2.0 * vx / (vy * vy);
+          break;
         case sqrt_a:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
@@ -238,11 +270,56 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           info.dx = exp(vx);
           info.pxx = info.dx;
           break;
+        case log_a:
+          info.r = trace->get_next_loc_r();
+          info.x = trace->get_next_loc_r();
+          vx = trace->get_next_val_r();
+          info.dx = 1.0 / vx;
+          info.pxx = - info.dx * info.dx;
+          break;
+        case pow_a_a:
+          info.r = trace->get_next_loc_r();
+          info.y = trace->get_next_loc_r();
+          info.x = trace->get_next_loc_r();
+          vy = trace->get_next_val_r();
+          vx = trace->get_next_val_r();
+          {
+            Base t = pow(vx, vy);
+            info.dx = vy * t / vx;
+            info.pxx = (vy - 1) * info.dx / vx;
+            info.dy = log(vx) * t;
+            info.pyy = log(vx) * info.dy;
+            info.pxy = (vy * log(vx) + 1) * t / vx;
+          }
+          PSEUDO_BINARY
+          break;
+        case pow_a_d:
+          info.r = trace->get_next_loc_r();
+          info.x = trace->get_next_loc_r();
+          vx = trace->get_next_val_r();
+          coval = trace->get_next_coval_r();
+          {
+            Base t = pow(vx, coval);
+            info.dx = coval * t / vx;
+            info.pxx = (coval - 1) * info.dx / vx;
+          }
+          break;
+        case pow_d_a:
+          info.r = trace->get_next_loc_r();
+          info.x = trace->get_next_loc_r();
+          vx = trace->get_next_val_r();
+          coval = trace->get_next_coval_r();
+          {
+            Base t = pow(coval, vx);
+            info.dx = log(coval) * t;
+            info.pxx = log(coval) * info.dx;
+          }
+          break;
         case rmpi_send:
         case rmpi_recv:
           break;
         default:
-          log.warning << "Unrecongized opcode : " << (int)op << std::endl; 
+          logger.warning << "Unrecongized opcode : " << (int)op << std::endl; 
       }
       // call to inherited virtual functions
       process_sac(info);
@@ -283,7 +360,7 @@ void BaseReverseMode<Base>::compute_hessian_sac(
   Base pw;
   while (has_next) {
     has_next = r_enum.get_next(p, pw);
-    //log.info << "p = " << p << "pw = " << pw << std::endl;
+    //logger.info << "p = " << p << "pw = " << pw << std::endl;
     if (pw != 0.0) {
       if (info.y != NULL_LOC) {
         if (p != info.r) {

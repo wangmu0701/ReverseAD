@@ -36,21 +36,21 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base>,
     double time = get_timing();
     this->reverse_local_computation(trace->get_num_ind(), trace->get_num_dep());
     time = get_timing();
-    log.warning << "reverse  local hessian timing : " << time << std::endl;
+    logger.warning << "reverse  local hessian timing : " << time << std::endl;
 
     for (auto& kv : dep_deriv) {
-      log.info << "Dep : " << kv.first << std::endl;
-      kv.second.adjoint_vals->debug(log.info);
-      kv.second.hessian_vals->debug(log.info);
+      logger.info << "Dep : " << kv.first << std::endl;
+      kv.second.adjoint_vals->debug(logger.info);
+      kv.second.hessian_vals->debug(logger.info);
     }
 
     forward_global_phase();
     time = get_timing();
-    log.warning << "forward global hessian timing : " << time << std::endl;
+    logger.warning << "forward global hessian timing : " << time << std::endl;
     for (auto& kv : dep_deriv) {
-      log.info << "Dep : " << kv.first << std::endl;
-      kv.second.adjoint_vals->debug(log.info);
-      kv.second.hessian_vals->debug(log.info);
+      logger.info << "Dep : " << kv.first << std::endl;
+      kv.second.adjoint_vals->debug(logger.info);
+      kv.second.hessian_vals->debug(logger.info);
     }
   }
 /*
@@ -60,7 +60,7 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base>,
     trace->init_comm_forward();
     while(trace->has_next_sr_info_f()) {
       SendRecvInfo sr_info = trace->get_next_sr_info_f();
-      //log.info << sr_info;
+      //logger.info << sr_info;
       if (sr_info.comm_op == COMM_RMPI_SEND) {
         int total_buf_size = 0;
         locint dummy_ind;
@@ -94,17 +94,17 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base>,
         for(int i = 0; i < sr_info.count; i++) {
           SingleDeriv local_deriv(&buf[total_buf_size]);
           total_buf_size += local_deriv.byte_size();
-          //local_deriv.debug(log.info);
+          //local_deriv.debug(logger.info);
           // we only remove things from reverse_live_set during forward
           locint dummy_ind = trace->get_next_comm_loc_f();
-          //log.info << "dummy_ind = " << dummy_ind << std::endl;
+          //logger.info << "dummy_ind = " << dummy_ind << std::endl;
           std::set<locint> dep_set = std::move(reverse_live[dummy_ind]);
           reverse_live.erase(dummy_ind);
           for (const locint& dep : dep_set) {
-            //log.info << "processing : " << dummy_ind << std::endl;
-            //dep_deriv[dep].debug(log.info);
+            //logger.info << "processing : " << dummy_ind << std::endl;
+            //dep_deriv[dep].debug(logger.info);
             this->process_single_deriv(dummy_ind, local_deriv, dep_deriv[dep]);
-            //dep_deriv[dep].debug(log.info);
+            //dep_deriv[dep].debug(logger.info);
           }
         }
       }

@@ -5,7 +5,7 @@
 namespace ReverseAD {
 
 //Log log(&(std::cout));
-Log log(nullptr, &(std::cerr), &(std::cerr));
+Log logger(nullptr, &(std::cerr), &(std::cerr));
 
 double get_timing() {
   static struct timeval tv1, tv2;

@@ -32,11 +32,11 @@ namespace ReverseAD {
     }
     rc = MPI_Send((void*)send_val, count, MPI_DOUBLE, dest, tag, comm);
     if (rc != MPI_SUCCESS) {
-      log.fatal << "Sending vals in Send_ind error." << std::endl;
+      logger.fatal << "Sending vals in Send_ind error." << std::endl;
     }
     rc = MPI_Send((void*)send_loc, count, MPI_LOCINT, dest, tag, comm);
     if (rc != MPI_SUCCESS) {
-      log.fatal << "Sending locs in Send_ind error." << std::endl;
+      logger.fatal << "Sending locs in Send_ind error." << std::endl;
     }
     temp_memory_allocator->return_temp_memory((void*)temp_buf);
     return rc;
@@ -54,11 +54,11 @@ namespace ReverseAD {
     locint* recv_loc = (locint*)(temp_buf + sizeof(double) * count);
     rc = MPI_Recv((void*)recv_val, count, MPI_DOUBLE, src, tag, comm, MPI_STATUS_IGNORE);
     if (rc != MPI_SUCCESS) {
-      log.fatal << "Recving vals in Send_ind error." << std::endl;
+      logger.fatal << "Recving vals in Send_ind error." << std::endl;
     }
     rc = MPI_Recv((void*)recv_loc, count, MPI_LOCINT, src, tag, comm, MPI_STATUS_IGNORE);
     if (rc != MPI_SUCCESS) {
-      log.fatal << "Recving locs in Send_ind error." << std::endl;
+      logger.fatal << "Recving locs in Send_ind error." << std::endl;
     }
     for (int i = 0; i < count; i++) {
       buf[i].markRemoteInd(recv_val[i], recv_loc[i]);

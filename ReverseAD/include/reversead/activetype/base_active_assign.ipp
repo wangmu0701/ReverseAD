@@ -4,13 +4,13 @@
     this->val = 0.0;
     this->loc = get_next_loc();
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    log.info << "V-ctor: " << this <<"["<<this->loc<<"]" << " = " << val << std::endl;
+    logger.info << "V-ctor: " << this <<"["<<this->loc<<"]" << " = " << val << std::endl;
 #endif
     trace_put_old<Base>(assign_d, this->loc, 0.0);
   }
   ~BaseActive() {
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    log.info << "free loc: " << this << "["<<this->loc<<"]" << std::endl;
+    logger.info << "free loc: " << this << "["<<this->loc<<"]" << std::endl;
 #endif
   }
 
@@ -18,7 +18,7 @@
     this->val = val;
     this->loc = get_next_loc();
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    log.info << "V-ctor: " << this <<"["<<this->loc<<"]" << " = " << val << std::endl;
+    logger.info << "V-ctor: " << this <<"["<<this->loc<<"]" << " = " << val << std::endl;
 #endif
     trace_put_old<Base>(assign_d, this->loc, val);
   }
@@ -26,7 +26,7 @@
   // copy c-tor
   BaseActive(const BaseActive<Base>& other) {
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    log.info << "L-ctor: " << this <<"["<<this->loc<<"]" 
+    logger.info << "L-ctor: " << this <<"["<<this->loc<<"]" 
               <<" <- " << &other <<"["<<other.loc<<"]"<< std::endl;
 #endif
     this->val = other.val;
@@ -38,7 +38,7 @@
     this->val = val;
     this->loc = get_next_dummy_loc();
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    log.info << "dummy ind: " << this << "[" << this->loc << "] = "
+    logger.info << "dummy ind: " << this << "[" << this->loc << "] = "
              << val << std::endl;
 #endif
     trace_put_olb<Base>(assign_ind, this->loc, val);
@@ -48,7 +48,7 @@
     this->val = val;
     this->loc = loc;
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    log.info << "remote ind: " << this << "[" << this->loc << "] = "
+    logger.info << "remote ind: " << this << "[" << this->loc << "] = "
              << val << std::endl;
 #endif
     trace_put_olb<Base>(assign_ind, this->loc, val);
@@ -75,7 +75,7 @@
     this->loc = get_next_loc();
     trace_put_old<Base>(assign_d, this->loc, val);
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    log.info << "V-assign: " << this <<"["<<this->loc<<"]" << " = " << val << std::endl;
+    logger.info << "V-assign: " << this <<"["<<this->loc<<"]" << " = " << val << std::endl;
 #endif
     return *this;
   }
@@ -88,7 +88,7 @@
     }
     trace_put_oll<Base>(assign_a, this->loc, other.loc);
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    log.info << "L-assign: " << this <<"["<<this->loc<<"]" 
+    logger.info << "L-assign: " << this <<"["<<this->loc<<"]" 
               <<" <- " << &other <<"["<<other.loc<<"]"<< std::endl;
 #endif
     return *this;
@@ -100,7 +100,7 @@
     this->val = other.val;
     this->loc = get_next_loc();
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    log.info << "R-ctor: " << this <<"["<<this->loc<<"]" 
+    logger.info << "R-ctor: " << this <<"["<<this->loc<<"]" 
               <<" <- " << &other <<"["<<other.loc<<"]"<< std::endl;
 #endif
     trace_put_oll<Base>(assign_a, this->loc, other.loc);
@@ -114,7 +114,7 @@
     }
     trace_put_oll<Base>(assign_a, this->loc, other.loc);
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    log.info << "R-assign: " << this <<"["<<this->loc<<"]" 
+    logger.info << "R-assign: " << this <<"["<<this->loc<<"]" 
               <<" <- " << &other <<"["<<other.loc<<"]"<< std::endl;
 #endif
     return *this;

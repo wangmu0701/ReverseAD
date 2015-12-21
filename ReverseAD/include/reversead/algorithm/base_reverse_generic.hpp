@@ -290,7 +290,7 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
         }
         break;
       default:
-        log.warning << "Unrecongized opcode : " << (int)info.opcode
+        logger.warning << "Unrecongized opcode : " << (int)info.opcode
                     << std::endl;
     }
   } 

@@ -69,6 +69,26 @@ int main() {
       y = (2*x) / (2/x);
       testLine = "y=(2*x)/(2/x)";
       break;
+    case 5:
+      y = tan(atan(x*x/20))*20;
+      testLine = "y=tan(atan(x*x/20))*20";
+      break;
+    case 6:
+      y = exp(2*log(x));
+      testLine = "y=exp(2*log(x))";
+      break;
+    case 7:
+      y = sqrt(log(exp(x*x*x*x)));
+      testLine = "y=sqrt(log(exp(x*x*x*x)))";
+      break;
+    case 8:
+      y = pow(sqrt(x), 4);
+      testLine = "y=pow(sqrt(x), 4)";
+      break;
+    case 9:
+      y = pow(1,x)*x*sqrt(pow(x,2));
+      testLine = "y=pow(1,x)*x*sqrt(pow(x,2))";
+      break;
     default:
       done = true;
       break;

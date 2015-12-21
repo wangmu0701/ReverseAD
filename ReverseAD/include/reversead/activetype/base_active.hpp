@@ -1,7 +1,7 @@
 #ifndef BASE_ACBaseIVE_H_
 #define BASE_ACBaseIVE_H_
 
-#include <math.h>
+#include <cmath>
 #include <iostream>
 #include "reversead/common/reversead_base.hpp"
 #include "reversead/common/opcodes.hpp"
@@ -23,14 +23,15 @@ class BaseActive {
   #include "base_active_mult.ipp" // mult *
   #include "base_active_minus.ipp" // minus -
   #include "base_active_div.ipp" // div /
-  #include "base_active_sincos.ipp" // sin cos
+  #include "base_active_trigono.ipp" // sin, cos, tan, asin, acos, atan
+  #include "base_active_powexp.ipp" // pow, sqrt, exp, log
 
   inline Base getVal() {return val;}
   inline locint getLoc() {return loc;}
   static BaseActive<Base> markParam(const Base& param) {
     BaseActive res(param, get_next_loc());
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    log.info << "markParam : " << &res <<"["<<res.getLoc()<<"]" << " = " << param << std::endl;
+    logger.info << "markParam : " << &res <<"["<<res.getLoc()<<"]" << " = " << param << std::endl;
 #endif
     trace_put_olp<Base>(assign_param, res.getLoc(), param);
     return res;
@@ -42,7 +43,7 @@ class BaseActive {
     this->val = val;
     this->loc = loc;
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    log.info << "Private c-tor: " << this <<"["<<this->loc<<"]" << " = " << val << std::endl;
+    logger.info << "Private c-tor: " << this <<"["<<this->loc<<"]" << " = " << val << std::endl;
 #endif
   }
 

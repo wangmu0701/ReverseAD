@@ -1,6 +1,7 @@
 #ifndef BASE_FUNCTION_REPLAY_H_
 #define BASE_FUNCTION_REPLAY_H_
 
+#include <cmath>
 #include <map>
 #include <memory>
 
@@ -111,17 +112,17 @@ class BaseFunctionReplay {
     int dep_count = 0;
     int param_count = 0;
     if (reset_param && param_num != trace->get_num_param()) {
-      log.fatal << "Number of parameter (" << param_num << ") does NOT"
+      logger.fatal << "Number of parameter (" << param_num << ") does NOT"
                 << " match the record on the trace (" << trace->get_num_param()
                 << ")." << std::endl;
     }
     if (reset_ind && ind_num != trace->get_num_ind()) {
-      log.fatal << "Number of independents (" << ind_num << ") does NOT"
+      logger.fatal << "Number of independents (" << ind_num << ") does NOT"
                 << " match the record on the trace (" << trace->get_num_ind()
                 << ")." << std::endl;
     }
     if (reset_dep && dep_num != trace->get_num_dep()) {
-      log.fatal << "Number of dependents (" << dep_num << ") does NOT"
+      logger.fatal << "Number of dependents (" << dep_num << ") does NOT"
                 << " match the record on the trace (" << trace->get_num_dep()
                 << ")." << std::endl;
     }
@@ -141,7 +142,7 @@ class BaseFunctionReplay {
           break;
         case assign_ind:
           if (ind_count >= ind_num) {
-            log.warning << "more independents found on tape than : " << ind_num << std::endl;
+            logger.warning << "more independents found on tape than : " << ind_num << std::endl;
             return nullptr;
           }
           res = trace->get_next_loc_f();
@@ -157,7 +158,7 @@ class BaseFunctionReplay {
           break;
         case assign_dep:
           if (dep_count >= dep_num) {
-            log.warning << "more dependents found on tape than : " << ind_num << std::endl;
+            logger.warning << "more dependents found on tape than : " << ind_num << std::endl;
             return nullptr;
           }
           res = trace->get_next_loc_f();
@@ -275,6 +276,44 @@ class BaseFunctionReplay {
           val_map[res] = cos(val1);
           val_tape->put(val1);
           break;
+        case tan_a:
+          arg1 = trace->get_next_loc_f();
+          res = trace->get_next_loc_f();
+          trace->get_next_val_f();
+          val1 = val_map[arg1];
+          val_map[res] = tan(val1);
+          val_tape->put(val1);
+          break;
+        case asin_a:
+          arg1 = trace->get_next_loc_f();
+          res = trace->get_next_loc_f();
+          trace->get_next_val_f();
+          val1 = val_map[arg1];
+          if (val1 < -1 || val1 > 1) {
+            logger.ParameterOutOfBound<NewBase>(val, "asin");
+          }
+          val_map[res] = asin(val1);
+          val_tape->put(val1);
+          break;
+        case acos_a:
+          arg1 = trace->get_next_loc_f();
+          res = trace->get_next_loc_f();
+          trace->get_next_val_f();
+          val1 = val_map[arg1];
+          if (val1 < -1 || val1 > 1) {
+            logger.ParameterOutOfBound<NewBase>(val, "acos");
+          }
+          val_map[res] = acos(val1);
+          val_tape->put(val1);
+          break;
+        case atan_a:
+          arg1 = trace->get_next_loc_f();
+          res = trace->get_next_loc_f();
+          trace->get_next_val_f();
+          val1 = val_map[arg1];
+          val_map[res] = atan(val1);
+          val_tape->put(val1);
+          break;
         case sqrt_a:
           arg1 = trace->get_next_loc_f();
           res = trace->get_next_loc_f();
@@ -291,11 +330,52 @@ class BaseFunctionReplay {
           val_map[res] = exp(val1);
           val_tape->put(val1);
           break;
+        case log_a:
+          arg1 = trace->get_next_loc_f();
+          res = trace->get_next_loc_f();
+          trace->get_next_val_f(); 
+          val1 = val_map[arg1]; 
+          if (val1 <= 0) {
+            logger.ParameterOutOfBound<NewBase>(val, "logger");
+          }
+          val_map[res] = log(val1);
+          val_tape->put(val1);
+          break;
+        case pow_a_a:
+          arg1 = trace->get_next_loc_f();
+          arg2 = trace->get_next_loc_f();
+          res = trace->get_next_loc_f();
+          trace->get_next_val_f();
+          trace->get_next_val_f();
+          val1 = val_map[arg1];
+          val2 = val_map[arg2];
+          val_map[res] = pow(val1, val2);
+          val_tape->put(val1);
+          val_tape->put(val2);
+          break;
+        case pow_a_d:
+          arg1 = trace->get_next_loc_f();
+          trace->get_next_val_f();
+          coval = trace->get_next_coval_f();
+          res = trace->get_next_loc_f();
+          val1 = val_map[arg1];
+          val_map[res] = pow(val1, coval);
+          val_tape->put(val1);
+          break;
+        case pow_d_a:
+          arg1 = trace->get_next_loc_f();
+          trace->get_next_val_f();
+          coval = trace->get_next_coval_f();
+          res = trace->get_next_loc_f();
+          val1 = val_map[arg1];
+          val_map[res] = pow(coval, val1);
+          val_tape->put(val1);
+          break;
         case rmpi_send:
         case rmpi_recv:
           break;
         default:
-          log.warning << "Unrecongized opcode : " << (int)op << std::endl; 
+          logger.warning << "Unrecongized opcode : " << (int)op << std::endl; 
       }
       op = trace->get_next_op_f();
     }

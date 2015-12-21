@@ -3,7 +3,7 @@
     BaseActive<Base> res(lhs.val * rhs.val, get_next_loc());
     trace_put_olllbb<Base>(mult_a_a, res.loc, lhs.loc, rhs.loc, lhs.val, rhs.val);
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    log.info << "L(" << &res <<")[" << res.loc << "] = " 
+    logger.info << "L(" << &res <<")[" << res.loc << "] = " 
               << "L("<< &lhs << ")["<<lhs.loc<<"] * L(" << &rhs << ")[" << rhs.loc << "]" << std::endl;
 #endif
     return res;
@@ -12,7 +12,7 @@
     BaseActive<Base> res(lhs.val * val, get_next_loc());
     trace_put_olld<Base>(mult_d_a, res.loc, lhs.loc, val);
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    log.info << "L(" << &res <<")[" << res.loc << "] = " 
+    logger.info << "L(" << &res <<")[" << res.loc << "] = " 
               << "L("<< &lhs << ")["<<lhs.loc<<"] * const(" << val << ")" << std::endl;
 #endif
     return res;
@@ -21,7 +21,7 @@
     BaseActive<Base> res(val * rhs.val, get_next_loc());
     trace_put_olld<Base>(mult_d_a, res.loc, rhs.loc, val);
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    log.info << "L(" << &res <<")[" << res.loc << "] = " 
+    logger.info << "L(" << &res <<")[" << res.loc << "] = " 
               << "const("<< val << ") * L(" << &rhs << ")[" << rhs.loc << "]" << std::endl;
 #endif
     return res;
@@ -35,7 +35,7 @@
     lhs.val *= rhs.val;
     lhs.loc = resloc;
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    log.info << "R(" << &lhs <<")[" << resloc << "] = " 
+    logger.info << "R(" << &lhs <<")[" << resloc << "] = " 
               << "R("<< &lhs << ")["<<lhs.loc<<"] * L(" << &rhs << ")[" << rhs.loc << "]" << std::endl;
 #endif
     return std::move(lhs); 
@@ -46,7 +46,7 @@
     rhs.val *= lhs.val;
     rhs.loc = resloc;
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    log.info << "R(" << &rhs <<")[" << resloc << "] = " 
+    logger.info << "R(" << &rhs <<")[" << resloc << "] = " 
               << "L("<< &lhs << ")["<<lhs.loc<<"] * R(" << &rhs << ")[" << rhs.loc << "]" << std::endl;
 #endif
     return std::move(rhs);
@@ -57,7 +57,7 @@
     lhs.val *= rhs.val;
     lhs.loc = resloc;
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    log.info << "R(" << &lhs <<")[" << resloc << "] = " 
+    logger.info << "R(" << &lhs <<")[" << resloc << "] = " 
               << "R("<< &lhs << ")["<<lhs.loc<<"] * R(" << &rhs << ")[" << rhs.loc << "]" << std::endl;
 #endif
     return std::move(lhs);
@@ -68,7 +68,7 @@
     trace_put_olld<Base>(mult_d_a, resloc, lhs.loc, val);
     lhs.loc = resloc;
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    log.info << "R(" << &lhs <<")[" << lhs.loc << "] = " 
+    logger.info << "R(" << &lhs <<")[" << lhs.loc << "] = " 
               << "R("<< &lhs << ")["<<lhs.loc<<"] * const(" << val << ")" << std::endl;
 #endif
     return std::move(lhs);
@@ -79,7 +79,7 @@
     trace_put_olld<Base>(mult_d_a, resloc, rhs.loc, val);
     rhs.loc = resloc;
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    log.info << "R(" << &rhs <<")[" << resloc << "] = " 
+    logger.info << "R(" << &rhs <<")[" << resloc << "] = " 
               << "const("<< val << ") * R(" << &rhs << ")[" << rhs.loc << "]" << std::endl;
 #endif
     return std::move(rhs);

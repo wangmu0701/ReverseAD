@@ -9,7 +9,7 @@ namespace ReverseAD {
   locint curr_loc = 0;
   locint curr_ind_loc = 0;
   locint curr_dummy_loc = 0;
-  extern Log log;
+  extern Log logger;
 
   int rank = 0;
 
@@ -31,9 +31,9 @@ namespace ReverseAD {
     return ret;
   }
   
-  // turn on some internal logging
+  // turn on some internal loggerging
   void logging_on() {
-    log.reset_info(&(std::cout));   
+    logger.reset_info(&(std::cout));   
   }
 
 } // namespace ReverseAD
