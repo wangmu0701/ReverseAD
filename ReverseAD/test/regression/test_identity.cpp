@@ -112,6 +112,28 @@ int main() {
       y = pow(1, x) * x;
       testLine = "y=pow(1,x)*x";
       break;
+    case 17:
+      y = 0;
+      y += 2.0*x;
+      y -= x;
+      testLine = "y=0;y+=2*x;y-=x";
+      break;
+    case 18:
+      y = 1;
+      y *= x*x;
+      y /= x;
+      testLine = "y=1;y*=x*x;y/=x";
+      break;
+    case 19:
+      x += 2;
+      y = x*x;
+      y -= 4;
+      x -= 2;
+      y -= x*x;
+      y /= 2;
+      y *= 0.5;
+      testLine = "x+=2;y=x*x;y-=4;x-=2;y-=x*x;y/=2;y*=0.5";
+      break;
     default:
       done = true;
       break;

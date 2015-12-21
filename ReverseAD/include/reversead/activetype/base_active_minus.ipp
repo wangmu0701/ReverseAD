@@ -30,6 +30,22 @@
     return res;
   }
 
+  BaseActive<Base>& operator -= (const BaseActive<Base>& rhs) {
+    locint resloc = get_next_loc();
+    trace_put_olll<Base>(minus_a_a, resloc, this->loc, rhs.loc);
+    this->val -= rhs.val;
+    this->loc = resloc;
+    return *this;
+  }
+
+  BaseActive<Base>& operator -= (const double& rhs) {
+    this->val -= rhs;
+    locint resloc = get_next_loc();
+    trace_put_olld<Base>(minus_a_d, resloc, this->loc, rhs);
+    this->loc = resloc;
+    return *this;
+  }
+
 #ifdef REVERSE_AD_CPP11 
   // R-value minus
   friend BaseActive<Base>&& operator-(BaseActive<Base>&& lhs, const BaseActive<Base>& rhs) {

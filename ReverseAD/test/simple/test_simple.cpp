@@ -8,7 +8,7 @@ using ReverseAD::locint;
 #define M 1
 
 int main() {
-  double x[4] = {0.2, 3, 4, 5};
+  double x[4] = {0, 3, 4, 5};
   double y[M];
   adouble yad[M];
   adouble xad[N];
@@ -26,7 +26,12 @@ int main() {
     //a2 = xad[i] - 1.;
     //yad[0] = yad[0] + 100*a1*a1 + a2*a2;
   //}
-  yad[0] = acos(xad[0]); 
+  //yad[0] = acos(xad[0]); 
+  xad[0] += 2;
+  yad[0] = xad[0] * xad[0];
+  xad[0] -= 2;
+  yad[0] -= xad[0]*xad[0];
+  yad[0] /= 2;
   //yad[0] = yad[0] * adouble::markParam(vp);
   //d <<= 4.0;
   //yad[1] = a * c;

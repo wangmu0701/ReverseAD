@@ -89,6 +89,23 @@ int main() {
       y = pow(1,x)*x*sqrt(pow(x,2));
       testLine = "y=pow(1,x)*x*sqrt(pow(x,2))";
       break;
+    case 10:
+      y = 0;
+      x += 2;
+      y += x*x;
+      y -=4;
+      y -= 4*x;
+      y += 8;
+      testLine = "y=0;x+=2;y+=x*x;y-=4;y-=4*x;y+=8;";
+      break;
+    case 11:
+      y = x;
+      y *= x*x;
+      y *= 2;
+      y /= x;
+      y /= 2;
+      testLine = "y=x;y*=x*x;y*=2;y/=x;y/=2";
+      break;
     default:
       done = true;
       break;

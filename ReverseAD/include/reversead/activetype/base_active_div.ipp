@@ -27,6 +27,23 @@
     return res;
   }
 
+  BaseActive<Base>& operator /= (const BaseActive<Base>& rhs) {
+    locint resloc = get_next_loc();
+    trace_put_olllbb<Base>(div_a_a, resloc, this->loc, rhs.loc, this->val, rhs.val);
+    this->val /= rhs.val;
+    this->loc = resloc;
+    return *this;
+  }
+
+  BaseActive<Base>& operator /= (const double& rhs) {
+    locint resloc = get_next_loc();
+    trace_put_olld<Base>(mult_d_a, resloc, this->loc, 1.0 / rhs);
+    this->val /= rhs;
+    this->loc = resloc;
+    return *this;
+  }
+
+
 #ifdef REVERSE_AD_CPP11 
   // R-value mult
   friend BaseActive<Base>&& operator/(BaseActive<Base>&& lhs, const BaseActive<Base>& rhs) {

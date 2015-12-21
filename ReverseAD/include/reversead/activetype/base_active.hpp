@@ -47,6 +47,13 @@ class BaseActive {
 #endif
   }
 
+  // the swap function for copy-and-swap idiom
+  friend void swap(BaseActive<Base>& left, BaseActive<Base>& right) {
+    using std::swap;
+    swap(left.val, right.val);
+    swap(left.loc, right.loc);
+  }
+
   Base val;
   locint loc;
 };  

@@ -1,6 +1,6 @@
   // All assignment related operations:
   // value c-tor, copy c-tor, d-tor, assign_a, assign_d, assign_dep, assign_ind
-  BaseActive() {
+  explicit BaseActive() {
     this->val = 0.0;
     this->loc = get_next_loc();
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
@@ -8,6 +8,7 @@
 #endif
     trace_put_old<Base>(assign_d, this->loc, 0.0);
   }
+
   ~BaseActive() {
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     logger.info << "free loc: " << this << "["<<this->loc<<"]" << std::endl;
@@ -33,6 +34,11 @@
     this->loc = get_next_loc();
     trace_put_oll<Base>(assign_a, this->loc, other.loc);
   }
+
+  BaseActive<Base>& operator=(BaseActive<Base> other) {
+    swap(*this, other);
+    return *this;
+  } 
 
   void markDummyInd(const Base& val) {
     this->val = val;
@@ -69,6 +75,7 @@
     return *this;
   }
 
+/*
   // value assignment
   BaseActive<Base>& operator = (const double& val) {
     this->val = val;
@@ -79,7 +86,8 @@
 #endif
     return *this;
   }
-
+*/
+/*
   // copy assignment
   BaseActive<Base>& operator = (const BaseActive<Base>& other) {
     if (this != (&other)) {
@@ -93,6 +101,7 @@
 #endif
     return *this;
   }
+*/
 
 #ifdef REVERSE_AD_CPP11 
   // move c-tor
@@ -106,6 +115,7 @@
     trace_put_oll<Base>(assign_a, this->loc, other.loc);
   }
 
+/*
   // move assignment
   BaseActive<Base>& operator = (const BaseActive<Base>&& other) {
     if (this != &other) {
@@ -119,4 +129,5 @@
 #endif
     return *this;
   }
+*/
 #endif
