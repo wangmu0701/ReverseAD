@@ -77,6 +77,23 @@ int main() {
         y = t*x*p;
         testLine = "t=(sin(x)^2+cos(x)^2)*x;y=t*x*p;";
         break;
+      case 5:
+        y = 0;
+        x += 2;
+        y += x*x*p;
+        y -=4*p;
+        y -= 4*x*p;
+        y += 8*p;
+        testLine = "y=0;x+=2;y+=x*x*p;y-=4*p;y-=4*x*p;y+=8*p;";
+        break;
+      case 6:
+        y = x;
+        y *= x*x*p;
+        y *= 2;
+        y /= x;
+        y /= 2;
+        testLine = "y=x;y*=x*x*p;y*=2;y/=x;y/=2";
+        break;   
       default:
         done = true;
         break;

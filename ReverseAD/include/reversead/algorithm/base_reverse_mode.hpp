@@ -137,6 +137,7 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           info.x = trace->get_next_loc_r();
           info.dx = 1.0;
           break;
+        case eq_plus_a:
         case plus_a_a:
           info.r = trace->get_next_loc_r();
           info.y = trace->get_next_loc_r();
@@ -145,12 +146,14 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           info.dy = 1.0;
           PSEUDO_BINARY
           break;
+        case eq_plus_d:
         case plus_d_a:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
           trace->get_next_coval_r();
           info.dx = 1.0;
           break;
+        case eq_minus_a:
         case minus_a_a:
           info.r = trace->get_next_loc_r();
           info.y = trace->get_next_loc_r();
@@ -159,18 +162,13 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           info.dy = -1.0;
           PSEUDO_BINARY
           break;
-        case minus_a_d:
-          info.r = trace->get_next_loc_r();
-          info.x = trace->get_next_loc_r();
-          trace->get_next_coval_r();
-          info.dx = 1.0;
-          break;
         case minus_d_a:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
           trace->get_next_coval_r();
           info.dx = -1.0;
           break;
+        case eq_mult_a:
         case mult_a_a:
           info.r = trace->get_next_loc_r();
           info.y = trace->get_next_loc_r();
@@ -180,11 +178,13 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           info.pxy = 1.0;
           PSEUDO_BINARY
           break;
+        case eq_mult_d:
         case mult_d_a:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
           info.dx = trace->get_next_coval_r();
           break;
+        case eq_div_a:
         case div_a_a:
           info.r = trace->get_next_loc_r();
           info.y = trace->get_next_loc_r();

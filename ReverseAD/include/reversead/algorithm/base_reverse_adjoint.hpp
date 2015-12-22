@@ -142,6 +142,12 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
       case start_of_tape:
       case assign_a:
       case assign_d:
+      case eq_plus_a:
+      case eq_plus_d:
+      case eq_minus_a:
+      case eq_mult_a:
+      case eq_mult_d:
+      case eq_div_a:
         std::set<locint> dep_set = std::move(reverse_live[temp_local_dep]);
         reverse_live.erase(temp_local_dep);
         for (const locint& dep : dep_set) {

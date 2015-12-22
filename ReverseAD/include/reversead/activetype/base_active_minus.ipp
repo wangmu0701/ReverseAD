@@ -11,7 +11,7 @@
   }
   friend BaseActive<Base> operator-(const BaseActive<Base>& lhs, const double& val) {
     BaseActive<Base> res(lhs.val - val, get_next_loc());
-    trace_put_olld<Base>(minus_a_d, res.loc, lhs.loc, val);
+    trace_put_olld<Base>(plus_d_a, res.loc, lhs.loc, -val);
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     logger.info << "L(" << &res <<")[" << res.loc << "] = " 
               << "L("<< &lhs << ")["<<lhs.loc<<"] - const("
@@ -32,7 +32,7 @@
 
   BaseActive<Base>& operator -= (const BaseActive<Base>& rhs) {
     locint resloc = get_next_loc();
-    trace_put_olll<Base>(minus_a_a, resloc, this->loc, rhs.loc);
+    trace_put_olll<Base>(eq_minus_a, resloc, this->loc, rhs.loc);
     this->val -= rhs.val;
     this->loc = resloc;
     return *this;
@@ -41,7 +41,7 @@
   BaseActive<Base>& operator -= (const double& rhs) {
     this->val -= rhs;
     locint resloc = get_next_loc();
-    trace_put_olld<Base>(minus_a_d, resloc, this->loc, rhs);
+    trace_put_olld<Base>(eq_plus_d, resloc, this->loc, -rhs);
     this->loc = resloc;
     return *this;
   }
@@ -87,7 +87,7 @@
   friend BaseActive<Base>&& operator-(BaseActive<Base>&& lhs, const double& val) {
     lhs.val -= val;
     locint resloc = get_next_loc();
-    trace_put_olld<Base>(minus_a_d, resloc, lhs.loc, val);
+    trace_put_olld<Base>(plus_d_a, resloc, lhs.loc, -val);
     lhs.loc = resloc;
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     logger.info << "R(" << &lhs <<")[" << resloc << "] = " 

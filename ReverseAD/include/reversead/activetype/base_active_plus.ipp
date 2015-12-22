@@ -33,7 +33,7 @@
   BaseActive<Base>& operator += (const BaseActive<Base>& rhs) {
     this->val += rhs.val;
     locint resloc = get_next_loc();
-    trace_put_olll<Base>(plus_a_a, resloc, this->loc, rhs.loc);
+    trace_put_olll<Base>(eq_plus_a, resloc, this->loc, rhs.loc);
     this->loc = resloc;
     return *this;
   }
@@ -41,7 +41,7 @@
   BaseActive<Base>& operator += (const double& rhs) {
     this->val += rhs;
     locint resloc = get_next_loc();
-    trace_put_olld<Base>(plus_d_a, resloc, this->loc, rhs);
+    trace_put_olld<Base>(eq_plus_d, resloc, this->loc, rhs);
     this->loc = resloc;
     return *this;
   }

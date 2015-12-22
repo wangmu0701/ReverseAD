@@ -190,29 +190,26 @@ class BaseFunctionReplay {
           res = trace->get_next_loc_f();
           val_map[res] = val_map[arg1];
           break;
+        case eq_plus_a:
         case plus_a_a:
           arg1 = trace->get_next_loc_f();
           arg2 = trace->get_next_loc_f();
           res = trace->get_next_loc_f();
           val_map[res] = val_map[arg1] + val_map[arg2];
           break;
+        case eq_plus_d:
         case plus_d_a:
           arg1 = trace->get_next_loc_f();
           coval = trace->get_next_coval_f();
           res = trace->get_next_loc_f();
           val_map[res] = val_map[arg1] + coval;
           break;
+        case eq_minus_a:
         case minus_a_a:
           arg1 = trace->get_next_loc_f();
           arg2 = trace->get_next_loc_f();
           res = trace->get_next_loc_f();
           val_map[res] = val_map[arg1] - val_map[arg2];
-          break;
-        case minus_a_d:
-          arg1 = trace->get_next_loc_f();
-          coval = trace->get_next_coval_f();
-          res = trace->get_next_loc_f();
-          val_map[res] = val_map[arg1] - coval;
           break;
         case minus_d_a:
           arg1 = trace->get_next_loc_f();
@@ -220,6 +217,7 @@ class BaseFunctionReplay {
           res = trace->get_next_loc_f();
           val_map[res] = coval - val_map[arg1];
           break;
+        case eq_mult_a:
         case mult_a_a:
           arg1 = trace->get_next_loc_f();
           arg2 = trace->get_next_loc_f();
@@ -232,6 +230,7 @@ class BaseFunctionReplay {
           val_tape->put(val1);
           val_tape->put(val2);
           break;
+        case eq_mult_d:
         case mult_d_a:
           arg1 = trace->get_next_loc_f();
           coval = trace->get_next_coval_f();
@@ -239,6 +238,7 @@ class BaseFunctionReplay {
           val1 = val_map[arg1];
           val_map[res] = val1 * coval;
           break;
+        case eq_div_a:
         case div_a_a:
           arg1 = trace->get_next_loc_f();
           arg2 = trace->get_next_loc_f();
