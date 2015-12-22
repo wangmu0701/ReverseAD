@@ -190,6 +190,28 @@ class BaseFunctionReplay {
           res = trace->get_next_loc_f();
           val_map[res] = val_map[arg1];
           break;
+        case comp_eq:
+          arg1 = trace->get_next_loc_f();
+          arg2 = trace->get_next_loc_f();
+          coval = trace->get_next_coval_f();
+          {
+            bool flag = (val_map[arg1] == val_map[arg2]);
+            if ((!flag && coval == 1.0) || (flag && coval != 1.0)) {
+              logger.BranchInconsistent<NewBase>(val_map[arg1], "==", val_map[arg2]);
+            }
+          }
+          break;
+        case comp_lt:
+          arg1 = trace->get_next_loc_f();
+          arg2 = trace->get_next_loc_f();
+          coval = trace->get_next_coval_f();
+          {
+            bool flag = (val_map[arg1] < val_map[arg2]);
+            if ((!flag && coval == 1.0) || (flag && coval != 1.0)) {
+              logger.BranchInconsistent<NewBase>(val_map[arg1], "<", val_map[arg2]);
+            }
+          }
+          break;
         case eq_plus_a:
         case plus_a_a:
           arg1 = trace->get_next_loc_f();

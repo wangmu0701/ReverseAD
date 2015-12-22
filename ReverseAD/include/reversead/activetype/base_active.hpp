@@ -19,6 +19,7 @@ class BaseActive {
  public:
 
   #include "base_active_assign.ipp" // constructor and assignment
+  #include "base_active_comparison.ipp" // ==, !=, <, >, <=, >=
   #include "base_active_plus.ipp" // plus +
   #include "base_active_mult.ipp" // mult *
   #include "base_active_minus.ipp" // minus -

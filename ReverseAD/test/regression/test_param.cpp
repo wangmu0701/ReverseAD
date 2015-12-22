@@ -73,6 +73,24 @@ int main() {
       y = (2/x)*p*(x*0.5)*x;
       testLine = "y=(2/x)*p*(x*0.5)*x";
       break;
+    case 5:
+      {
+        adouble t1 = x * 3;
+        adouble t2 = p * 2;
+        if (t1 == t2) {
+          if (x > p) {
+            y = x*p+x;
+            y -=x;
+          } else {
+            y = p*x*p;
+            y /= p;
+          }
+        } else {
+          y = (2/x)*p*(x*0.5)*x;
+        }
+      }
+      testLine = "Testing conditional branch, ignore the warning.";
+      break;
     default:
       done = true;
       break;
@@ -82,7 +100,7 @@ int main() {
     if (!done) {
       ReverseAD::TrivialTrace<double>* trace = ReverseAD::trace_off<double>();
       check_answer(trace, vx, vp, done);
-      check_answer(trace, 3.0, 4.0, done);
+      check_answer(trace, 4.0, 3.0, done);
       if (done) {
         std::cout << "test " << testLine << " fail!" << std::endl;
         exit(-1);

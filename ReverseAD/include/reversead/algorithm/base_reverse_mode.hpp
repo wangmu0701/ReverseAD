@@ -137,6 +137,12 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           info.x = trace->get_next_loc_r();
           info.dx = 1.0;
           break;
+        case comp_eq:
+        case comp_lt:
+          trace->get_next_loc_r();
+          trace->get_next_loc_r();
+          trace->get_next_coval_r();
+          break;
         case eq_plus_a:
         case plus_a_a:
           info.r = trace->get_next_loc_r();

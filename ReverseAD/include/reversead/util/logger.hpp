@@ -55,6 +55,12 @@ class Log {
     warning << "Parameter : " << val << " out of bound for " << opname
             << std::endl;
   }
+  template <typename Base>
+  void BranchInconsistent(const Base& lhs, const char* const opname, const Base& rhs) {
+    warning << "Branch condition inconsistent : "
+            << lhs << " " << opname << " " << rhs 
+            << ". Consider retrace!" << std::endl;
+  }
 };
 
 double get_timing();
