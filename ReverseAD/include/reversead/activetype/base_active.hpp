@@ -20,10 +20,11 @@ class BaseActive {
 
   #include "base_active_assign.ipp" // constructor and assignment
   #include "base_active_comparison.ipp" // ==, !=, <, >, <=, >=
-  #include "base_active_plus.ipp" // plus +
-  #include "base_active_mult.ipp" // mult *
-  #include "base_active_minus.ipp" // minus -
-  #include "base_active_div.ipp" // div /
+  #include "base_active_incdec.ipp" // ++a, a++, --a, a--
+  #include "base_active_plus.ipp" // plus +, +=
+  #include "base_active_mult.ipp" // mult *, *=
+  #include "base_active_minus.ipp" // minus -, -=
+  #include "base_active_div.ipp" // div /, /=
   #include "base_active_trigono.ipp" // sin, cos, tan, asin, acos, atan
   #include "base_active_powexp.ipp" // pow, sqrt, exp, log
 

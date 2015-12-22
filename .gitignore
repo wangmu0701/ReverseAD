@@ -17,6 +17,7 @@ test_tape
 test_trace
 test_rosenbrock
 test_simple
+test_simple.cpp
 test_generic
 test_identity
 test_square

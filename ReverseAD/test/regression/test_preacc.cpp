@@ -93,7 +93,15 @@ int main() {
         y /= x;
         y /= 2;
         testLine = "y=x;y*=x*x*p;y*=2;y/=x;y/=2";
-        break;   
+        break;
+      case 7:
+        x++;
+        y = x*x;
+        --y;
+        y -= 2*(--x);
+        y *= p;
+        testLine = "x++;y=x*x;--y;y-=2*(--x);y*=p;";
+        break;
       default:
         done = true;
         break;
