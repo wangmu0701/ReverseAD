@@ -25,8 +25,10 @@ class BaseActive {
   #include "base_active_mult.ipp" // mult *, *=
   #include "base_active_minus.ipp" // minus -, -=
   #include "base_active_div.ipp" // div /, /=
-  #include "base_active_trigono.ipp" // sin, cos, tan, asin, acos, atan
   #include "base_active_powexp.ipp" // pow, sqrt, exp, log
+  #include "base_active_trigono.ipp" // sin, cos, tan, asin, acos, atan
+  #include "base_active_hyperbolic.ipp" // sinh, cosh, tanh, asinh, acosh, atanh
+  #include "base_active_other.ipp" // fabs
 
   inline Base getVal() {return val;}
   inline locint getLoc() {return loc;}

@@ -39,6 +39,7 @@ enum OPCODES {
   log_a,
   comp_eq,
   comp_lt,
+  fabs_a,
   rmpi_send,
   rmpi_recv
 };

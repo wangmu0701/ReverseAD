@@ -321,6 +321,18 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
             info.pxx = log(coval) * info.dx;
           }
           break;
+        case fabs_a:
+          info.r = trace->get_next_loc_r();
+          info.x = trace->get_next_loc_r();
+          vx = trace->get_next_val_r();
+          if (vx > 0) {
+            info.dx = 1.0;
+          } else if (vx < 0) {
+            info.dx = -1.0;
+          } else {
+            // TODO(muwang) : warning message
+          }
+          break;
         case rmpi_send:
         case rmpi_recv:
           break;

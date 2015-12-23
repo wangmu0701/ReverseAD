@@ -4,11 +4,18 @@
 
 using ReverseAD::locint;
 
-double myEps = 1.E-10;
+double myEps = 1.E-8;
 
 void check_answer(ReverseAD::TrivialTrace<double>* trace,
+                  double vx,
                   bool& done) {
-      ReverseAD::BaseReverseHessian<double> hessian(trace);
+      double vy;
+      ReverseAD::TrivialTrace<double>* new_trace =
+        ReverseAD::BaseFunctionReplay::replay_ind<double>(trace, &vy, 1, &vx, 1);
+      if (fabs(vy - vx) > myEps) {
+        done = true;
+      }
+      ReverseAD::BaseReverseHessian<double> hessian(new_trace);
       hessian.compute(1,1);
       double** adjoints;
       hessian.retrieve_adjoint(&adjoints);
@@ -28,6 +35,7 @@ void check_answer(ReverseAD::TrivialTrace<double>* trace,
         }
       }
       if (done) {
+        std::cout << "vy = " << vy << std::endl;
         std::cout << "A[0] = " << adjoints[0][0] << std::endl;
         std::cout << "H[0] = " << values[0][0] << std::endl;
       }
@@ -134,6 +142,26 @@ int main() {
       y *= 0.5;
       testLine = "x+=2;y=x*x;y-=4;x-=2;y-=x*x;y/=2;y*=0.5";
       break;
+    case 20:
+      y = asinh(sinh(x));
+      testLine = "y=asinh(sinh(x))";
+      break;
+    case 21:
+      y = acosh(cosh(x));
+      testLine = "y=acosh(cosh(x))";
+      break;
+    case 22:
+      y = atanh(tanh(x));
+      testLine = "y=atanh(tanh(x))";
+      break;
+    case 23:
+      y = fabs(x);
+      testLine = "y=fabs(x)";
+      break;
+    case 24:
+      y = fabs(-x);
+      testLine = "y=fabs(-x)";
+      break;
     default:
       done = true;
       break;
@@ -142,13 +170,8 @@ int main() {
     y >>= vy;
     if (!done) {
       ReverseAD::TrivialTrace<double>* trace = ReverseAD::trace_off<double>();
-      check_answer(trace, done);
-      vx = 4;
-      ReverseAD::TrivialTrace<double>* new_trace =
-        ReverseAD::BaseFunctionReplay::replay_ind<double>(trace, &vy, 1, &vx, 1);
-      if (vy != vx) {done = true;}
-      check_answer(trace, done);
-      check_answer(new_trace, done);
+      check_answer(trace, 2.0, done);
+      check_answer(trace, 4.0, done);
       if (done) {
         std::cout << "test " << testLine << " fail!" << std::endl;
         exit(-1);
