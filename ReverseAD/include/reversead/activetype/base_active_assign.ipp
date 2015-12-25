@@ -35,8 +35,16 @@
     trace_put_oll<Base>(assign_a, this->loc, other.loc);
   }
 
-  BaseActive<Base>& operator=(BaseActive<Base> other) {
-    swap(*this, other);
+  BaseActive<Base>& operator=(const BaseActive<Base>& other) {
+    if (this != &other) {
+      this->val = other.val;
+      this->loc = get_next_loc();
+    }
+    trace_put_oll<Base>(assign_a, this->loc, other.loc);
+#ifdef REVERSEAD_BASE_ACTIVE_DEBUG
+    logger.info << "L-assign: " << this <<"["<<this->loc<<"]" 
+              <<" <- " << &other <<"["<<other.loc<<"]"<< std::endl;
+#endif
     return *this;
   } 
 
@@ -75,34 +83,6 @@
     return *this;
   }
 
-/*
-  // value assignment
-  BaseActive<Base>& operator = (const double& val) {
-    this->val = val;
-    this->loc = get_next_loc();
-    trace_put_old<Base>(assign_d, this->loc, val);
-#ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    logger.info << "V-assign: " << this <<"["<<this->loc<<"]" << " = " << val << std::endl;
-#endif
-    return *this;
-  }
-*/
-/*
-  // copy assignment
-  BaseActive<Base>& operator = (const BaseActive<Base>& other) {
-    if (this != (&other)) {
-      this->val = other.val;
-      this->loc = get_next_loc();
-    }
-    trace_put_oll<Base>(assign_a, this->loc, other.loc);
-#ifdef REVERSEAD_BASE_ACTIVE_DEBUG
-    logger.info << "L-assign: " << this <<"["<<this->loc<<"]" 
-              <<" <- " << &other <<"["<<other.loc<<"]"<< std::endl;
-#endif
-    return *this;
-  }
-*/
-
 #ifdef REVERSE_AD_CPP11 
   // move c-tor
   BaseActive(BaseActive<Base>&& other) {
@@ -115,7 +95,6 @@
     trace_put_oll<Base>(assign_a, this->loc, other.loc);
   }
 
-/*
   // move assignment
   BaseActive<Base>& operator = (const BaseActive<Base>&& other) {
     if (this != &other) {
@@ -129,5 +108,4 @@
 #endif
     return *this;
   }
-*/
 #endif

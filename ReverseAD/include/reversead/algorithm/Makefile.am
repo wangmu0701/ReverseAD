@@ -11,6 +11,7 @@ libalgorithminclude_HEADERS = base_function_replay.hpp\
                               abstract_serializable.hpp\
                               trivial_adjoint.hpp\
                               trivial_hessian.hpp\
+                              trivial_third.hpp\
                               generic_deriv.hpp\
                               reversead_multiset.hpp\
                               base_reverse_generic.hpp

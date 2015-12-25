@@ -47,18 +47,37 @@ class TrivialHessian : public AbstractSerializable {
       return _iter != _data->end();
     }
     
+    enumerator() {} 
+    void operator = (const enumerator& other) {
+      this->_data = other._data;
+      this->_iter = other._iter;
+      this->_enum = other._enum;
+    }
+    enumerator(const enumerator& other) : _data(other._data) {
+      this->_iter = other._iter;
+      this->_enum = other._enum;
+    }
+
    private:
     enumerator(const typename std::map<LocType, TrivialAdjoint<LocType, Base> >* const data) {
       this->_data = data;
       this->_iter = data->begin();
-      this->_enum = _iter->second.get_enumerator();
-      find_next();
+      if (_iter != _data->end()) {
+        this->_enum = _iter->second.get_enumerator();
+        find_next();
+      }
     }
     void find_next() {
       while(!_enum.has_next() && _iter != _data->end()) {
         ++_iter;
         _enum = _iter->second.get_enumerator();
       }
+    }
+    void swap(enumerator& lhs, enumerator& rhs) {
+      using std::swap;
+      swap(lhs._data, rhs._data);
+      swap(lhs._iter, rhs._iter);
+      swap(lhs._enum, rhs._enum);
     }
     const typename std::map<LocType, TrivialAdjoint<LocType, Base> >* _data;
     typename std::map<LocType, TrivialAdjoint<LocType, Base> >::const_iterator _iter;
