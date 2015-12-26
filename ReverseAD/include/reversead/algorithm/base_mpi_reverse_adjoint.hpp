@@ -83,17 +83,17 @@ class BaseMpiReverseAdjoint : public virtual BaseReverseAdjoint<Base> {
         for(int i = 0; i < sr_info.count; i++) {
           SingleDeriv local_deriv(&buf[total_buf_size]);
           total_buf_size += local_deriv.byte_size();
-          //local_deriv.debug(logger.info);
+          local_deriv.debug(logger.info);
           // we only remove things from reverse_live_set during forward
           locint dummy_ind = trace->get_next_comm_loc_f();
-          //logger.info << "dummy_ind = " << dummy_ind << std::endl;
+          logger.info << "dummy_ind = " << dummy_ind << std::endl;
           std::set<locint> dep_set = std::move(reverse_live[dummy_ind]);
           reverse_live.erase(dummy_ind);
           for (const locint& dep : dep_set) {
-            //logger.info << "processing : " << dummy_ind << std::endl;
-            //dep_deriv[dep].debug(logger.info);
+            logger.info << "processing : " << dummy_ind << std::endl;
+            dep_deriv[dep].debug(logger.info);
             this->process_single_deriv(dummy_ind, local_deriv, dep_deriv[dep]);
-            //dep_deriv[dep].debug(logger.info);
+            dep_deriv[dep].debug(logger.info);
           }
         }
       }

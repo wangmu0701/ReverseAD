@@ -7,6 +7,7 @@ libalgorithminclude_HEADERS = base_function_replay.hpp\
                               base_reverse_third.hpp\
                               base_mpi_reverse_adjoint.hpp\
                               base_mpi_reverse_hessian.hpp\
+                              base_mpi_reverse_third.hpp\
                               single_derivative.hpp\
                               algorithm_common.hpp\
                               abstract_serializable.hpp\

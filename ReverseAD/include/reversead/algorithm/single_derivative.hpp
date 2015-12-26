@@ -27,7 +27,7 @@ class SingleDerivative : AbstractSerializable{
     adjoint_vals = new type_adjoint(buf);
     buf_size += adjoint_vals->byte_size();
     hessian_vals = new type_hessian(&(buf[buf_size]));
-    buf_size += third_vals->byte_size();
+    buf_size += hessian_vals->byte_size();
     third_vals = new type_third(&buf[buf_size]);
   }
 

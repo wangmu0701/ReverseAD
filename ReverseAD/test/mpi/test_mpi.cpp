@@ -7,6 +7,7 @@ using ReverseAD::RMPI_Recv;
 using ReverseAD::RMPI_ADOUBLE;
 using ReverseAD::BaseMpiReverseAdjoint;
 using ReverseAD::BaseMpiReverseHessian;
+using ReverseAD::BaseMpiReverseThird;
 
 int main(int argc, char** argv) {
   int size;
@@ -23,7 +24,6 @@ int main(int argc, char** argv) {
   if (rank == 0) {
     adouble v0;
     v0 <<= 2.0;
-    std::cout << "WTF" << std::endl;
     RMPI_Send(&v0, 1, RMPI_ADOUBLE, 1, 0, MPI_COMM_WORLD);
     adouble v1;
     RMPI_Recv(&v1, 1, RMPI_ADOUBLE, 1, 0, MPI_COMM_WORLD, NULL);
@@ -47,6 +47,7 @@ int main(int argc, char** argv) {
   adjoint.compute_mpi();
   BaseMpiReverseHessian<double> hessian(trace);
   hessian.compute_mpi();
-
+  BaseMpiReverseThird<double> third(trace);
+  third.compute_mpi();
   ReverseAD::RMPI_Finalize();
 }

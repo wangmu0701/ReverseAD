@@ -18,6 +18,7 @@
 #include "reversead/rmpi/rmpi_wrapper.hpp"
 #include "reversead/algorithm/base_mpi_reverse_adjoint.hpp"
 #include "reversead/algorithm/base_mpi_reverse_hessian.hpp"
+#include "reversead/algorithm/base_mpi_reverse_third.hpp"
 #endif
 
 #endif // REVERSE_AD_H_
