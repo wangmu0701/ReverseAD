@@ -15,6 +15,7 @@ class DerivativeInfo {
 
   void clear() {
     r = NULL_LOC; x = NULL_LOC; y = NULL_LOC;
+    vx = 0.0; vy = 0.0;
     dx = 0.0; dy = 0.0;
     pxx = 0.0; pxy = 0.0; pyy = 0.0;
     pxxx = 0.0; pxxy = 0.0; pxyy = 0.0; pyyy = 0.0;
@@ -30,6 +31,7 @@ class DerivativeInfo {
   }
   opbyte opcode;
   LocType r, x, y;
+  Base vx, vy;
   Base dx, dy;
   Base pxx, pxy, pyy;
   Base pxxx, pxxy, pxyy, pyyy;

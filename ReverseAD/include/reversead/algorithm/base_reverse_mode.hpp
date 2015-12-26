@@ -125,7 +125,6 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
     int dep_count = trace->get_num_dep();
 
     locint res;
-    Base vx, vy;
     double coval;
     trace->init_reverse();
     opbyte op = trace->get_next_op_r();
@@ -206,8 +205,10 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           info.r = trace->get_next_loc_r();
           info.y = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
-          info.dx = trace->get_next_val_r();
-          info.dy = trace->get_next_val_r();
+          info.vy = trace->get_next_val_r();
+          info.vx = trace->get_next_val_r();
+          info.dx = info.vy;
+          info.dy = info.vx;
           info.pxy = 1.0;
           PSEUDO_BINARY
           break;
@@ -222,110 +223,118 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           info.r = trace->get_next_loc_r();
           info.y = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
-          vy = trace->get_next_val_r();
-          vx = trace->get_next_val_r();
-          info.dx = 1.0 / vy;
-          info.dy = -vx / (vy*vy);
-          info.pxy = -1.0 / (vy*vy);
-          info.pyy = 2.0 * vx / (vy*vy*vy);
+          info.vy = trace->get_next_val_r();
+          info.vx = trace->get_next_val_r();
+          info.dx = 1.0 / info.vy;
+          info.dy = -info.vx / (info.vy*info.vy);
+          info.pxy = -1.0 / (info.vy*info.vy);
+          info.pyy = 2.0 * info.vx / (info.vy*info.vy*info.vy);
 #ifdef ENABLE_REVERSE_THIRD
-          info.pxyy = 2.0 / (vy * vy * vy);
-          info.pyyy = -6.0 * vx / (vy * vy * vy * vy);
+          info.pxyy = 2.0 / (info.vy * info.vy * info.vy);
+          info.pyyy = -6.0 * info.vx / (info.vy*info.vy*info.vy*info.vy);
 #endif
           PSEUDO_BINARY
           break;
         case div_d_a:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
-          vx = trace->get_next_val_r();
+          info.vx = trace->get_next_val_r();
           coval = trace->get_next_coval_r();
-          info.dx = -coval / (vx*vx);
-          info.pxx = 2.0 * coval / (vx*vx*vx);
+          info.dx = -coval / (info.vx*info.vx);
+          info.pxx = 2.0 * coval / (info.vx*info.vx*info.vx);
 #ifdef ENABLE_REVERSE_THIRD
-          info.pxxx = -6.0 * coval / (vx*vx*vx*vx);
+          info.pxxx = -6.0 * coval / (info.vx*info.vx*info.vx*info.vx);
 #endif
           break;
         case sin_a:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
-          vx = trace->get_next_val_r();
-          info.dx = cos(vx);
-          info.pxx = -sin(vx);
+          info.vx = trace->get_next_val_r();
+          info.dx = cos(info.vx);
+          info.pxx = -sin(info.vx);
 #ifdef ENABLE_REVERSE_THIRD
-          info.pxxx = -cos(vx);
+          info.pxxx = -cos(info.vx);
 #endif
           break;
         case cos_a:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
-          vx = trace->get_next_val_r();
-          info.dx = -sin(vx);
-          info.pxx = -cos(vx);
+          info.vx = trace->get_next_val_r();
+          info.dx = -sin(info.vx);
+          info.pxx = -cos(info.vx);
 #ifdef ENABLE_REVERSE_THIRD
-          info.pxxx = sin(vx);
+          info.pxxx = sin(info.vx);
 #endif
           break;
         case tan_a:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
-          vx = trace->get_next_val_r();
-          vy = cos(vx);
-          info.dx = 1.0 / (vy * vy);
-          info.pxx = 2.0 * tan(vx) / (vy * vy);
+          info.vx = trace->get_next_val_r();
+          {
+            Base t = cos(info.vx);
+            info.dx = 1.0 / (t * t);
+            info.pxx = 2.0 * tan(info.vx) / (t * t);
 #ifdef ENABLE_REVERSE_THIRD
-          info.pxxx = -2 * (cos(2*vx)-2) / (vy*vy*vy*vy);
+            info.pxxx = -2 * (cos(2*info.vx)-2) / (t*t*t*t);
 #endif
+          }
           break;
         case asin_a:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
-          vx = trace->get_next_val_r();
-          vy = sqrt(1.0 - vx * vx);
-          info.dx = 1.0 / vy;
-          info.pxx = vx / (vy * vy * vy);
+          info.vx = trace->get_next_val_r();
+          {
+            Base t = sqrt(1.0 - info.vx * info.vx);
+            info.dx = 1.0 / t;
+            info.pxx = info.vx / (t * t * t);
 #ifdef ENABLE_REVERSE_THIRD
-          info.pxxx = (2.0*vx*vx+1.0) / (vy*vy*vy*vy*vy);
+            info.pxxx = (2.0*info.vx*info.vx+1.0) / (t*t*t*t*t);
 #endif
+          }
           break;
         case acos_a:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
-          vx = trace->get_next_val_r();
-          vy = -sqrt(1.0 - vx * vx);
-          info.dx = 1.0 / vy;
-          info.pxx = vx / (vy * vy * vy);
+          info.vx = trace->get_next_val_r();
+          {
+            Base t = -sqrt(1.0 - info.vx * info.vx);
+            info.dx = 1.0 / t;
+            info.pxx = info.vx / (t * t * t);
 #ifdef ENABLE_REVERSE_THIRD
-          info.pxxx = (2.0*vx*vx+1.0) / (vy*vy*vy*vy*vy);
+            info.pxxx = (2.0*info.vx*info.vx+1.0) / (t*t*t*t*t);
 #endif
+          }
           break;
         case atan_a:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
-          vx = trace->get_next_val_r();
-          vy = 1.0 + vx * vx;
-          info.dx = 1.0 / vy;
-          info.pxx = -2.0 * vx / (vy * vy);
+          info.vx = trace->get_next_val_r();
+          {
+            Base t = 1.0 + info.vx * info.vx;
+            info.dx = 1.0 / t;
+            info.pxx = -2.0 * info.vx / (t * t);
 #ifdef ENABLE_REVERSE_THIRD
-          info.pxxx = (6.0*vx*vx-2.0)/(vy*vy*vy);
+            info.pxxx = (6.0*info.vx*info.vx-2.0)/(t*t*t);
 #endif
+          }
           break;
         case sqrt_a:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
-          vx = trace->get_next_val_r();
-          if (vx != 0.0) {
-            info.dx = 0.5/sqrt(vx);
-            info.pxx = -0.5 * info.dx / vx;
+          info.vx = trace->get_next_val_r();
+          if (info.vx != 0.0) {
+            info.dx = 0.5/sqrt(info.vx);
+            info.pxx = -0.5 * info.dx / info.vx;
 #ifdef ENABLE_REVERSE_THIRD
-            info.pxxx = -1.5 * info.pxx / vx;
+            info.pxxx = -1.5 * info.pxx / info.vx;
 #endif
           }
           break;
         case exp_a:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
-          vx = trace->get_next_val_r();
-          info.dx = exp(vx);
+          info.vx = trace->get_next_val_r();
+          info.dx = exp(info.vx);
           info.pxx = info.dx;
 #ifdef ENABLE_REVERSE_THIRD
           info.pxxx = info.dx;
@@ -334,31 +343,31 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
         case log_a:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
-          vx = trace->get_next_val_r();
-          info.dx = 1.0 / vx;
+          info.vx = trace->get_next_val_r();
+          info.dx = 1.0 / info.vx;
           info.pxx = - info.dx * info.dx;
 #ifdef ENABLE_REVERSE_THIRD
-          info.pxxx = -2.0 * info.pxx / vx;
+          info.pxxx = -2.0 * info.pxx / info.vx;
 #endif
           break;
         case pow_a_a:
           info.r = trace->get_next_loc_r();
           info.y = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
-          vy = trace->get_next_val_r();
-          vx = trace->get_next_val_r();
+          info.vy = trace->get_next_val_r();
+          info.vx = trace->get_next_val_r();
           {
-            Base t = pow(vx, vy);
-            info.dx = vy * t / vx;
-            info.pxx = (vy - 1) * info.dx / vx;
-            info.dy = log(vx) * t;
-            info.pyy = log(vx) * info.dy;
-            info.pxy = (vy * log(vx) + 1) * t / vx;
+            Base t = pow(info.vx, info.vy);
+            info.dx = info.vy * t / info.vx;
+            info.pxx = (info.vy - 1) * info.dx / info.vx;
+            info.dy = log(info.vx) * t;
+            info.pyy = log(info.vx) * info.dy;
+            info.pxy = (info.vy * log(info.vx) + 1) * t / info.vx;
 #ifdef ENABLE_REVERSE_THIRD
-            info.pxxx = (vy - 2) * info.pxx / vx;
-            info.pxxy = (vy-1)*info.pxy/vx + vy*t/(vx*vx);
-            info.pxyy = info.dx*log(vx)*log(vx) + 2*log(vx)*t/vx;
-            info.pyyy = log(vx) * info.pyy;
+            info.pxxx = (info.vy - 2) * info.pxx / info.vx;
+            info.pxxy = (info.vy-1)*info.pxy/info.vx + info.vy*t/(info.vx*info.vx);
+            info.pxyy = info.dx*log(info.vx)*log(info.vx) + 2*log(info.vx)*t/info.vx;
+            info.pyyy = log(info.vx) * info.pyy;
 #endif
           }
           PSEUDO_BINARY
@@ -366,24 +375,24 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
         case pow_a_d:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
-          vx = trace->get_next_val_r();
+          info.vx = trace->get_next_val_r();
           coval = trace->get_next_coval_r();
           {
-            Base t = pow(vx, coval);
-            info.dx = coval * t / vx;
-            info.pxx = (coval - 1) * info.dx / vx;
+            Base t = pow(info.vx, coval);
+            info.dx = coval * t / info.vx;
+            info.pxx = (coval - 1) * info.dx / info.vx;
 #ifdef ENABLE_REVERSE_THIRD
-            info.pxxx = (coval - 2) * info.pxx / vx;
+            info.pxxx = (coval - 2) * info.pxx / info.vx;
 #endif
           }
           break;
         case pow_d_a:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
-          vx = trace->get_next_val_r();
+          info.vx = trace->get_next_val_r();
           coval = trace->get_next_coval_r();
           {
-            Base t = pow(coval, vx);
+            Base t = pow(coval, info.vx);
             info.dx = log(coval) * t;
             info.pxx = log(coval) * info.dx;
 #ifdef ENABLE_REVERSE_THIRD
@@ -394,10 +403,10 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
         case fabs_a:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
-          vx = trace->get_next_val_r();
-          if (vx > 0) {
+          info.vx = trace->get_next_val_r();
+          if (info.vx > 0) {
             info.dx = 1.0;
-          } else if (vx < 0) {
+          } else if (info.vx < 0) {
             info.dx = -1.0;
           } else {
             // TODO(muwang) : warning message
