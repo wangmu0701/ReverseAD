@@ -142,6 +142,7 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
       case start_of_tape:
       case assign_a:
       case assign_d:
+      case assign_param:
       case eq_plus_a:
       case eq_plus_d:
       case eq_minus_a:

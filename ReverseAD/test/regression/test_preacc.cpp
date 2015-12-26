@@ -14,13 +14,16 @@ void check_answer(ReverseAD::TrivialTrace<double>* trace,
       ReverseAD::TrivialTrace<double>* new_trace = 
         ReverseAD::BaseFunctionReplay::replay(trace, &vy, 1, &vx, 1, &vp, 1);
       ReverseAD::BaseReverseHessian<double> hessian(new_trace);
+      hessian.enable_preacc();
       if (fabs(vy - vx*vx*vp) > myEps ) {
+        std::cout << "1" << std::endl;
         done = true;
       }
       hessian.compute(1,1);
       double** adjoints;
       hessian.retrieve_adjoint(&adjoints);
       if (fabs(adjoints[0][0]-2*vx*vp) > myEps) {
+        std::cout << "2" << std::endl;
         done = true;
       }
       int *size;
@@ -29,9 +32,11 @@ void check_answer(ReverseAD::TrivialTrace<double>* trace,
       double** values;
       hessian.retrieve_hessian_sparse_format(&size, &rind, &cind, &values);
       if (size[0] > 1) {
+        std::cout << "3" << std::endl;
         done = true;
       } else if (size[0] == 1) {
         if (fabs(values[0][0]-2*vp) > myEps) {
+          std::cout << "4" << std::endl;
           done = true;
         }
       }

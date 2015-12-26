@@ -27,8 +27,8 @@ class SingleDerivative : AbstractSerializable{
     adjoint_vals = new type_adjoint(buf);
     buf_size += adjoint_vals->byte_size();
     hessian_vals = new type_hessian(&(buf[buf_size]));
-//    buf_size += third_vals->byte_size();
-//    third_vals = new type_third(&buf[buf_size]);
+    buf_size += third_vals->byte_size();
+    third_vals = new type_third(&buf[buf_size]);
   }
 
   int byte_size() const {
@@ -36,17 +36,15 @@ class SingleDerivative : AbstractSerializable{
     if (hessian_vals) {
       ret += hessian_vals->byte_size();
     }
-/*
     if (third_vals) {
       ret += third_vals->byte_size();
     }
-*/
     return ret;
   }
   void clear() {
     adjoint_vals->clear();
     hessian_vals->clear();
-    //third_vals->clear();
+    third_vals->clear();
   }
   void write_to_byte(char* const buf) const {
     int buf_size = 0;
@@ -54,7 +52,7 @@ class SingleDerivative : AbstractSerializable{
     buf_size = adjoint_vals->byte_size();
     hessian_vals->write_to_byte(&buf[buf_size]);
     buf_size += hessian_vals->byte_size();
-    //third_vals->write_to_byte(&buf[buf_size]);
+    third_vals->write_to_byte(&buf[buf_size]);
   }
   
   void debug() const {

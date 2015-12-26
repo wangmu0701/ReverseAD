@@ -21,6 +21,7 @@ test_simple.cpp
 test_generic
 test_identity
 test_square
+test_quad
 test_param
 test_preacc
 test_mpi

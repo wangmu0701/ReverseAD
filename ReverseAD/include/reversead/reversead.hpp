@@ -10,6 +10,7 @@
 #include "reversead/algorithm/base_reverse_mode.hpp"
 #include "reversead/algorithm/base_reverse_adjoint.hpp"
 #include "reversead/algorithm/base_reverse_hessian.hpp"
+#include "reversead/algorithm/base_reverse_third.hpp"
 #include "reversead/algorithm/base_reverse_generic.hpp"
 
 #ifdef ENABLE_REVERSEAD_MPI

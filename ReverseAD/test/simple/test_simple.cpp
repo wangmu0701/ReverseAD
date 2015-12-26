@@ -18,7 +18,8 @@ int main() {
   for (int i=0; i<N; i++) {
     xad[i] <<= x[i];
   }
-  double vp = 1.0;
+  double vp = 3.0;
+  //adouble p = adouble::markParam(vp);
   yad[0] = 0;
 
   //for (int i=0; i<N-1; i++) {
@@ -26,19 +27,13 @@ int main() {
     //a2 = xad[i] - 1.;
     //yad[0] = yad[0] + 100*a1*a1 + a2*a2;
   //}
-  //yad[0] = acos(xad[0]);
-  xad[0]++;
-  yad[0] = xad[0]*xad[0];
-  //--yad[0];
-  //--xad[0];
-  //yad[0] -= 2*xad[0];
-  //yad[0] = yad[0] * adouble::markParam(vp);
-  //d <<= 4.0;
-  //yad[1] = a * c;
-  //yad = sin(a) + sqrt(b) + c / d + 1.0/c;
-  //yad = (2*a)/(1/a);
-  //yad = a*a;
-  //yad = p * a;
+  //a1 = xad[0]*xad[0]*p+xad[0]*p;
+  //yad[0] = a1-xad[0]*p;
+  //yad[0] = xad[0] * p;
+  //yad[0] = log(exp(xad[0]));
+  //yad[0] *= pow(xad[0], 3);
+  yad[0] = xad[0];
+  yad[0] *= xad[0]*xad[0]*xad[0];
   yad[0] >>= y[0];
   //yad[1] >>= y[1];
   std::cout << "yad[0] = " << yad[0].getVal() << std::endl;
@@ -56,14 +51,14 @@ int main() {
     ReverseAD::BaseFunctionReplay::replay_ind<double> (trace, x, N);
   new_trace->dump_trace();
 
-  ReverseAD::BaseReverseHessian<double> hessian(new_trace);
-  //hessian.enable_preacc();
-  hessian.compute(N, M);
+  ReverseAD::BaseReverseThird<double> third(new_trace);
+  third.enable_preacc();
+  third.compute(N, M);
   int size_j;
   locint* rind_j;
   locint* cind_j;
   double* values_j;
-  hessian.retrieve_adjoint_sparse_format(&size_j, &rind_j, &cind_j, &values_j);
+  third.retrieve_adjoint_sparse_format(&size_j, &rind_j, &cind_j, &values_j);
   for(int i = 0; i < size_j; i++) {
     std::cout << "A[" << rind_j[i] << "," << cind_j[i]
                << "] = " << values_j[i] << std::endl;
@@ -72,9 +67,16 @@ int main() {
   locint **rind;
   locint **cind;
   double** values;
-  hessian.retrieve_hessian_sparse_format(&size, &rind, &cind, &values);
+  third.retrieve_hessian_sparse_format(&size, &rind, &cind, &values);
   std::cout << "hessian size = "<<size[0] << std::endl;
   for(int i = 0; i < size[0]; i++) {
     std::cout << "H["<<rind[0][i]<<","<<cind[0][i]<<"] = "<<values[0][i] << std::endl;
+  }
+  locint*** tind;
+  third.retrieve_third_sparse_format(&size, &tind, &values);
+  std::cout << "third order size = " << size[0] << std::endl;
+  for (int i=0; i<size[0]; i++) {
+    std::cout << "T[" << tind[0][i][0] << ", " << tind[0][i][1]
+              << ", " << tind[0][i][2] << " ] =" << values[0][i] << std::endl;
   }
 }

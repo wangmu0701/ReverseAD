@@ -11,18 +11,22 @@ double myEps = 1.E-10;
 
 void check_answer(TrivialTrace<double>* trace,
                   bool& done,
-                  double vx) {
+                  double vx,
+                  bool enable_preacc) {
       double vy;
       TrivialTrace<double>* new_trace =
           BaseFunctionReplay::replay_ind(trace, &vy,1, &vx, 1);
-      if (fabs(vy - vx*vx) > myEps) {
+      if (fabs(vy - vx*vx*vx*vx) > myEps) {
         done = true;
       }
       BaseReverseThird<double> base_derivative(new_trace);
+      if (enable_preacc) {
+        base_derivative.enable_preacc();
+      }
       base_derivative.compute(1,1);
       double** adjoints;
       base_derivative.retrieve_adjoint(&adjoints);
-      if (fabs(adjoints[0][0]-2*vx) > myEps) {
+      if (fabs(adjoints[0][0]-4*vx*vx*vx) > myEps) {
         done = true;
       }
       int *size;
@@ -31,7 +35,7 @@ void check_answer(TrivialTrace<double>* trace,
       double** values;
       base_derivative.retrieve_hessian_sparse_format(&size, &rind, &cind, &values);
       if (size[0] == 1) {
-        if (fabs(values[0][0]-2.0) > myEps) {
+        if (fabs(values[0][0]-12.0*vx*vx) > myEps) {
           done = true;
         }
       } else {
@@ -44,7 +48,7 @@ void check_answer(TrivialTrace<double>* trace,
       if (size[0] > 1) {
         done = true;
       } else if (size[0] == 1) {
-        if (fabs(tvalues[0][0] - 0.0) > myEps) {
+        if (fabs(tvalues[0][0] - 24.0*vx) > myEps) {
           done = true;
         }
       }
@@ -66,61 +70,32 @@ int main() {
     x <<= 2.0;
     switch(testCase) {
     case 0:
-      y = x*x;
-      testLine = "y=x*x";
+      y = x*(x+x-x)*(2*x)/2*sqrt(x*x);
+      testLine = "y=x*(x+x-x)*(2*x)/2*sqrt(x*x)";
       break;
     case 1:
-      y = (x*x*x)/x;
-      testLine = "y=(x*x*x)/x";
+      y = exp(log(x));
+      y *= pow(x, 3);
+      testLine = "y=exp(log(x));y*=pow(x,3)";
       break;
     case 2:
-      y = (x+2)*(x-2)+4;
-      testLine = "(x+2)*(x-2)+4";
+      y = pow(x+2, 2);
+      y -= 4*x;
+      y -= 4;
+      y *= y;
+      testLine = "y=pow(x+2,2);y-=4*x;y-=4;y*=y";
       break;
     case 3:
       y = sqrt(x*x)*x;
-      testLine = "y=sqrt(x*x)*x";
+      y *= (x+2)*(x-2)+4;
+      testLine = "y=sqrt(x*x)*x;y*=(x+2)*(x-2)+4";
       break;
     case 4:
-      y = (2*x) / (2/x);
-      testLine = "y=(2*x)/(2/x)";
-      break;
-    case 5:
-      y = tan(atan(x*x/20))*20;
-      testLine = "y=tan(atan(x*x/20))*20";
-      break;
-    case 6:
-      y = exp(2*log(x));
-      testLine = "y=exp(2*log(x))";
-      break;
-    case 7:
-      y = sqrt(log(exp(x*x*x*x)));
-      testLine = "y=sqrt(log(exp(x*x*x*x)))";
-      break;
-    case 8:
-      y = pow(sqrt(x), 4);
-      testLine = "y=pow(sqrt(x), 4)";
-      break;
-    case 9:
-      y = pow(1,x)*x*sqrt(pow(x,2));
-      testLine = "y=pow(1,x)*x*sqrt(pow(x,2))";
-      break;
-    case 10:
-      y = 0;
-      x += 2;
-      y += x*x;
-      y -=4;
-      y -= 4*x;
-      y += 8;
-      testLine = "y=0;x+=2;y+=x*x;y-=4;y-=4*x;y+=8;";
-      break;
-    case 11:
-      y = x;
+      y = 400*x;
       y *= x*x;
-      y *= 2;
       y /= x;
-      y /= 2;
-      testLine = "y=x;y*=x*x;y*=2;y/=x;y/=2";
+      y *= asin(sin(x/20))*acos(cos(x/20));
+      testLine = "y=400*x;y*=x*x;y/=x;y*=asin(sin(x/20))*acos(cos(x/20))";
       break;
     default:
       done = true;
@@ -130,9 +105,9 @@ int main() {
     y >>= vy;
     if (!done) {
       ReverseAD::TrivialTrace<double>* trace = ReverseAD::trace_off<double>();
-      check_answer(trace, done, 1.0);
-      check_answer(trace, done, 2.0);
-      check_answer(trace, done, 3.0);
+      check_answer(trace, done, 1.0, false);
+      check_answer(trace, done, 2.0, true);
+      check_answer(trace, done, 3.0, false);
       if (done) {
         std::cout << "test " << testLine << " fail!" << std::endl;
         exit(-1);

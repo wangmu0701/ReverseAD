@@ -3,22 +3,25 @@
 #include "reversead/reversead.hpp"
 
 using ReverseAD::locint;
+using ReverseAD::TrivialTrace;
+using ReverseAD::BaseFunctionReplay;
+using ReverseAD::BaseReverseThird;
 
-double myEps = 1.E-8;
+double myEps = 1.E-5;
 
-void check_answer(ReverseAD::TrivialTrace<double>* trace,
+void check_answer(TrivialTrace<double>* trace,
                   double vx,
                   bool& done) {
       double vy;
-      ReverseAD::TrivialTrace<double>* new_trace =
-        ReverseAD::BaseFunctionReplay::replay_ind<double>(trace, &vy, 1, &vx, 1);
+      TrivialTrace<double>* new_trace =
+          BaseFunctionReplay::replay_ind<double>(trace, &vy, 1, &vx, 1);
       if (fabs(vy - vx) > myEps) {
         done = true;
       }
-      ReverseAD::BaseReverseHessian<double> hessian(new_trace);
-      hessian.compute(1,1);
+      BaseReverseThird<double> base_derivative(new_trace);
+      base_derivative.compute(1,1);
       double** adjoints;
-      hessian.retrieve_adjoint(&adjoints);
+      base_derivative.retrieve_adjoint(&adjoints);
       if (fabs(adjoints[0][0]-1.0) > myEps) {
         done = true;
       }
@@ -26,7 +29,7 @@ void check_answer(ReverseAD::TrivialTrace<double>* trace,
       locint **rind;
       locint **cind;
       double** values;
-      hessian.retrieve_hessian_sparse_format(&size, &rind, &cind, &values);
+      base_derivative.retrieve_hessian_sparse_format(&size, &rind, &cind, &values);
       if (size[0] > 1) {
         done = true;
       } else if (size[0] == 1) {
@@ -34,10 +37,21 @@ void check_answer(ReverseAD::TrivialTrace<double>* trace,
           done = true;
         }
       }
+      locint ***tind;
+      double** tvalues;
+      base_derivative.retrieve_third_sparse_format(&size, &tind, &tvalues);
+      if (size[0] > 1) {
+        done = true;
+      } else if (size[0] == 1) {
+        if (fabs(tvalues[0][0] - 0.0) > myEps) {
+          done = true;
+        }
+      }
       if (done) {
         std::cout << "vy = " << vy << std::endl;
         std::cout << "A[0] = " << adjoints[0][0] << std::endl;
         std::cout << "H[0] = " << values[0][0] << std::endl;
+        std::cout << "T[0] = " << tvalues[0][0] << std::endl;
       }
 }
 int main() {

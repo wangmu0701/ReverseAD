@@ -14,12 +14,23 @@
 #include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/single_derivative.hpp"
 
+#define ENABLE_REVERSE_THIRD
+
 #define COMBINE_D_1 info.dx += info.dy; info.dy = 0;
 #define COMBINE_D_2 info.pxx += 2.0 * info.pxy + info.pyy;\
                     info.pxy = 0.0; info.pyy = 0.0;\
                     COMBINE_D_1
 
+#ifdef ENABLE_REVERSE_THIRD
+#define COMBINE_D_3 info.pxxx += 3.0*info.pxxy+3.0*info.pxyy+info.pyyy;\
+                    info.pxxy = 0.0; info.pxyy = 0.0; info.pyyy = 0.0;\
+                    COMBINE_D_2
+
+#define PSEUDO_BINARY if (info.x == info.y) {info.y = NULL_LOC; COMBINE_D_3}
+#else
+
 #define PSEUDO_BINARY if (info.x == info.y) {info.y = NULL_LOC; COMBINE_D_2}
+#endif // ENABLE_REVERSE_THIRD
 
 namespace ReverseAD {
 
@@ -28,6 +39,7 @@ class BaseReverseMode {
  public:
   typedef typename SingleDerivative<Base>::type_adjoint type_adjoint;
   typedef typename SingleDerivative<Base>::type_hessian type_hessian;
+  typedef typename SingleDerivative<Base>::type_third type_third;
   typedef SingleDerivative<Base> SingleDeriv;
 
   BaseReverseMode(AbstractTrace<Base>* trace) {
@@ -50,12 +62,18 @@ class BaseReverseMode {
 
   void compute_adjoint_sac(const DerivativeInfo<locint, Base>& info,
                            type_adjoint& adjoint_vals,
-                           const Base&);
+                           const Base& w);
 
   void compute_hessian_sac(const DerivativeInfo<locint, Base>& info,
                            type_hessian& hessian_vals,
-                           const Base&,
+                           const Base& w,
                            const type_adjoint& r);
+
+  void compute_third_sac(const DerivativeInfo<locint, Base>& info,
+                         type_third& third_vals,
+                         const Base& w,
+                         const type_adjoint& r,
+                         const type_hessian& e);
 
   void compute_adjoint_deriv(const type_adjoint& local_adjoint,
                              type_adjoint& global_adjoint,
@@ -66,7 +84,16 @@ class BaseReverseMode {
                              const type_hessian& local_hessian,
                              type_hessian& global_hessian,
                              const Base& w,
-                             type_adjoint& r);
+                             const type_adjoint& r);
+
+  void compute_third_deriv(locint local_dep,
+                           const type_adjoint& local_adjoint,
+                           const type_hessian& local_hessian,
+                           const type_third& local_third,
+                           type_third& global_third,
+                           const Base& w,
+                           const type_adjoint& r,
+                           const type_hessian& e);
 
   virtual void process_sac(const DerivativeInfo<locint, Base>& info) = 0;
 
@@ -201,6 +228,10 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           info.dy = -vx / (vy*vy);
           info.pxy = -1.0 / (vy*vy);
           info.pyy = 2.0 * vx / (vy*vy*vy);
+#ifdef ENABLE_REVERSE_THIRD
+          info.pxyy = 2.0 / (vy * vy * vy);
+          info.pyyy = -6.0 * vx / (vy * vy * vy * vy);
+#endif
           PSEUDO_BINARY
           break;
         case div_d_a:
@@ -210,6 +241,9 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           coval = trace->get_next_coval_r();
           info.dx = -coval / (vx*vx);
           info.pxx = 2.0 * coval / (vx*vx*vx);
+#ifdef ENABLE_REVERSE_THIRD
+          info.pxxx = -6.0 * coval / (vx*vx*vx*vx);
+#endif
           break;
         case sin_a:
           info.r = trace->get_next_loc_r();
@@ -217,6 +251,9 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           vx = trace->get_next_val_r();
           info.dx = cos(vx);
           info.pxx = -sin(vx);
+#ifdef ENABLE_REVERSE_THIRD
+          info.pxxx = -cos(vx);
+#endif
           break;
         case cos_a:
           info.r = trace->get_next_loc_r();
@@ -224,6 +261,9 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           vx = trace->get_next_val_r();
           info.dx = -sin(vx);
           info.pxx = -cos(vx);
+#ifdef ENABLE_REVERSE_THIRD
+          info.pxxx = sin(vx);
+#endif
           break;
         case tan_a:
           info.r = trace->get_next_loc_r();
@@ -232,6 +272,9 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           vy = cos(vx);
           info.dx = 1.0 / (vy * vy);
           info.pxx = 2.0 * tan(vx) / (vy * vy);
+#ifdef ENABLE_REVERSE_THIRD
+          info.pxxx = -2 * (cos(2*vx)-2) / (vy*vy*vy*vy);
+#endif
           break;
         case asin_a:
           info.r = trace->get_next_loc_r();
@@ -240,6 +283,9 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           vy = sqrt(1.0 - vx * vx);
           info.dx = 1.0 / vy;
           info.pxx = vx / (vy * vy * vy);
+#ifdef ENABLE_REVERSE_THIRD
+          info.pxxx = (2.0*vx*vx+1.0) / (vy*vy*vy*vy*vy);
+#endif
           break;
         case acos_a:
           info.r = trace->get_next_loc_r();
@@ -248,6 +294,9 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           vy = -sqrt(1.0 - vx * vx);
           info.dx = 1.0 / vy;
           info.pxx = vx / (vy * vy * vy);
+#ifdef ENABLE_REVERSE_THIRD
+          info.pxxx = (2.0*vx*vx+1.0) / (vy*vy*vy*vy*vy);
+#endif
           break;
         case atan_a:
           info.r = trace->get_next_loc_r();
@@ -256,6 +305,9 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           vy = 1.0 + vx * vx;
           info.dx = 1.0 / vy;
           info.pxx = -2.0 * vx / (vy * vy);
+#ifdef ENABLE_REVERSE_THIRD
+          info.pxxx = (6.0*vx*vx-2.0)/(vy*vy*vy);
+#endif
           break;
         case sqrt_a:
           info.r = trace->get_next_loc_r();
@@ -264,9 +316,9 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           if (vx != 0.0) {
             info.dx = 0.5/sqrt(vx);
             info.pxx = -0.5 * info.dx / vx;
-          } else {
-            info.dx = 0.0;
-            info.pxx = 0.0;
+#ifdef ENABLE_REVERSE_THIRD
+            info.pxxx = -1.5 * info.pxx / vx;
+#endif
           }
           break;
         case exp_a:
@@ -275,6 +327,9 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           vx = trace->get_next_val_r();
           info.dx = exp(vx);
           info.pxx = info.dx;
+#ifdef ENABLE_REVERSE_THIRD
+          info.pxxx = info.dx;
+#endif
           break;
         case log_a:
           info.r = trace->get_next_loc_r();
@@ -282,6 +337,9 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           vx = trace->get_next_val_r();
           info.dx = 1.0 / vx;
           info.pxx = - info.dx * info.dx;
+#ifdef ENABLE_REVERSE_THIRD
+          info.pxxx = -2.0 * info.pxx / vx;
+#endif
           break;
         case pow_a_a:
           info.r = trace->get_next_loc_r();
@@ -296,6 +354,12 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
             info.dy = log(vx) * t;
             info.pyy = log(vx) * info.dy;
             info.pxy = (vy * log(vx) + 1) * t / vx;
+#ifdef ENABLE_REVERSE_THIRD
+            info.pxxx = (vy - 2) * info.pxx / vx;
+            info.pxxy = (vy-1)*info.pxy/vx + vy*t/(vx*vx);
+            info.pxyy = info.dx*log(vx)*log(vx) + 2*log(vx)*t/vx;
+            info.pyyy = log(vx) * info.pyy;
+#endif
           }
           PSEUDO_BINARY
           break;
@@ -308,6 +372,9 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
             Base t = pow(vx, coval);
             info.dx = coval * t / vx;
             info.pxx = (coval - 1) * info.dx / vx;
+#ifdef ENABLE_REVERSE_THIRD
+            info.pxxx = (coval - 2) * info.pxx / vx;
+#endif
           }
           break;
         case pow_d_a:
@@ -319,6 +386,9 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
             Base t = pow(coval, vx);
             info.dx = log(coval) * t;
             info.pxx = log(coval) * info.dx;
+#ifdef ENABLE_REVERSE_THIRD
+            info.pxxx = log(coval) * info.pxx;
+#endif
           }
           break;
         case fabs_a:
@@ -425,6 +495,107 @@ void BaseReverseMode<Base>::compute_hessian_sac(
   }
 }
 
+template<typename Base>
+void BaseReverseMode<Base>::compute_third_sac(
+    const DerivativeInfo<locint, Base>& info,
+    type_third& third_vals,
+    const Base& w,
+    const type_adjoint& r,
+    const type_hessian& e) {
+  locint p,q;
+  double pw;
+  double coeff, xcoeff, ycoeff;
+
+  typename type_hessian::enumerator e_enum = e.get_enumerator();
+  while(e_enum.has_next()) {
+    e_enum.get_next(p, q, pw);
+    if (p != info.r && q != info.r) { // p!=r && q!=r
+      if (info.x != NULL_LOC && info.dx != 0.0) {
+        xcoeff = 1.0;
+        if (info.x == p) {xcoeff += 1.0;}
+        if (info.x == q) {xcoeff += 1.0;}
+        third_vals.increase(info.x, p, q, xcoeff * pw * info.dx);
+      }
+      if (info.y != NULL_LOC && info.dy != 0.0) {
+        ycoeff = 1.0;
+        if (info.y == p) {ycoeff += 1.0;}
+        if (info.y == q) {ycoeff += 1.0;}
+        third_vals.increase(info.y, p, q, ycoeff * pw * info.dy);
+      }
+    } else if (p !=q) { // p==r || q ==r, p!=q
+      if (q == info.r) {std::swap(p, q);}
+      if (info.x != NULL_LOC && info.y != NULL_LOC) {
+        coeff = 1.0; xcoeff = 1.0; ycoeff = 1.0;
+        if (info.x == q) {coeff+=1.0; xcoeff+=2.0;}
+        if (info.y == q) {coeff+=1.0; ycoeff+=2.0;}
+        third_vals.increase(q, info.x, info.x, xcoeff*pw*info.dx*info.dx);
+        third_vals.increase(q, info.x, info.y, coeff*pw*info.dx*info.dy);
+        third_vals.increase(q, info.y, info.y, ycoeff*pw*info.dy*info.dy);
+      } else if (info.x != NULL_LOC) {
+        xcoeff = 1.0;
+        if (info.x == q) {xcoeff+=2.0;}
+        third_vals.increase(q, info.x, info.x, xcoeff*pw*info.dx*info.dx);
+      } 
+    } else { // p==q==r
+      if (info.x != NULL_LOC) {
+        third_vals.increase(info.x, info.x, info.x, 
+                             pw * info.dx * info.dx * info.dx);
+        if (info.y != NULL_LOC && info.dy != 0.0) {
+          third_vals.increase(info.x, info.x, info.y,
+                               pw * info.dx * info.dx * info.dy);
+          third_vals.increase(info.x, info.y, info.y,
+                               pw * info.dx * info.dy * info.dy);
+          third_vals.increase(info.y, info.y, info.y,
+                               pw * info.dy * info.dy * info.dy);
+        }
+      }
+    } // if
+  } // while
+
+  typename type_adjoint::enumerator r_enum = r.get_enumerator();
+  while (r_enum.has_next()) {
+    r_enum.get_next(p, pw);
+    if (p != info.r) {
+      if (info.x != NULL_LOC && info.y != NULL_LOC) {
+        coeff = xcoeff = ycoeff = 1.0;
+        if (info.x == p) {coeff+=1.0;xcoeff+=2.0;}
+        if (info.y == p) {coeff+=1.0;ycoeff+=2.0;}
+        third_vals.increase(p, info.x, info.x, xcoeff*pw*info.pxx);
+        third_vals.increase(p, info.x, info.y, coeff*pw*info.pxy);
+        third_vals.increase(p, info.y, info.y, ycoeff*pw*info.pyy);
+      } else if (info.x != NULL_LOC) {
+        xcoeff = 1.0;
+        if (info.x == p) {xcoeff +=2.0;}
+        third_vals.increase(p, info.x, info.x, xcoeff*pw*info.pxx);
+      }
+    } else { // p == info.r
+      if (info.x != NULL_LOC) {
+        third_vals.increase(info.x, info.x, info.x,
+                             3.0*pw*info.dx*info.pxx);
+        if (info.y != NULL_LOC) {
+          third_vals.increase(info.x, info.x, info.y,
+                               2.0*pw*info.dx*info.pxy+pw*info.dy*info.pxx);
+          third_vals.increase(info.x, info.y, info.y,
+                               2.0*pw*info.dy*info.pxy+pw*info.dx*info.pyy);
+          third_vals.increase(info.y, info.y, info.y,
+                               3.0*pw*info.dy*info.pyy);
+        }
+      }
+    } 
+  } // while
+  
+  if (w != 0.0) {
+    if (info.x != NULL_LOC) {
+      third_vals.increase(info.x, info.x, info.x, w*info.pxxx);
+      if (info.y != NULL_LOC) {
+        third_vals.increase(info.x, info.x, info.y, w*info.pxxy);
+        third_vals.increase(info.x, info.y, info.y, w*info.pxyy);
+        third_vals.increase(info.y, info.y, info.y, w*info.pyyy);
+      }
+    }
+  }
+}
+
 template <typename Base>
 void BaseReverseMode<Base>::compute_adjoint_deriv(
     const type_adjoint& local_adjoint,
@@ -450,37 +621,37 @@ void BaseReverseMode<Base>::compute_hessian_deriv(
     const type_hessian& local_hessian,
     type_hessian& global_hessian,
     const Base& w,
-    type_adjoint& r) {
+    const type_adjoint& r) {
 
-  locint p, v;
-  Base pw, vw;
-  if (r[local_dep] != 0.0) {
-    Base dw = r[local_dep];
-    typename type_adjoint::enumerator a_enum = local_adjoint.get_enumerator();
-    bool a_has_next = a_enum.has_next();
-    while(a_has_next) {
-      typename type_adjoint::enumerator a2_enum = a_enum;
-      a_has_next = a_enum.get_next(p, pw);
-      bool a2_has_next = true;
-      while(a2_has_next) {
-        a2_has_next = a2_enum.get_next(v, vw);
-        global_hessian.increase(p, v, dw * pw * vw);
-      }
-    }
-  }
-  r.erase(local_dep);
+  locint p, v, u;
+  Base pw, vw, uw;
+
   typename type_adjoint::enumerator r_enum = r.get_enumerator();
   bool r_has_next = r_enum.has_next();
   while(r_has_next) {
     r_has_next = r_enum.get_next(p, pw);
-    typename type_adjoint::enumerator a_enum = local_adjoint.get_enumerator();
-    bool a_has_next = a_enum.has_next();
-    while(a_has_next) {
-      a_has_next = a_enum.get_next(v, vw);
-      if (p != v) {
-        global_hessian.increase(p, v, pw * vw);
-      } else {
-        global_hessian.increase(p, v, 2.0 * pw * vw);
+    if (p == local_dep) {
+      typename type_adjoint::enumerator a_enum = local_adjoint.get_enumerator();
+      bool a_has_next = a_enum.has_next();
+      while(a_has_next) {
+        typename type_adjoint::enumerator a2_enum = a_enum;
+        a_has_next = a_enum.get_next(v, vw);
+        bool a2_has_next = true;
+        while(a2_has_next) {
+          a2_has_next = a2_enum.get_next(u, uw);
+          global_hessian.increase(v, u, pw * vw * uw);
+        }
+      }
+    } else {
+      typename type_adjoint::enumerator a_enum = local_adjoint.get_enumerator();
+      bool a_has_next = a_enum.has_next();
+      while(a_has_next) {
+        a_has_next = a_enum.get_next(v, vw);
+        if (p != v) {
+          global_hessian.increase(p, v, pw * vw);
+        } else {
+          global_hessian.increase(p, v, 2.0 * pw * vw);
+        }
       }
     }
   }
@@ -490,6 +661,107 @@ void BaseReverseMode<Base>::compute_hessian_deriv(
     while(h_has_next) {
       h_has_next = h_enum.get_next(p, v, pw);
       global_hessian.increase(p, v, w * pw);
+    }
+  }
+}
+
+template<typename Base>
+void BaseReverseMode<Base>::compute_third_deriv(
+    locint local_dep,
+    const type_adjoint& local_adjoint,
+    const type_hessian& local_hessian,
+    const type_third& local_third,
+    type_third& global_third,
+    const Base& w,
+    const type_adjoint& r,
+    const type_hessian& e) {
+
+  locint p, q, x, y, z;
+  Base ww, wx, wy, wz;
+  double coeff;
+  typename type_hessian::enumerator e_enum = e.get_enumerator();
+  while(e_enum.has_next()) {
+    e_enum.get_next(p, q, ww);
+    if (p != local_dep && q != local_dep) { // p != dep && q != dep
+      typename type_adjoint::enumerator la_enum = local_adjoint.get_enumerator();
+      while(la_enum.has_next()) {
+        la_enum.get_next(x, wx);
+        coeff = 1.0;
+        if (p == x) {coeff += 1.0;}
+        if (q == x) {coeff += 1.0;}
+        global_third.increase(x, p, q, coeff*ww*wx);
+      }
+    } else if (p != q) { // p == dep != q
+      if (q == local_dep) {std::swap(p, q);}
+      typename type_adjoint::enumerator la_enum1 = local_adjoint.get_enumerator();
+      while (la_enum1.has_next()) {
+        typename type_adjoint::enumerator la_enum2 = la_enum1;
+        la_enum1.get_next(x, wx);
+        while (la_enum2.has_next()) {
+          la_enum2.get_next(y, wy);
+          coeff = 1.0;
+          if (x == y) {
+            if (q == x) {coeff += 2.0;}
+          } else if (q == x || q == y) {
+            coeff += 1.0;
+          }
+          global_third.increase(q, x, y, coeff*ww*wx*wy);
+        }
+      }
+    } else { // p == q == dep
+      typename type_adjoint::enumerator la_enum1 = local_adjoint.get_enumerator();
+      while(la_enum1.has_next()) {
+        typename type_adjoint::enumerator la_enum2 = la_enum1;
+        la_enum1.get_next(x, wx);
+        while (la_enum2.has_next()) {
+          typename type_adjoint::enumerator la_enum3 = la_enum2;
+          la_enum2.get_next(y, wy);
+          while (la_enum3.has_next()) {
+            la_enum3.get_next(z, wz);
+            global_third.increase(x, y, z, ww*wx*wy*wz);
+          }
+        }
+      }
+    } 
+  } // while
+
+  typename type_adjoint::enumerator r_enum = r.get_enumerator();
+  while (r_enum.has_next()) {
+    r_enum.get_next(p, ww);
+    if (p != local_dep) { // p != local_dep
+      typename type_hessian::enumerator lh_enum =
+          local_hessian.get_enumerator();
+      while (lh_enum.has_next()) {
+        lh_enum.get_next(x, y, wx);
+        coeff = 1.0;
+        if (p == x) {coeff += 1.0;}
+        if (p == y) {coeff += 1.0;}
+        global_third.increase(p, x, y, coeff * ww * wx);
+      }
+    } else { // p == local_dep
+      typename type_hessian::enumerator lh_enum = 
+          local_hessian.get_enumerator();
+      while (lh_enum.has_next()) {
+        lh_enum.get_next(x, y, wx);
+        typename type_adjoint::enumerator la_enum = 
+            local_adjoint.get_enumerator();
+        while (la_enum.has_next()) {
+          la_enum.get_next(z, wz);
+          coeff = 1.0;
+          if (x == z) {coeff += 1.0;}
+          if (y == z) {coeff += 1.0;}
+          global_third.increase(x, y, z, coeff * ww * wx * wz);
+        }
+      }
+    }
+  } // while
+
+  if (w != 0.0) {
+    typename type_third::enumerator lt_enum =
+        local_third.get_enumerator();
+    while (lt_enum.has_next()) {
+      lt_enum.get_next(x, y, z, ww);
+      global_third.increase(x, y, z, w * ww);
     }
   }
 }

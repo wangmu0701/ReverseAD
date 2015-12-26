@@ -68,9 +68,11 @@ class TrivialHessian : public AbstractSerializable {
       }
     }
     void find_next() {
-      while(!_enum.has_next() && _iter != _data->end()) {
+      while(_iter != _data->end() && !_enum.has_next()) {
         ++_iter;
-        _enum = _iter->second.get_enumerator();
+        if (_iter != _data->end()) {
+          _enum = _iter->second.get_enumerator();
+        }
       }
     }
     void swap(enumerator& lhs, enumerator& rhs) {
