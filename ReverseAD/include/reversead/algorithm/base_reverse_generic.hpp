@@ -9,10 +9,14 @@
 #include "reversead/algorithm/reversead_multiset.hpp"
 #include "reversead/algorithm/single_derivative.hpp"
 #include "reversead/algorithm/generic_deriv.hpp"
+
+#define REVERSEAD_MAX_GENERIC_ORDER 10
+
 namespace ReverseAD {
 
-static const double kFactorial[11] = {1.0, 1.0, 2.0, 6.0, 24.0, 120.0, 720.0, 
-                                      5040.0, 40320.0, 362880.0, 3628800.0};
+static const double kFactorial[REVERSEAD_MAX_GENERIC_ORDER + 1] =
+    {1.0, 1.0, 2.0, 6.0, 24.0, 120.0, 720.0, 
+     5040.0, 40320.0, 362880.0, 3628800.0};
 
 template <typename Base>
 class BaseReverseGeneric : public BaseReverseMode<Base> {
@@ -24,13 +28,21 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
   using BaseReverseMode<Base>::indep_index_map;
   using BaseReverseMode<Base>::dep_index_map;
 
-  BaseReverseGeneric(AbstractTrace<Base>* trace) : BaseReverseMode<Base>(trace){}
-  void compute(int ind_num, int dep_num, int order) {
-    if (order > 10) {
-      std::cout << "Sorry, max order should be less than 10!" << std::endl;
+  BaseReverseGeneric(AbstractTrace<Base>* trace, int order) :
+      BaseReverseMode<Base>(trace) {
+    if (order > REVERSEAD_MAX_GENERIC_ORDER) {
+      std::cout << "Sorry, max order should be less than " 
+                << REVERSEAD_MAX_GENERIC_ORDER << "." << std::endl;
       return;
     }
+    if (order <= 0) {
+      std::cout << "Order("<<order<<") should be positive." << std::endl;
+    }
     this->order = order;
+  }
+
+  void compute(int ind_num, int dep_num) {
+
     BaseReverseMode<Base>::compute(ind_num, dep_num);
     for(const auto& kv : dep_deriv) {
       locint dep = kv.first;
@@ -40,7 +52,47 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
     }
   }
 
-  // here we're NOT touching SingleDeriv
+  int retrieve_generic_values(int t_order, int** ssize, locint**** tind, Base*** values) {
+    int dep_size = dep_deriv.size();
+    (*ssize) = new int[dep_size];
+    (*tind) = new locint**[dep_size];
+    (*values) = new Base*[dep_size];
+    for (auto& kv : dep_deriv) {
+      locint dep = dep_index_map[kv.first] - 1;
+      typename GenericDeriv<locint, Base>::enumerator g_enum =
+        kv.second.get_enumerator();
+      ReverseADMultiSet<locint> s_set;
+      Base sw;
+      int size = 0;
+      while(g_enum.has_next()) {
+        g_enum.get_curr_pair(s_set, sw);
+        g_enum.move_to_next();
+        if (s_set.size() == t_order) {
+          size++;
+        }
+      }
+      (*ssize)[dep] = size;
+      (*tind)[dep] = new locint*[size];
+      (*values)[dep] = new Base[size];
+      g_enum = kv.second.get_enumerator();
+      int l = 0;
+      while (g_enum.has_next()) {
+        g_enum.get_curr_pair(s_set, sw);
+        g_enum.move_to_next();
+        if (s_set.size() == t_order) {
+          (*values)[dep][l] = sw;
+          (*tind)[dep][l] = s_set.to_array();
+          for (int i=0; i<t_order; i++) {
+            (*tind)[dep][l][i] = indep_index_map[(*tind)[dep][l][i]];
+          }
+          l++;
+        }
+      } 
+    }
+    return dep_size;
+  }
+
+  // here we're NOT touching SingleDeriv, will change interface later
   void init_dep_deriv(SingleDeriv& deriv, locint dep) {
     GenericDeriv<locint, Base> d_deriv(order);
     ReverseADMultiSet<locint> d_set;
@@ -257,42 +309,141 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
     ret = ret / kFactorial[count];
     return ret;
   }
+
+  void check_and_increase(const ReverseADMultiSet<locint>& term,
+                        const Base& value,
+                        GenericDeriv<locint, Base>& local_deriv) {
+    if (value != 0.0) {
+      local_deriv.increase(term, value);
+    }
+  }
+  // fill in a generic derivative table for SACs
   void fill_in_local_deriv(const DerivativeInfo<locint, Base>& info,
                            GenericDeriv<locint, Base>& local_deriv) {
+
+    if (order <= 3) { // simple fill
+      ReverseADMultiSet<locint> term;
+      // dx
+      term.insert(info.x);
+      check_and_increase(term, info.dx, local_deriv);
+      term.clear();
+      // dy
+      term.insert(info.y);
+      check_and_increase(term, info.dy, local_deriv);
+      term.clear();
+      if (order >= 2) {
+        //pxx
+        term.insert(info.x); term.insert(info.x);
+        check_and_increase(term, info.pxx, local_deriv);
+        term.clear();
+        //pxy
+        term.insert(info.x); term.insert(info.y);
+        check_and_increase(term, info.pxy, local_deriv);
+        term.clear();
+        //pyy
+        term.insert(info.y); term.insert(info.y);
+        check_and_increase(term, info.pyy, local_deriv);
+        term.clear();
+        if (order >= 3){
+          // pxxx
+          term.insert(info.x); term.insert(info.x); term.insert(info.x);
+          check_and_increase(term, info.pxxx, local_deriv);
+          term.clear();
+          // pxxy
+          term.insert(info.x); term.insert(info.x); term.insert(info.y);
+          check_and_increase(term, info.pxxy, local_deriv);
+          term.clear();
+          // pxyy
+          term.insert(info.x); term.insert(info.y); term.insert(info.y);
+          check_and_increase(term, info.pxyy, local_deriv);
+          term.clear();
+          // pyyy
+          term.insert(info.y); term.insert(info.y); term.insert(info.y);
+          check_and_increase(term, info.pyyy, local_deriv);
+          term.clear();
+        }
+      }
+      return;
+    }
     ReverseADMultiSet<locint> term;
     switch(info.opcode) {
-      case plus_d_a:
       case assign_a:
+      case eq_plus_d:
+      case plus_d_a:
+      case minus_d_a:
+      case eq_mult_d:
+      case mult_d_a:
         term.insert(info.x);
-        local_deriv.increase(term, info.dx);
+        check_and_increase(term, info.dx, local_deriv);
         break;
+      case eq_plus_a:
       case plus_a_a:
+      case eq_minus_a:
+      case minus_a_a:
         term.insert(info.x);
-        local_deriv.increase(term, info.dx);
+        check_and_increase(term, info.dx, local_deriv);
         if (info.y != NULL_LOC) {
           term.clear();
           term.insert(info.y);
-          local_deriv.increase(term, info.dy);
+          check_and_increase(term, info.dy, local_deriv);
         }
         break;
+      case eq_mult_a:
       case mult_a_a:
         term.insert(info.x);
-        local_deriv.increase(term, info.dx);
+        check_and_increase(term, info.dx, local_deriv);
         if (info.y != NULL_LOC) {
           term.clear();
           term.insert(info.y);
-          local_deriv.increase(term, info.dy);
+          check_and_increase(term, info.dy, local_deriv);
           term.insert(info.x);
-          local_deriv.increase(term, info.pxy);
+          check_and_increase(term, info.pxy, local_deriv);
         } else {
           term.insert(info.x);
-          local_deriv.increase(term, info.pxx);
+          check_and_increase(term, info.pxx, local_deriv);
+        }
+        break;
+      case eq_div_a:
+      case div_a_a:
+        term.insert(info.x);
+        check_and_increase(term, info.dx, local_deriv);
+        term.clear();
+        if (info.y != NULL_LOC) {
+          Base t = 1.0 / info.vy;
+          term.insert(info.x);
+          for(int i=2;i<=order; i++) {
+            t = t * (1-i) / info.vy;
+            term.insert(info.y);
+            check_and_increase(term, t, local_deriv);
+          }
+          term.clear();
+          t = info.vx / info.vy;
+          for(int i=1;i<=order; i++) {
+            t = t * (-i) / info.vy;
+            term.insert(info.y);
+            check_and_increase(term, t, local_deriv);
+          }
+          term.clear(); 
+        } 
+        break;
+      case div_d_a:
+        term.insert(info.x);
+        check_and_increase(term, info.dx, local_deriv);
+        {
+          Base t = info.dx;
+          for (int i=2; i<=order; i++) {
+            t *= (-i) / info.vx;
+            check_and_increase(term, t, local_deriv);
+          }
         }
         break;
       default:
         logger.warning << "Unrecongized opcode : " << (int)info.opcode
                     << std::endl;
     }
+    std::cout << "filling in for :" << std::endl;
+    info.debug();
+    local_deriv.debug(); 
   } 
 };
 

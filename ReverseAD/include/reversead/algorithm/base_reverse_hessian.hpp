@@ -49,7 +49,7 @@ class BaseReverseHessian : public virtual BaseReverseAdjoint<Base> {
     compute_hessian_sac(info, *(deriv.hessian_vals), w, r);
   }
 
-  void retrieve_hessian_sparse_format(int** ssize, locint*** rind, locint*** cind, Base*** values) {
+  int retrieve_hessian_sparse_format(int** ssize, locint*** rind, locint*** cind, Base*** values) {
     int dep_size = dep_deriv.size();
     (*ssize) = new int[dep_size];
     (*rind) = new locint*[dep_size];
@@ -73,6 +73,7 @@ class BaseReverseHessian : public virtual BaseReverseAdjoint<Base> {
         l++;
       }
     }
+    return dep_size;
   }
 
  protected:

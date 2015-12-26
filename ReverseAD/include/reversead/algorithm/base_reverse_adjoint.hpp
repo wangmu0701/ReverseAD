@@ -42,7 +42,7 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
     preacc_enabled = true;
   }
 
-  void retrieve_adjoint(Base*** values) {
+  int retrieve_adjoint(Base*** values) {
     int dep_size = dep_deriv.size();
     (*values) = new Base*[dep_size];
     for (auto& kv : dep_deriv) {
@@ -59,11 +59,12 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
         (*values)[dep][indep_index_map[x] - 1] = w;
       } 
     }
+    return dep_size;
   }
 
   void retrieve_adjoint_sparse_format(int* ssize,
-                                      locint** rind, locint** cind,
-                                      Base** values) {
+                                     locint** rind, locint** cind,
+                                     Base** values) {
     int total_size = 0;
     for (auto& kv : dep_deriv) {
       total_size += kv.second.adjoint_vals->get_size();

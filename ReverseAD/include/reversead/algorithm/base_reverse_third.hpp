@@ -56,7 +56,7 @@ class BaseReverseThird : public virtual BaseReverseHessian<Base> {
     compute_third_sac(info, *(deriv.third_vals), w, r, e);
   }
 
-  void retrieve_third_sparse_format(int** ssize, locint**** tind, Base*** values) {
+  int retrieve_third_sparse_format(int** ssize, locint**** tind, Base*** values) {
     int dep_size = dep_deriv.size();
     (*ssize) = new int[dep_size];
     (*tind) = new locint**[dep_size];
@@ -80,6 +80,7 @@ class BaseReverseThird : public virtual BaseReverseHessian<Base> {
         l++;
       }
     }
+    return dep_size;
   }
 
  protected:
