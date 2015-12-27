@@ -19,13 +19,15 @@
     return res;
   }
   friend BaseActive<Base> tan(const BaseActive<Base>& rhs) {
+/*
     BaseActive<Base> res(tan(rhs.val), get_next_loc());
     trace_put_ollb<Base>(tan_a, res.loc, rhs.loc, rhs.val);
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     logger.info << "L(" << &res << ")[" << res.loc << "] = "
              << "tan L(" << &rhs << ")[" << rhs.loc << ")" << std::endl;
 #endif
-    return res;
+*/
+    return sin(rhs) / cos(rhs);
   }
 
   friend BaseActive<Base> asin(const BaseActive<Base>& rhs) {
@@ -79,6 +81,7 @@
     rhs.loc = resloc;
     return std::move(rhs);
   }
+/*
   friend BaseActive<Base>&& tan(BaseActive<Base>&& rhs) {
     locint resloc = get_next_loc();
     trace_put_ollb<Base>(tan_a, resloc, rhs.loc, rhs.val);
@@ -90,7 +93,7 @@
     rhs.loc = resloc;
     return std::move(rhs);
   }
-
+*/
   friend BaseActive<Base>&& asin(BaseActive<Base>&& rhs) {
     locint resloc = get_next_loc();
     trace_put_ollb<Base>(asin_a, resloc, rhs.loc, rhs.val);

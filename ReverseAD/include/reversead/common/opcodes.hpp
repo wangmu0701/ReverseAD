@@ -27,7 +27,6 @@ enum OPCODES {
   div_d_a,
   sin_a,
   cos_a,
-  tan_a,
   asin_a,
   acos_a,
   atan_a,

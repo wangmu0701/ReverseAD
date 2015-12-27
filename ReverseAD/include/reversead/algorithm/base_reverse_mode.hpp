@@ -266,6 +266,7 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           info.pxxx = sin(info.vx);
 #endif
           break;
+/*
         case tan_a:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
@@ -279,6 +280,7 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
 #endif
           }
           break;
+*/
         case asin_a:
           info.r = trace->get_next_loc_r();
           info.x = trace->get_next_loc_r();
@@ -377,6 +379,7 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           info.x = trace->get_next_loc_r();
           info.vx = trace->get_next_val_r();
           coval = trace->get_next_coval_r();
+          info.coval = coval;
           {
             Base t = pow(info.vx, coval);
             info.dx = coval * t / info.vx;
@@ -391,6 +394,7 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
           info.x = trace->get_next_loc_r();
           info.vx = trace->get_next_val_r();
           coval = trace->get_next_coval_r();
+          info.coval = coval;
           {
             Base t = pow(coval, info.vx);
             info.dx = log(coval) * t;

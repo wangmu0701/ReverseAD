@@ -298,6 +298,7 @@ class BaseFunctionReplay {
           val_map[res] = cos(val1);
           val_tape->put(val1);
           break;
+/*
         case tan_a:
           arg1 = trace->get_next_loc_f();
           res = trace->get_next_loc_f();
@@ -306,6 +307,7 @@ class BaseFunctionReplay {
           val_map[res] = tan(val1);
           val_tape->put(val1);
           break;
+*/
         case asin_a:
           arg1 = trace->get_next_loc_f();
           res = trace->get_next_loc_f();

@@ -31,6 +31,7 @@ class DerivativeInfo {
   }
   opbyte opcode;
   LocType r, x, y;
+  mutable double coval; // only used by pow_d_a and pow_a_d
   Base vx, vy;
   Base dx, dy;
   Base pxx, pxy, pyy;

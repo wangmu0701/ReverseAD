@@ -9,11 +9,40 @@ using ReverseAD::BaseReverseGeneric;
 
 double myEps = 1.E-10;
 
+
+void check_value(int t_order,
+                 BaseReverseGeneric<double>& generic,
+                 double true_answer,
+                 bool& done) {
+  int* size;
+  locint*** tind;
+  double** values;
+  int dep_size = generic.retrieve_generic_values(t_order, &size, &tind, &values);
+  if (dep_size != 1) {
+    std::cout << "dep_size = " << dep_size << std::endl;
+    done = true;
+    return;
+  }
+  if (size[0] > 1) {
+    std::cout << "size = " << size[0] << std::endl;
+    done = true;
+  } else if (size[0] == 1) {
+    if (fabs(values[0][0] - true_answer) > myEps) {
+      std::cout << values[0][0] << " != " << true_answer << std::endl;
+      done = true;
+    }
+  } else {
+    if (true_answer != 0.0) {
+      std::cout << "None != " << true_answer << std::endl;
+      done = true;
+    }
+  }
+}
+
 //check answer up to order 6
 void check_answer(TrivialTrace<double>* trace,
                   bool& done,
-                  double vx,
-                  bool enable_preacc) {
+                  double vx) {
       double vy;
       TrivialTrace<double>* new_trace =
           BaseFunctionReplay::replay_ind(trace, &vy,1, &vx, 1);
@@ -21,42 +50,8 @@ void check_answer(TrivialTrace<double>* trace,
         done = true;
       }
       BaseReverseGeneric<double> generic_derivative(new_trace, 6);
-      base_derivative.compute(1,1);
-      double** adjoints;
-      base_derivative.retrieve_adjoint(&adjoints);
-      if (fabs(adjoints[0][0]-4*vx*vx*vx) > myEps) {
-        done = true;
-      }
-      int *size;
-      locint **rind;
-      locint **cind;
-      double** values;
-      base_derivative.retrieve_hessian_sparse_format(&size, &rind, &cind, &values);
-      if (size[0] == 1) {
-        if (fabs(values[0][0]-12.0*vx*vx) > myEps) {
-          done = true;
-        }
-      } else {
-        done = true;
-      }
-
-      locint ***tind;
-      double** tvalues;
-      base_derivative.retrieve_third_sparse_format(&size, &tind, &tvalues);
-      if (size[0] > 1) {
-        done = true;
-      } else if (size[0] == 1) {
-        if (fabs(tvalues[0][0] - 24.0*vx) > myEps) {
-          done = true;
-        }
-      }
-     
-      if (done) {
-        std::cout << "y = " << vy << std::endl;
-        std::cout << "A[0] = " << adjoints[0][0] << std::endl;
-        std::cout << "H[0] = " << values[0][0] << std::endl;
-        std::cout << "T[0] = " << tvalues[0][0] << std::endl;
-      }
+      generic_derivative.compute(1, 1);
+      check_value(1, generic_derivative, 5*vx*vx*vx*vx, done);
 }
 int main() {
   bool done = false;
@@ -70,6 +65,12 @@ int main() {
     case 0:
       y = x*x*x*x*x;
       testLine = "y=x*x*x*x*x";
+      break;
+    case 1:
+      y = x*x*x;
+      y *= y;
+      y /= x;
+      testLine = "y=x*x*x;y*=y;y/=x";
       break;
     default:
       done = true;

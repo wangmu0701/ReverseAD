@@ -39,17 +39,20 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
       std::cout << "Order("<<order<<") should be positive." << std::endl;
     }
     this->order = order;
+    special_derivative_coeff();
   }
 
   void compute(int ind_num, int dep_num) {
 
     BaseReverseMode<Base>::compute(ind_num, dep_num);
+/*
     for(const auto& kv : dep_deriv) {
       locint dep = kv.first;
       std::cout << "Dep : " << dep << std::endl;
       kv.second.debug();
       std::cout << std::endl;
     }
+*/
   }
 
   int retrieve_generic_values(int t_order, int** ssize, locint**** tind, Base*** values) {
@@ -99,7 +102,7 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
     d_set.insert(dep);
     d_deriv.increase(d_set, 1.0);
     dep_deriv.insert(std::pair<locint, GenericDeriv<locint, Base>>(dep, d_deriv));
-    d_deriv.debug();
+    //d_deriv.debug();
   }
 
   void accumulate_deriv(const DerivativeInfo<locint, Base>& info,
@@ -159,6 +162,9 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
     if (info.r != NULL_LOC) {
       GenericDeriv<locint, Base> local_deriv(order);
       fill_in_local_deriv(info, local_deriv);
+      //std::cout << "filling in : " << std::endl;
+      //info.debug();
+      //local_deriv.debug(); 
       std::set<locint> dep_set = std::move(reverse_live[info.r]);
       reverse_live.erase(info.r);
       //info.debug();
@@ -193,6 +199,35 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
   locint temp_x;
   locint temp_y;
   
+  // helper coefficient series for derivatives of asin/atan/asinh/atanh
+  double c_atan[REVERSEAD_MAX_GENERIC_ORDER + 1]
+      [REVERSEAD_MAX_GENERIC_ORDER + 1][REVERSEAD_MAX_GENERIC_ORDER + 1];
+  double c_asin[REVERSEAD_MAX_GENERIC_ORDER + 1]
+      [REVERSEAD_MAX_GENERIC_ORDER + 1][REVERSEAD_MAX_GENERIC_ORDER + 1];
+
+  void special_derivative_coeff() {
+    for (int i=0;i<=REVERSEAD_MAX_GENERIC_ORDER; i++) {
+      for (int j=0;j<=REVERSEAD_MAX_GENERIC_ORDER; j++) {
+        for (int k=0;k<=REVERSEAD_MAX_GENERIC_ORDER; k++) {
+          c_atan[i][j][k] = c_asin[i][j][k] =  0.0;
+        }
+      }
+    }
+    c_atan[1][1][0] = c_asin[1][1][0] = 1.0;
+    for (int i=2; i <= REVERSEAD_MAX_GENERIC_ORDER; i++) {
+      for (int j = REVERSEAD_MAX_GENERIC_ORDER; j >= 2; j--) {
+        for (int k=0; k < REVERSEAD_MAX_GENERIC_ORDER; k++) {
+          c_atan[i][j][k] = c_atan[i-1][j][k+1] * (k+1);
+          c_asin[i][j][k] = c_asin[i-1][j][k+1] * (k+1);
+        }
+        for (int k=1; k <= REVERSEAD_MAX_GENERIC_ORDER; k++) {
+          c_atan[i][j][k] += c_atan[i-1][j-1][k-1] * 2 * (1-j);
+          c_asin[i][j][k] += c_asin[i-1][j-1][k-1] * -2 * (1.5 - j);
+        }
+      }
+    }
+  }
+ 
   void clear_private_temps() {
     temp_x = NULL_LOC;
     temp_y = NULL_LOC;
@@ -217,9 +252,9 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
     Base w;
     while(s_enum.has_next()) {
       s_enum.get_curr_pair(dc, w);
-      std::cout << "curr_pair : ";
-      dc.debug();
-      std::cout << " w = " << w << std::endl;
+      //std::cout << "curr_pair : ";
+      //dc.debug();
+      //std::cout << " w = " << w << std::endl;
       if (w != 0.0) {
         int size = dc.size();
         if (size * (max_level - curr_level + 1) + curr_order <= max_order) {
@@ -367,12 +402,18 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
     }
     ReverseADMultiSet<locint> term;
     switch(info.opcode) {
+      case assign_ind:
+      case assign_dep:
+      case assign_d:
+      case assign_param:
+        break;
       case assign_a:
       case eq_plus_d:
       case plus_d_a:
       case minus_d_a:
       case eq_mult_d:
       case mult_d_a:
+      case fabs_a:
         term.insert(info.x);
         check_and_increase(term, info.dx, local_deriv);
         break;
@@ -437,13 +478,136 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
           }
         }
         break;
+      case sin_a:
+        {
+          Base dsin[4] = {sin(info.vx), cos(info.vx),
+                          -sin(info.vx), -cos(info.vx)};
+          for(int i=1; i<=order; i++) {
+            term.insert(info.x);
+            check_and_increase(term, dsin[i % 4], local_deriv);
+          }
+        }
+        break;
+      case cos_a:
+        {
+          Base dcos[4] = {cos(info.vx), -sin(info.vx),
+                          -cos(info.vx), sin(info.vx)};
+          for(int i=1; i<=order; i++) {
+            term.insert(info.x);
+            check_and_increase(term, dcos[i % 4], local_deriv);
+          }
+        }
+        break;
+/*
+      case tan_a:
+        std::cout << "MISSING tan_a, do we need this?" << std::endl;
+        break;
+*/
+      case asin_a:
+      case acos_a:
+        {
+          Base c = 1.0 / (1.0 - info.vx * info.vx);
+          Base sw = 0;
+          Base w = 0;
+          Base s = 0;
+          for (int i=1; i<= order; i++) {
+            term.insert(info.x);
+            sw = 0;
+            s = sqrt(1.0 - info.vx * info.vx);
+            for (int j=0; j<=i; j++) {
+              w = 1;
+              for (int k=0;k<=j; k++) {
+                sw += c_asin[i][j][k] * w * s;
+                w = w * info.vx;
+              }
+              s = s * c;
+            }
+            if (info.opcode == asin_a) {
+              check_and_increase(term, sw, local_deriv);
+            } else {
+              check_and_increase(term, -sw, local_deriv);
+            }
+          }
+        }
+        break;
+      case atan_a:
+        {
+          Base c = 1.0 / (1.0 + info.vx * info.vx);
+          Base sw = 0;
+          Base w = 0;
+          Base s = 0;
+          for (int i = 1; i <= order; i++) {
+            term.insert(info.x);
+            sw = 0;
+            s = 1;
+            for (int j = 0; j <= i; j++) {
+              w = 1;
+              for (int k = 0; k <= j; k++) {
+                sw += c_atan[i][j][k] * w * s;
+                w = w * info.vx;
+              }
+              s = s * c;
+            }
+            check_and_increase(term, sw, local_deriv); 
+          }
+        }
+        break;
+      case exp_a:
+        for (int i=1; i<=order; i++) {
+          term.insert(info.x);
+          check_and_increase(term, info.dx, local_deriv);
+        }
+        break;
+      case log_a:
+        {
+          term.insert(info.x);
+          check_and_increase(term, info.dx, local_deriv);
+          Base t = info.dx;
+          for(int i=2; i<=order; i++) {
+            t = t * (1-i) / info.vx;
+            term.insert(info.x);
+            check_and_increase(term, t, local_deriv);
+          }
+        }
+        break;
+      case sqrt_a:
+        {
+          Base t = sqrt(info.vx);
+          for (int i = 1; i <= order; i++) {
+            t = t * (1.5 - i) / info.vx;
+            term.insert(info.x);
+            check_and_increase(term, t, local_deriv);
+          }
+        }
+        break;
+      case pow_d_a:
+        {
+          Base t = info.dx;
+          for (int i = 1; i <= order; i++) {
+            term.insert(info.x);
+            check_and_increase(term, t, local_deriv);
+            t = t * log(info.coval);
+          }
+        }
+        info.coval = 0.0;
+        break;
+      case pow_a_d:
+        {
+          Base t = pow(info.vx, info.coval);
+          for (int i=1; i <= order; i++) {
+            t = t * (info.coval + 1 - i) / info.vx; 
+            term.insert(info.x);
+            check_and_increase(term, t, local_deriv);
+          }  
+        }
+        info.coval = 0.0;
+        break;
+      case pow_a_a:
+        break;
       default:
         logger.warning << "Unrecongized opcode : " << (int)info.opcode
                     << std::endl;
     }
-    std::cout << "filling in for :" << std::endl;
-    info.debug();
-    local_deriv.debug(); 
   } 
 };
 
