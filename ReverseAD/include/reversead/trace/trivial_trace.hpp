@@ -20,7 +20,7 @@ class TrivialTrace : public AbstractTrace<Base> {
   using AbstractTrace<Base>::num_param;
 
  public:
-  TrivialTrace(TrivialTrace* other,
+  TrivialTrace(const std::shared_ptr<TrivialTrace<Base>>& other,
                const std::shared_ptr<TrivialTape<Base>>& val_tape,
                const std::shared_ptr<TrivialTape<Base>>& param_tape) {
     this->op_tape = other->op_tape;
@@ -37,7 +37,7 @@ class TrivialTrace : public AbstractTrace<Base> {
     this->num_dummy_dep = other->num_dummy_dep;
 #endif
   }
-  TrivialTrace(TrivialTrace* other,
+  TrivialTrace(const std::shared_ptr<TrivialTrace<Base>>& other,
                const std::shared_ptr<TrivialTape<Base>>& val_tape) {
     this->op_tape = other->op_tape;
     this->loc_tape = other->loc_tape;

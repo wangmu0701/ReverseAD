@@ -3,15 +3,16 @@
 #include "reversead/reversead.hpp"
 
 using ReverseAD::locint;
+using ReverseAD::TrivialTrace;
 
 double myEps = 1.E-10;
 
-void check_answer(ReverseAD::TrivialTrace<double>* trace,
+void check_answer(std::shared_ptr<TrivialTrace<double>> trace,
                   double vx,
                   double vp,
                   bool& done) {
       double vy;
-      ReverseAD::TrivialTrace<double>* new_trace = 
+      std::shared_ptr<TrivialTrace<double>> new_trace = 
         ReverseAD::BaseFunctionReplay::replay(trace, &vy, 1, &vx, 1, &vp, 1);
       ReverseAD::BaseReverseHessian<double> hessian(new_trace);
       hessian.enable_preacc();
@@ -114,7 +115,7 @@ int main() {
     double vy;
     y >>= vy;
     if (!done) {
-      ReverseAD::TrivialTrace<double>* trace = ReverseAD::trace_off<double>();
+      std::shared_ptr<TrivialTrace<double>> trace = ReverseAD::trace_off<double>();
       check_answer(trace, vx, vp, done);
       check_answer(trace, 3.0, 4.0, done);
       if (done) {

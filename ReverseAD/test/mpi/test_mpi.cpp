@@ -8,6 +8,7 @@ using ReverseAD::RMPI_ADOUBLE;
 using ReverseAD::BaseMpiReverseAdjoint;
 using ReverseAD::BaseMpiReverseHessian;
 using ReverseAD::BaseMpiReverseThird;
+using ReverseAD::TrivialTrace;
 
 int main(int argc, char** argv) {
   int size;
@@ -39,7 +40,7 @@ int main(int argc, char** argv) {
     adouble t1 = t0 * t0;
     RMPI_Send(&t1, 1, RMPI_ADOUBLE, 0, 0, MPI_COMM_WORLD);
   }
-  ReverseAD::TrivialTrace<double>* trace = ReverseAD::trace_off<double>();
+  std::shared_ptr<TrivialTrace<double>> trace = ReverseAD::trace_off<double>();
   if (rank == 0) {
     trace->dump_trace();
   }

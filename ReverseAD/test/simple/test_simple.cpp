@@ -3,6 +3,7 @@
 #include "reversead/reversead.hpp"
 
 using ReverseAD::locint;
+using ReverseAD::TrivialTrace;
 
 #define N 1
 #define M 1
@@ -33,12 +34,13 @@ int main() {
   //yad[0] = log(exp(xad[0]));
   //yad[0] *= pow(xad[0], 3);
   yad[0] = xad[0];
-  yad[0] *= xad[0]*xad[0]*xad[0];
   yad[0] >>= y[0];
   //yad[1] >>= y[1];
   std::cout << "yad[0] = " << yad[0].getVal() << std::endl;
   //std::cout << "yad[1] = " << yad[1].getVal() << std::endl;
-  ReverseAD::TrivialTrace<double>* trace = ReverseAD::trace_off<double>();
+  std::shared_ptr<TrivialTrace<double>> trace =
+      ReverseAD::trace_off<double>();
+
   trace->dump_trace();
   //vp = 5.0;
 
@@ -46,13 +48,12 @@ int main() {
     //ReverseAD::BaseFunctionReplay::replay(trace, y, M, x, N, &vp, 1);
   std::cout << "new y[0] = " << y[0] << std::endl;
   //std::cout << "new y[1] = " << y[0] << std::endl;
-
-  ReverseAD::TrivialTrace<double>* new_trace =
+  
+  std::shared_ptr<TrivialTrace<double>> new_trace =
     ReverseAD::BaseFunctionReplay::replay_ind<double> (trace, x, N);
   new_trace->dump_trace();
 
   ReverseAD::BaseReverseThird<double> third(new_trace);
-  third.enable_preacc();
   third.compute(N, M);
   int size_j;
   locint* rind_j;

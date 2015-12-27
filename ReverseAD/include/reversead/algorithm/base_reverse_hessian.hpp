@@ -1,8 +1,6 @@
 #ifndef BASE_REVERSE_HESSIAN_H_
 #define BASE_REVERSE_HESSIAN_H_
 
-#include <math.h>
-
 #include <set>
 #include <vector>
 #include <map>
@@ -10,8 +8,7 @@
 
 #include "reversead/common/reversead_base.hpp"
 #include "reversead/common/opcodes.hpp"
-#include "reversead/trace/abstract_trace.hpp"
-#include "reversead/tape/abstract_tape.hpp"
+#include "reversead/trace/trivial_trace.hpp"
 #include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/base_reverse_mode.hpp"
 #include "reversead/algorithm/base_reverse_adjoint.hpp"
@@ -39,7 +36,8 @@ class BaseReverseHessian : public virtual BaseReverseAdjoint<Base> {
   using BaseReverseMode<Base>::compute_adjoint_deriv;
   using BaseReverseMode<Base>::compute_hessian_deriv;
 
-  BaseReverseHessian(AbstractTrace<Base>* trace) : BaseReverseAdjoint<Base>(trace) {}
+  BaseReverseHessian(const std::shared_ptr<TrivialTrace<Base>>& trace)
+      : BaseReverseAdjoint<Base>(trace) {}
 
   void accumulate_deriv(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) {
     Base w = deriv.adjoint_vals->get_and_erase(info.r);
@@ -77,6 +75,8 @@ class BaseReverseHessian : public virtual BaseReverseAdjoint<Base> {
   }
 
  protected:
+  BaseReverseHessian() : BaseReverseAdjoint<Base>() {}
+
   virtual void process_single_deriv(locint local_dep,
                                     SingleDeriv& local_deriv,
                                     SingleDeriv& deriv) {

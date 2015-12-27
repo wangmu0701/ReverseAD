@@ -1,8 +1,6 @@
 #ifndef BASE_REVERSE_ADJOINT_H_
 #define BASE_REVERSE_ADJOINT_H_
 
-#include <math.h>
-
 #include <set>
 #include <vector>
 #include <map>
@@ -10,8 +8,7 @@
 
 #include "reversead/common/reversead_base.hpp"
 #include "reversead/common/opcodes.hpp"
-#include "reversead/trace/abstract_trace.hpp"
-#include "reversead/tape/abstract_tape.hpp"
+#include "reversead/trace/trivial_trace.hpp"
 #include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/base_reverse_mode.hpp"
 #include "single_derivative.hpp"
@@ -33,8 +30,8 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
   using BaseReverseMode<Base>::compute_adjoint_sac;
   using BaseReverseMode<Base>::compute_adjoint_deriv;
 
-  BaseReverseAdjoint(AbstractTrace<Base>* trace) :
-      BaseReverseMode<Base>(trace) {
+  BaseReverseAdjoint(const std::shared_ptr<TrivialTrace<Base>>& trace)
+      : BaseReverseMode<Base>(trace) {
     preacc_enabled = false; // no preaccumulation as default
   }
 
@@ -92,6 +89,8 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
 
 
  protected:
+  BaseReverseAdjoint() {}
+
   void init_dep_deriv(SingleDeriv& deriv, locint dep) {
     deriv.adjoint_vals->increase(dep, 1.0);
   }

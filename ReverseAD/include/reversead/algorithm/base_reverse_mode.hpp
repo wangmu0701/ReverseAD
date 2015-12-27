@@ -10,7 +10,7 @@
 
 #include "reversead/common/reversead_base.hpp"
 #include "reversead/common/opcodes.hpp"
-#include "reversead/trace/abstract_trace.hpp"
+#include "reversead/trace/trivial_trace.hpp"
 #include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/single_derivative.hpp"
 
@@ -42,7 +42,7 @@ class BaseReverseMode {
   typedef typename SingleDerivative<Base>::type_third type_third;
   typedef SingleDerivative<Base> SingleDeriv;
 
-  BaseReverseMode(AbstractTrace<Base>* trace) {
+  BaseReverseMode(const std::shared_ptr<TrivialTrace<Base>>& trace) {
     this->trace = trace;
   }
 
@@ -57,7 +57,9 @@ class BaseReverseMode {
     }
   }
 
- protected:  
+ protected:
+  BaseReverseMode() {}
+
   void reverse_local_computation(int, int);
 
   void compute_adjoint_sac(const DerivativeInfo<locint, Base>& info,
@@ -99,12 +101,11 @@ class BaseReverseMode {
 
   virtual void init_dep_deriv(SingleDeriv& deriv, locint dep) = 0;
 
-  AbstractTrace<Base>* trace;
+  std::shared_ptr<TrivialTrace<Base>> trace;
   std::map<locint, std::set<locint> > reverse_live;
   std::map<locint, SingleDeriv> dep_deriv;
   std::map<locint, locint> indep_index_map;
   std::map<locint, locint> dep_index_map;
-
 };
 
 template <typename Base>

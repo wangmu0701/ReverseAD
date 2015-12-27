@@ -9,8 +9,9 @@ using ReverseAD::RMPI_Reduce;
 using ReverseAD::RMPI_ADOUBLE;
 using ReverseAD::BaseMpiReverseHessian;
 using ReverseAD::get_timing;
+using ReverseAD::TrivialTrace;
 
-#define N 400
+#define N 20
 
 #define PI 3.1416926
 
@@ -75,7 +76,7 @@ int main(int argc, char** argv) {
     tad = compute_thomson_function(x, p, rank, size);
     RMPI_Reduce(&tad, NULL, 1, RMPI_ADOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   }
-  ReverseAD::TrivialTrace<double>* trace = ReverseAD::trace_off<double>();
+  std::shared_ptr<TrivialTrace<double>> trace = ReverseAD::trace_off<double>();
   BaseMpiReverseHessian<double> hessian(trace);
   struct timeval tv1, tv2;
   if (rank == 0) {

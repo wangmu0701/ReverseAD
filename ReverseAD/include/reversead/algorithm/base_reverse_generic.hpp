@@ -28,8 +28,8 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
   using BaseReverseMode<Base>::indep_index_map;
   using BaseReverseMode<Base>::dep_index_map;
 
-  BaseReverseGeneric(AbstractTrace<Base>* trace, int order) :
-      BaseReverseMode<Base>(trace) {
+  BaseReverseGeneric(const std::shared_ptr<TrivialTrace<Base>>& trace, int order)
+      : BaseReverseMode<Base>(trace) {
     if (order > REVERSEAD_MAX_GENERIC_ORDER) {
       std::cout << "Sorry, max order should be less than " 
                 << REVERSEAD_MAX_GENERIC_ORDER << "." << std::endl;

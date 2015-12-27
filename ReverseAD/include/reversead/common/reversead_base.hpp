@@ -2,6 +2,7 @@
 #define REVERSEAD_BASE_H_
 
 #include <cstdint>
+#include <memory>
 
 #include "reversead/common/reversead_type.hpp"
 #include "reversead/common/opcodes.hpp"
@@ -35,7 +36,7 @@ namespace ReverseAD {
   }
 
   template <typename Base>
-  TrivialTrace<Base>* trace_off() {
+  std::shared_ptr<TrivialTrace<Base>> trace_off() {
     logger.info << "number of indepent = " << curr_ind_loc - 1 << std::endl;
     logger.info << "number of intermediate = " << (curr_loc-BASE_LOC) << std::endl;
     if (curr_loc >= BASE_LOC * 2) {
@@ -43,7 +44,7 @@ namespace ReverseAD {
     }
     ((TrivialTrace<Base>*)global_trace)->put_op(end_of_tape);
     is_tracing = false;
-    return (TrivialTrace<Base>*)global_trace;
+    return std::shared_ptr<TrivialTrace<Base>>((TrivialTrace<Base>*)global_trace);
   }
   
   template <typename Base>

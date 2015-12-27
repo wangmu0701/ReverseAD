@@ -9,11 +9,11 @@ using ReverseAD::BaseReverseThird;
 
 double myEps = 1.E-5;
 
-void check_answer(TrivialTrace<double>* trace,
+void check_answer(std::shared_ptr<TrivialTrace<double>> trace,
                   double vx,
                   bool& done) {
       double vy;
-      TrivialTrace<double>* new_trace =
+      std::shared_ptr<TrivialTrace<double>> new_trace =
           BaseFunctionReplay::replay_ind<double>(trace, &vy, 1, &vx, 1);
       if (fabs(vy - vx) > myEps) {
         done = true;
@@ -183,7 +183,7 @@ int main() {
     double vy;
     y >>= vy;
     if (!done) {
-      ReverseAD::TrivialTrace<double>* trace = ReverseAD::trace_off<double>();
+      std::shared_ptr<TrivialTrace<double>> trace = ReverseAD::trace_off<double>();
       check_answer(trace, 2.0, done);
       check_answer(trace, 4.0, done);
       if (done) {

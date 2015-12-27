@@ -25,10 +25,8 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base>,
 
   using BaseMpiReverseAdjoint<Base>::forward_global_phase;
 
-  BaseMpiReverseHessian(AbstractTrace<Base>* trace)
-    : BaseReverseAdjoint<Base>(trace),
-      BaseReverseHessian<Base>(trace),
-      BaseMpiReverseAdjoint<Base>(trace) {
+  BaseMpiReverseHessian(const std::shared_ptr<TrivialTrace<Base>>& trace)
+      : BaseReverseAdjoint<Base>(trace) {
   }
 
   void compute_mpi() {
@@ -53,6 +51,9 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base>,
       kv.second.hessian_vals->debug(logger.info);
     }
   }
+ protected:
+  BaseMpiReverseHessian() {}
+
 /*
  protected:
   void forward_global_hessian() {

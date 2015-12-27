@@ -6,7 +6,7 @@
 #ifdef ENABLE_REVERSEAD_MPI
 
 #include "mpi.h"
-#include "reversead/algorithm/base_reverse_hessian.hpp"
+#include "reversead/algorithm/base_reverse_adjoint.hpp"
 
 namespace ReverseAD {
 
@@ -21,7 +21,7 @@ class BaseMpiReverseAdjoint : public virtual BaseReverseAdjoint<Base> {
   using BaseReverseMode<Base>::reverse_live;
   using BaseReverseMode<Base>::trace;
 
-  BaseMpiReverseAdjoint(AbstractTrace<Base>* trace)
+  BaseMpiReverseAdjoint(const std::shared_ptr<TrivialTrace<Base>>& trace)
     : BaseReverseAdjoint<Base>(trace) {
   }
 
@@ -44,6 +44,8 @@ class BaseMpiReverseAdjoint : public virtual BaseReverseAdjoint<Base> {
     }
   }
  protected:
+  BaseMpiReverseAdjoint() : BaseReverseAdjoint<Base>() {}
+
   virtual void forward_global_phase() {
     std::vector<locint> temp_loc_vec;
     trace->init_comm_forward();

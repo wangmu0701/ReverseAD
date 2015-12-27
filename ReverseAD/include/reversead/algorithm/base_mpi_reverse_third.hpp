@@ -26,11 +26,10 @@ class BaseMpiReverseThird : public BaseReverseThird<Base>,
 
   using BaseMpiReverseAdjoint<Base>::forward_global_phase;
 
-  BaseMpiReverseThird(AbstractTrace<Base>* trace)
+  BaseMpiReverseThird(const std::shared_ptr<TrivialTrace<Base>>& trace)
     : BaseReverseAdjoint<Base>(trace),
-      BaseReverseHessian<Base>(trace),
-      BaseReverseThird<Base>(trace),
-      BaseMpiReverseAdjoint<Base>(trace) {
+      BaseReverseThird<Base>(),
+      BaseMpiReverseAdjoint<Base>() {
   }
 
   void compute_mpi() {

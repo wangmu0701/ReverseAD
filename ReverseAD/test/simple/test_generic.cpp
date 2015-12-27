@@ -4,6 +4,7 @@
 
 using ReverseAD::locint;
 using ReverseAD::BaseReverseGeneric;
+using ReverseAD::TrivialTrace;
 
 void retrieve_value(int t_order,
                     BaseReverseGeneric<double>& generic) {
@@ -46,7 +47,7 @@ int main() {
   adouble t = 2.0;
   yad = pow(xad, t);
   yad >>= y;
-  ReverseAD::TrivialTrace<double>* trace = ReverseAD::trace_off<double>();
+  std::shared_ptr<TrivialTrace<double>> trace = ReverseAD::trace_off<double>();
   //trace->dump_trace();
   std::cout << "y = " << y << std::endl;
 
