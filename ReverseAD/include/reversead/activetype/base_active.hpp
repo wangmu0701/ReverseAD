@@ -30,8 +30,8 @@ class BaseActive {
   #include "base_active_hyperbolic.ipp" // sinh, cosh, tanh, asinh, acosh, atanh
   #include "base_active_other.ipp" // fabs
 
-  inline Base getVal() {return val;}
-  inline locint getLoc() {return loc;}
+  inline Base getVal() const {return val;}
+  inline locint getLoc() const {return loc;}
   static BaseActive<Base> markParam(const Base& param) {
     BaseActive res(param, get_next_loc());
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG

@@ -41,8 +41,10 @@ int main() {
   //yad *= atanh(tanh(xad));
   //yad = sqrt(xad*xad);
   //yad = exp(2.0*log(xad));
-  yad = pow(sqrt(xad*xad), 2.0);
-  yad *= log(pow(2, xad)) / log(2);
+  //yad = pow(sqrt(xad*xad), 2.0);
+  //yad *= log(pow(2, xad)) / log(2);
+  adouble t = 2.0;
+  yad = pow(xad, t);
   yad >>= y;
   ReverseAD::TrivialTrace<double>* trace = ReverseAD::trace_off<double>();
   //trace->dump_trace();

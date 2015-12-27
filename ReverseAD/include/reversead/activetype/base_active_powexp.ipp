@@ -17,10 +17,17 @@
 
   friend BaseActive<Base> pow(const BaseActive<Base>& pow_base,
                               const BaseActive<Base>& pow_exp) {
+/*
     BaseActive<Base> res(pow(pow_base.val, pow_exp.val), get_next_loc());
     trace_put_olllbb<Base>(pow_a_a, res.loc, pow_base.loc, pow_exp.loc,
                            pow_base.val, pow_exp.val);
-    return res;
+*/
+    if (pow_base.getVal() < 0) {
+      //warning message here
+    } else if (pow_base.getVal() == 0 && pow_exp.getVal() <= 0) {
+      //warning message here
+    }
+    return exp(log(pow_base)*pow_exp);
   }
   friend BaseActive<Base> pow(const BaseActive<Base>& pow_base,
                               const double& pow_exp) {

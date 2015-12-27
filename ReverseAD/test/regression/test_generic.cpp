@@ -72,6 +72,20 @@ int main() {
       y /= x;
       testLine = "y=x*x*x;y*=y;y/=x";
       break;
+    case 2:
+      y = asin(sin(x/20))*20;
+      y *= acos(cos(x/20))*20;
+      y *= atan(tan(x/20))*20;
+      y *= asinh(sinh(x/20))*20;
+      y *= atanh(tanh(x/20))*20;
+      testLine = "y=asin(sin(x));y*=acos(cos(x));y*=atan(tan(x));y*=asinh(sinh(x));y*=atanh(tanh(x))";
+      break;
+    case 3:
+      y = pow(x, 2.0);
+      y *= sqrt(x*x);
+      y *= exp(2.0 * log(x));
+      testLine = "y=pow(x, 2.0);y*=sqrt(x*x);y*=exp(2.0*log(x))";
+      break;
     default:
       done = true;
       break;
