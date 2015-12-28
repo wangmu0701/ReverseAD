@@ -26,7 +26,7 @@ class ReverseADMultiSet {
   bool find(T target) const;
   int count(T target) const;
   void write_to_byte(char* buf) const;
-  T* to_array() const;
+  void to_array(T*) const;
   void clear();
 
  private:
@@ -82,15 +82,13 @@ int ReverseADMultiSet<T>::remove(T element) {
 }
 
 template <typename T>
-T* ReverseADMultiSet<T>::to_array() const {
-  T* ret = new T[_data.size()];
+void ReverseADMultiSet<T>::to_array(T* array) const {
   typename std::multiset<T>::const_iterator iter = _data.begin();
   int l = 0;
   while (iter != _data.end()) {
-    ret[l++] = *iter;
+    array[l++] = *iter;
     iter++;
   }
-  return ret;
 }
 
 template <typename T>

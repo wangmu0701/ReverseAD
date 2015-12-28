@@ -25,6 +25,10 @@ class GenericDeriv {
     _data[order-1][set] += v;
   }
 
+  int get_size(int order) const {
+    return _data[order].size();
+  }
+
   Base get(const ReverseADMultiSet<LocType>& set) {
     int order = set.size();
     if (check_size_fail(order)) {

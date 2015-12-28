@@ -53,6 +53,7 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
     }
   }
 */
+/*
   int retrieve_generic_values(int t_order, int** ssize, locint**** tind, Base*** values) {
     int dep_size = dep_deriv.size();
     (*ssize) = new int[dep_size];
@@ -92,6 +93,7 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
     }
     return dep_size;
   }
+*/
 
   void accumulate_deriv(const DerivativeInfo<locint, Base>& info,
                         const GenericDeriv<locint, Base>& local_deriv,
@@ -148,8 +150,41 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
 
  protected:
   virtual DerivativeTensor<locint, Base> transcript_result() {
-    return DerivativeTensor<locint, Base>();
+    int dep_size = dep_deriv.size();
+    int ind_size = indep_index_map.size();
+    DerivativeTensor<locint, Base> ret(dep_size, ind_size, order);
+    int* size = new int[order];
+    int* curr_l = new int[order];
+    locint* t = new locint[order];
+    for (auto& kv : dep_deriv) {
+      locint dep = dep_index_map[kv.first] - 1;
+      for (int i = 0; i < order; i++) {
+        size[i] = kv.second.get_size(i);
+        ret.init_single_tensor(dep, i+1, size[i]);
+        curr_l[i] = 0;
+      }
+      ReverseADMultiSet<locint> s_set;
+      Base sw;
+      typename GenericDeriv<locint, Base>::enumerator g_enum =
+        kv.second.get_enumerator();
+      while (g_enum.has_next()) {
+        g_enum.get_curr_pair(s_set, sw);
+        g_enum.move_to_next();
+        int t_order = s_set.size();
+        s_set.to_array(t);
+        for (int i=0; i<t_order; i++) {
+          t[i] = indep_index_map[t[i]] - 1;
+        }
+        ret.put_value(dep, t_order, curr_l[t_order-1], t, sw);
+        curr_l[t_order - 1]++;
+      } 
+    }
+    delete[] size;
+    delete[] curr_l;
+    delete[] t;
+    return ret;
   }
+
   // here we're NOT touching SingleDeriv, will change interface later
   void init_dep_deriv(SingleDeriv& deriv, locint dep) {
     GenericDeriv<locint, Base> d_deriv(order);

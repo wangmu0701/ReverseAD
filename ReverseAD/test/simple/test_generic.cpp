@@ -5,20 +5,20 @@
 using ReverseAD::locint;
 using ReverseAD::BaseReverseGeneric;
 using ReverseAD::TrivialTrace;
+using ReverseAD::DerivativeTensor;
 
 void retrieve_value(int t_order,
-                    BaseReverseGeneric<double>& generic) {
-  int* size;
-  locint*** tind;
-  double** values;
-  int dep_size = generic.retrieve_generic_values(t_order, &size, &tind, &values);
-  std::cout << "dep_size = " << dep_size << std::endl;  
-  for (int i=0;i<size[0]; i++) {
+                    DerivativeTensor<locint, double>& tensor) {
+  int size;
+  locint** tind;
+  double* values;
+  tensor.get_internal_coordinate_list(0, t_order, &size, &tind, &values);
+  for (int i=0;i<size; i++) {
     std::cout << "T[ ";
     for (int j=0;j<t_order; j++) {
-      std::cout << tind[0][i][j] << " ";
+      std::cout << tind[i][j] << " ";
     }
-    std::cout << "] = " << values[0][i] << std::endl;
+    std::cout << "] = " << values[i] << std::endl;
   }
 }
 
@@ -52,11 +52,11 @@ int main() {
   std::cout << "y = " << y << std::endl;
 
   ReverseAD::BaseReverseGeneric<double> generic(trace, 4);
-  generic.compute(1, 1);
-  retrieve_value(1, generic);
-  retrieve_value(2, generic);
-  retrieve_value(3, generic);
-  retrieve_value(4, generic);
+  DerivativeTensor<locint, double> tensor = generic.compute(1, 1);
+  retrieve_value(1, tensor);
+  retrieve_value(2, tensor);
+  retrieve_value(3, tensor);
+  retrieve_value(4, tensor);
   //retrieve_value(5, generic);
   //retrieve_value(6, generic);
 }
