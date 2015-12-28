@@ -34,7 +34,7 @@ int main() {
   //yad[0] = xad[0] * p;
   //yad[0] = log(exp(xad[0]));
   //yad[0] *= pow(xad[0], 3);
-  yad[0] = xad[0] * xad[0];
+  yad[0] = xad[0] * xad[0] * xad[0] * xad[0] * xad[0];
   yad[0] >>= y[0];
   //yad[1] >>= y[1];
   std::cout << "yad[0] = " << yad[0].getVal() << std::endl;

@@ -4,45 +4,43 @@
 
 using ReverseAD::locint;
 using ReverseAD::TrivialTrace;
+using ReverseAD::BaseFunctionReplay;
+using ReverseAD::BaseReverseThird;
+using ReverseAD::BaseReverseGeneric;
+using ReverseAD::DerivativeTensor;
 
-double myEps = 1.E-10;
+extern double myEps;
+
+void check_value(int, DerivativeTensor<locint, double>&, double, bool&);
 
 void check_answer(std::shared_ptr<TrivialTrace<double>> trace,
                   double vx,
                   double vp,
                   bool& done) {
-      double vy;
-      std::shared_ptr<TrivialTrace<double>> new_trace = 
-        ReverseAD::BaseFunctionReplay::replay(trace, &vy, 1, &vx, 1, &vp, 1);
-      ReverseAD::BaseReverseHessian<double> hessian(new_trace);
-      if (fabs(vy - vx * vp) > myEps ) {
-        done = true;
-      }
-      hessian.compute(1,1);
-      double** adjoints;
-      hessian.retrieve_adjoint(&adjoints);
-      if (fabs(adjoints[0][0]-vp) > myEps) {
-        done = true;
-      }
-      int *size;
-      locint **rind;
-      locint **cind;
-      double** values;
-      hessian.retrieve_hessian_sparse_format(&size, &rind, &cind, &values);
-      if (size[0] > 1) {
-        done = true;
-      } else if (size[0] == 1) {
-        if (fabs(values[0][0]-0.0) > myEps) {
-          done = true;
-        }
-      }
-      if (done) {
-        std::cout << "vy = " << vy << std::endl;
-        std::cout << "A[0] = " << adjoints[0][0] << std::endl;
-        std::cout << "H[0] = " << values[0][0] << std::endl;
-      }
+  double vy;
+  std::shared_ptr<TrivialTrace<double>> new_trace = 
+      BaseFunctionReplay::replay(trace, &vy, 1, &vx, 1, &vp, 1);
+
+  if (fabs(vy - vx * vp) > myEps) {
+    std::cout << vy << " != " << vx * vp << std::endl;
+    done = true;
+  }
+
+  ReverseAD::BaseReverseThird<double> third_derivative(new_trace);
+  DerivativeTensor<locint, double> tensor = third_derivative.compute(1, 1);
+  check_value(1, tensor, vp, done);
+  check_value(2, tensor, 0, done);
+  check_value(3, tensor, 0, done);
+
+  ReverseAD::BaseReverseGeneric<double> generic_derivative(new_trace, 6);
+  tensor = generic_derivative.compute(1, 1);
+  check_value(1, tensor, vp, done);
+  check_value(2, tensor, 0, done);
+  check_value(3, tensor, 0, done);
+
 }
-int main() {
+
+int run_function() {
   bool done = false;
   int testCase = 0;
   const char* testLine;
@@ -104,10 +102,11 @@ int main() {
       check_answer(trace, 4.0, 3.0, done);
       if (done) {
         std::cout << "test " << testLine << " fail!" << std::endl;
-        exit(-1);
+        return -1;
       }
       std::cout << "test " << testLine  << " ok." << std::endl;
     }
     testCase++;
   }
+  return 0;
 }

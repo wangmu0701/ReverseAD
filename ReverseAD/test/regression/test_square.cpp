@@ -6,57 +6,40 @@ using ReverseAD::locint;
 using ReverseAD::TrivialTrace;
 using ReverseAD::BaseFunctionReplay;
 using ReverseAD::BaseReverseThird;
+using ReverseAD::BaseReverseGeneric;
+using ReverseAD::DerivativeTensor;
 
-double myEps = 1.E-10;
+extern double myEps;
+
+void check_value(int, DerivativeTensor<locint, double>&, double, bool&);
 
 void check_answer(std::shared_ptr<TrivialTrace<double>> trace,
-                  bool& done,
-                  double vx) {
-      double vy;
-      std::shared_ptr<TrivialTrace<double>> new_trace =
-          BaseFunctionReplay::replay_ind(trace, &vy,1, &vx, 1);
-      if (fabs(vy - vx*vx) > myEps) {
-        done = true;
-      }
-      BaseReverseThird<double> base_derivative(new_trace);
-      base_derivative.compute(1,1);
-      double** adjoints;
-      base_derivative.retrieve_adjoint(&adjoints);
-      if (fabs(adjoints[0][0]-2*vx) > myEps) {
-        done = true;
-      }
-      int *size;
-      locint **rind;
-      locint **cind;
-      double** values;
-      base_derivative.retrieve_hessian_sparse_format(&size, &rind, &cind, &values);
-      if (size[0] == 1) {
-        if (fabs(values[0][0]-2.0) > myEps) {
-          done = true;
-        }
-      } else {
-        done = true;
-      }
+                  double vx,
+                  bool& done) {
+  double vy;
+  std::shared_ptr<TrivialTrace<double>> new_trace =
+      BaseFunctionReplay::replay_ind(trace, &vy,1, &vx, 1);
+  if (fabs(vy - vx * vx) > myEps) {
+    std::cout << vy << " != " << vx * vx << std::endl;
+    done = true;
+  }
 
-      locint ***tind;
-      double** tvalues;
-      base_derivative.retrieve_third_sparse_format(&size, &tind, &tvalues);
-      if (size[0] > 1) {
-        done = true;
-      } else if (size[0] == 1) {
-        if (fabs(tvalues[0][0] - 0.0) > myEps) {
-          done = true;
-        }
-      }
-     
-      if (done) {
-        std::cout << "y = " << vy << std::endl;
-        std::cout << "A[0] = " << adjoints[0][0] << std::endl;
-        std::cout << "H[0] = " << values[0][0] << std::endl;
-        std::cout << "T[0] = " << tvalues[0][0] << std::endl;
-      }
+  ReverseAD::BaseReverseThird<double> third_derivative(new_trace);
+  DerivativeTensor<locint, double> tensor = third_derivative.compute(1, 1);
+  check_value(1, tensor, 2 * vx, done);
+  check_value(2, tensor, 2, done);
+  check_value(3, tensor, 0, done);
+
+  ReverseAD::BaseReverseGeneric<double> generic_derivative(new_trace, 6);
+  tensor = generic_derivative.compute(1, 1);
+  check_value(1, tensor, 2 * vx, done);
+  check_value(2, tensor, 2, done);
+  check_value(3, tensor, 0, done);
 }
-int main() {
+
+
+
+int run_function() {
   bool done = false;
   int testCase = 0;
   const char* testLine;
@@ -130,15 +113,16 @@ int main() {
     y >>= vy;
     if (!done) {
       std::shared_ptr<TrivialTrace<double>> trace = ReverseAD::trace_off<double>();
-      check_answer(trace, done, 1.0);
-      check_answer(trace, done, 2.0);
-      check_answer(trace, done, 3.0);
+      check_answer(trace, 1.0, done);
+      check_answer(trace, 2.0, done);
+      check_answer(trace, 3.0, done);
       if (done) {
         std::cout << "test " << testLine << " fail!" << std::endl;
-        exit(-1);
+        return -1;
       }
       std::cout << "test " << testLine  << " ok." << std::endl;
     }
     testCase++;
   }
+  return 0;
 }

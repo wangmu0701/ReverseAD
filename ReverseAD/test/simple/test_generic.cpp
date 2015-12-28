@@ -44,8 +44,7 @@ int main() {
   //yad = exp(2.0*log(xad));
   //yad = pow(sqrt(xad*xad), 2.0);
   //yad *= log(pow(2, xad)) / log(2);
-  adouble t = 2.0;
-  yad = pow(xad, t);
+  yad = atanh(tanh(xad));
   yad >>= y;
   std::shared_ptr<TrivialTrace<double>> trace = ReverseAD::trace_off<double>();
   //trace->dump_trace();
@@ -56,7 +55,7 @@ int main() {
   retrieve_value(1, tensor);
   retrieve_value(2, tensor);
   retrieve_value(3, tensor);
-  retrieve_value(4, tensor);
-  //retrieve_value(5, generic);
-  //retrieve_value(6, generic);
+  //retrieve_value(4, tensor);
+  //retrieve_value(5, tensor);
+  //retrieve_value(6, tensor);
 }

@@ -511,6 +511,7 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
           Base t = info.dx;
           for (int i=2; i<=order; i++) {
             t *= (-i) / info.vx;
+            term.insert(info.x);
             check_and_increase(term, t, local_deriv);
           }
         }
