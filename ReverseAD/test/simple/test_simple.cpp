@@ -4,6 +4,7 @@
 
 using ReverseAD::locint;
 using ReverseAD::TrivialTrace;
+using ReverseAD::DerivativeTensor;
 
 #define N 1
 #define M 1
@@ -33,7 +34,7 @@ int main() {
   //yad[0] = xad[0] * p;
   //yad[0] = log(exp(xad[0]));
   //yad[0] *= pow(xad[0], 3);
-  yad[0] = xad[0];
+  yad[0] = xad[0] * xad[0];
   yad[0] >>= y[0];
   //yad[1] >>= y[1];
   std::cout << "yad[0] = " << yad[0].getVal() << std::endl;
@@ -54,30 +55,28 @@ int main() {
   new_trace->dump_trace();
 
   ReverseAD::BaseReverseThird<double> third(new_trace);
-  third.compute(N, M);
-  int size_j;
-  locint* rind_j;
-  locint* cind_j;
-  double* values_j;
-  third.retrieve_adjoint_sparse_format(&size_j, &rind_j, &cind_j, &values_j);
-  for(int i = 0; i < size_j; i++) {
-    std::cout << "A[" << rind_j[i] << "," << cind_j[i]
-               << "] = " << values_j[i] << std::endl;
+  DerivativeTensor<locint, double> tensor = third.compute(N, M);
+  int size;
+  locint** tind;
+  double* values; 
+
+  tensor.get_internal_coordinate_list(0, 1, &size, &tind, &values);
+  
+  std::cout << "adjoint size = "<<size << std::endl;
+  for(int i = 0; i < size; i++) {
+    std::cout << "A[" << tind[i][0] << "] = " << values[i] << std::endl;
   }
-  int *size;
-  locint **rind;
-  locint **cind;
-  double** values;
-  third.retrieve_hessian_sparse_format(&size, &rind, &cind, &values);
-  std::cout << "hessian size = "<<size[0] << std::endl;
-  for(int i = 0; i < size[0]; i++) {
-    std::cout << "H["<<rind[0][i]<<","<<cind[0][i]<<"] = "<<values[0][i] << std::endl;
+
+  tensor.get_internal_coordinate_list(0, 2, &size, &tind, &values);
+  std::cout << "hessian size = " <<size << std::endl;
+  for(int i = 0; i < size; i++) {
+    std::cout << "H["<<tind[i][0]<<","<<tind[i][1]<<"] = "<<values[i] << std::endl;
   }
-  locint*** tind;
-  third.retrieve_third_sparse_format(&size, &tind, &values);
-  std::cout << "third order size = " << size[0] << std::endl;
-  for (int i=0; i<size[0]; i++) {
-    std::cout << "T[" << tind[0][i][0] << ", " << tind[0][i][1]
-              << ", " << tind[0][i][2] << " ] =" << values[0][i] << std::endl;
+
+  tensor.get_internal_coordinate_list(0, 3, &size, &tind, &values);
+  std::cout << "third order size = " << size << std::endl;
+  for (int i=0; i<size; i++) {
+    std::cout << "T[" << tind[i][0] << ", " << tind[i][1]
+              << ", " << tind[i][2] << " ] =" << values[i] << std::endl;
   }
 }

@@ -80,6 +80,37 @@ class BaseReverseThird : public virtual BaseReverseHessian<Base> {
 
  protected:
   BaseReverseThird() : BaseReverseAdjoint<Base>() {}
+ 
+  virtual DerivativeTensor<locint, Base> transcript_result() {
+    int dep_size = dep_deriv.size();
+    int ind_size = indep_index_map.size();
+    DerivativeTensor<locint, Base> ret(dep_size, ind_size, 3);
+    BaseReverseAdjoint<Base>::transcript_adjoint(ret);
+    BaseReverseHessian<Base>::transcript_hessian(ret);
+    transcript_third(ret);
+    return ret;
+  } 
+    
+  void transcript_third(DerivativeTensor<locint, Base>& tensor) {
+    for (auto& kv : dep_deriv) {
+      locint dep = dep_index_map[kv.first] - 1;
+      int size = kv.second.third_vals->get_size();
+      tensor.init_single_tensor(dep, 3, size);
+      locint x[3];
+      Base w;             
+      int l = 0;          
+      typename type_third::enumerator t_enum = kv.second.third_vals->get_enumerator();
+      bool has_next = t_enum.has_next();
+      while (has_next) {
+        has_next = t_enum.get_next(x[0], x[1], x[2], w);
+        x[0] = indep_index_map[x[0]] - 1;
+        x[1] = indep_index_map[x[1]] - 1;
+        x[2] = indep_index_map[x[2]] - 1;
+        tensor.put_value(dep, 3, l, x, w);
+        l++;
+      }
+    }
+  }
 
   virtual void process_single_deriv(locint local_dep,
                                     SingleDeriv& local_deriv,

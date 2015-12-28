@@ -13,6 +13,7 @@
 #include "reversead/trace/trivial_trace.hpp"
 #include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/single_derivative.hpp"
+#include "reversead/algorithm/derivative_tensor.hpp"
 
 #define ENABLE_REVERSE_THIRD
 
@@ -46,7 +47,7 @@ class BaseReverseMode {
     this->trace = trace;
   }
 
-  virtual void compute(int ind_num, int dep_num) {
+  virtual DerivativeTensor<locint, Base> compute(int ind_num, int dep_num) {
     double time = get_timing();
     reverse_local_computation(ind_num, dep_num);
     time = get_timing();
@@ -55,6 +56,7 @@ class BaseReverseMode {
       logger.info << "Dep : " << kv.first << std::endl;
       kv.second.debug(logger.info);
     }
+    return transcript_result(); 
   }
 
  protected:
@@ -97,9 +99,12 @@ class BaseReverseMode {
                            const type_adjoint& r,
                            const type_hessian& e);
 
+  
   virtual void process_sac(const DerivativeInfo<locint, Base>& info) = 0;
 
   virtual void init_dep_deriv(SingleDeriv& deriv, locint dep) = 0;
+
+  virtual DerivativeTensor<locint, Base> transcript_result() = 0;
 
   std::shared_ptr<TrivialTrace<Base>> trace;
   std::map<locint, std::set<locint> > reverse_live;

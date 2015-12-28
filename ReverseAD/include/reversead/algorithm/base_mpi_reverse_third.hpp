@@ -56,6 +56,11 @@ class BaseMpiReverseThird : public BaseReverseThird<Base>,
       kv.second.third_vals->debug(logger.info);
     }
   }
+
+ protected:
+  virtual DerivativeTensor<locint, Base> transcript_result() {
+    return DerivativeTensor<locint, Base>();
+  }
 };
 
 } // namespace ReverseAD

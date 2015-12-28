@@ -90,6 +90,32 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
 
  protected:
   BaseReverseAdjoint() {}
+  
+  virtual DerivativeTensor<locint, Base> transcript_result() {
+    int dep_size = dep_deriv.size();
+    int ind_size = indep_index_map.size();
+    DerivativeTensor<locint, Base> ret(dep_size, ind_size, 1);
+    return ret;
+  }
+
+  void transcript_adjoint(DerivativeTensor<locint, Base>& tensor) {
+    for (auto& kv : dep_deriv) {
+      locint dep = dep_index_map[kv.first] - 1;
+      int size = kv.second.adjoint_vals->get_size();
+      tensor.init_single_tensor(dep, 1, size);
+      locint x[1];
+      Base w;
+      int l = 0;
+      typename type_adjoint::enumerator a_enum = kv.second.adjoint_vals->get_enumerator();
+      bool has_next = a_enum.has_next();
+      while (has_next) {
+        has_next = a_enum.get_next(x[0], w);
+        x[0] = indep_index_map[x[0]] - 1;
+        tensor.put_value(dep, 1, l, x, w);
+        l++;
+      } 
+    }
+  }
 
   void init_dep_deriv(SingleDeriv& deriv, locint dep) {
     deriv.adjoint_vals->increase(dep, 1.0);

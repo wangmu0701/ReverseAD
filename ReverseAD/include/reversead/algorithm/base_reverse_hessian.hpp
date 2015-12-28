@@ -77,6 +77,35 @@ class BaseReverseHessian : public virtual BaseReverseAdjoint<Base> {
  protected:
   BaseReverseHessian() : BaseReverseAdjoint<Base>() {}
 
+  virtual DerivativeTensor<locint, Base> transcript_result() {
+    int dep_size = dep_deriv.size();
+    int ind_size = indep_index_map.size();
+    DerivativeTensor<locint, Base> ret(dep_size, ind_size, 2);
+    BaseReverseAdjoint<Base>::transcript_adjoint(ret);
+    transcript_hessian(ret);
+    return ret;
+  }
+
+  void transcript_hessian(DerivativeTensor<locint, Base>& tensor) {
+    for (auto& kv : dep_deriv) {
+      locint dep = dep_index_map[kv.first] - 1;
+      int size = kv.second.hessian_vals->get_size();
+      tensor.init_single_tensor(dep, 2, size);
+      locint x[2];
+      Base w;
+      int l = 0;
+      typename type_hessian::enumerator h_enum = kv.second.hessian_vals->get_enumerator();
+      bool has_next = h_enum.has_next();
+      while (has_next) {
+        has_next = h_enum.get_next(x[0], x[1], w);
+        x[0] = indep_index_map[x[0]] - 1;
+        x[1] = indep_index_map[x[1]] - 1;
+        tensor.put_value(dep, 2, l, x, w);
+        l++;
+      }
+    }
+  }
+
   virtual void process_single_deriv(locint local_dep,
                                     SingleDeriv& local_deriv,
                                     SingleDeriv& deriv) {

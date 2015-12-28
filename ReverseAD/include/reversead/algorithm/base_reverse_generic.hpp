@@ -42,19 +42,17 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
     special_derivative_coeff();
   }
 
-  void compute(int ind_num, int dep_num) {
-
-    BaseReverseMode<Base>::compute(ind_num, dep_num);
 /*
+  void compute(int ind_num, int dep_num) {
+    BaseReverseMode<Base>::compute(ind_num, dep_num);
     for(const auto& kv : dep_deriv) {
       locint dep = kv.first;
       std::cout << "Dep : " << dep << std::endl;
       kv.second.debug();
       std::cout << std::endl;
     }
-*/
   }
-
+*/
   int retrieve_generic_values(int t_order, int** ssize, locint**** tind, Base*** values) {
     int dep_size = dep_deriv.size();
     (*ssize) = new int[dep_size];
@@ -93,16 +91,6 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
       } 
     }
     return dep_size;
-  }
-
-  // here we're NOT touching SingleDeriv, will change interface later
-  void init_dep_deriv(SingleDeriv& deriv, locint dep) {
-    GenericDeriv<locint, Base> d_deriv(order);
-    ReverseADMultiSet<locint> d_set;
-    d_set.insert(dep);
-    d_deriv.increase(d_set, 1.0);
-    dep_deriv.insert(std::pair<locint, GenericDeriv<locint, Base>>(dep, d_deriv));
-    //d_deriv.debug();
   }
 
   void accumulate_deriv(const DerivativeInfo<locint, Base>& info,
@@ -156,6 +144,20 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
         }
       }
     }
+  }
+
+ protected:
+  virtual DerivativeTensor<locint, Base> transcript_result() {
+    return DerivativeTensor<locint, Base>();
+  }
+  // here we're NOT touching SingleDeriv, will change interface later
+  void init_dep_deriv(SingleDeriv& deriv, locint dep) {
+    GenericDeriv<locint, Base> d_deriv(order);
+    ReverseADMultiSet<locint> d_set;
+    d_set.insert(dep);
+    d_deriv.increase(d_set, 1.0);
+    dep_deriv.insert(std::pair<locint, GenericDeriv<locint, Base>>(dep, d_deriv));
+    //d_deriv.debug();
   }
 
   void process_sac(const DerivativeInfo<locint, Base>& info) {
