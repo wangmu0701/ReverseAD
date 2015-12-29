@@ -1,10 +1,6 @@
 AM_CXXFLAGS = @ac_reversead_cxxflags@ 
 AM_CPPFLAGS = -I$(top_builddir)/ReverseAD/include
 
-SUBDIRS = common util algorithm
+noinst_LTLIBRARIES = libcommon.la
 
-if ENABLE_REVERSEAD_MPI
-
-SUBDIRS += rmpi
-
-endif
+libcommon_la_SOURCES = reversead_base.cpp

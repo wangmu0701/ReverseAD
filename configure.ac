@@ -34,6 +34,8 @@ AC_SUBST(ENABLE_MPI)
 AC_CONFIG_FILES(Makefile
                 ReverseAD/Makefile
                 ReverseAD/src/Makefile
+                ReverseAD/src/common/Makefile
+                ReverseAD/src/algorithm/Makefile
                 ReverseAD/src/util/Makefile
                 ReverseAD/src/rmpi/Makefile
                 ReverseAD/include/Makefile
