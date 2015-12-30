@@ -39,6 +39,19 @@ DerivativeTensor<locint, Base> BaseReverseMode<Base>::compute(
 }
 
 template <typename Base>
+DerivativeTensor<locint, Base> BaseReverseMode<Base>::compute(
+    int ind_num, int dep_num, Base* init_adjoint) {
+  this->_use_dep_init_adjoint = true;
+  if (dep_num != trace->get_num_dep()) {
+    logger.fatal << "dep_num error!" << std::endl;
+  }
+  for (int i=1; i<=dep_num; i++) {
+    dep_init_adjoint[i] = init_adjoint[i-1];
+  }
+  return compute(ind_num, dep_num);
+}
+
+template <typename Base>
 void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) {
     DerivativeInfo<locint, Base> info;
     
@@ -76,8 +89,9 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
             case assign_dep:
                 res = trace->get_next_loc_r();
                 trace->get_next_val_r();
-                init_dep_deriv(dep_deriv[res], res);
-                reverse_live[res].insert(res);
+                //init_dep_deriv(dep_deriv[res], res);
+                //reverse_live[res].insert(res);
+                init_dep_deriv(res, dep_count);
                 dep_index_map[res] = dep_count;
                 dep_count--;
                 break;

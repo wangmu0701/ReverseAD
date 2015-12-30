@@ -21,9 +21,13 @@ class BaseReverseMode {
   typedef SingleDerivative<Base> SingleDeriv;
 
   BaseReverseMode(const std::shared_ptr<TrivialTrace<Base>>& _trace)
-      : trace(_trace) {}
+      : trace(_trace),
+        _use_dep_init_adjoint(false) {}
 
-  virtual DerivativeTensor<locint, Base> compute(int ind_num, int dep_num);
+  virtual DerivativeTensor<locint, Base> compute(
+      int ind_num, int dep_num);
+  virtual DerivativeTensor<locint, Base> compute(
+      int ind_num, int dep_num, Base* init_dep_adjoints);
 
  protected:
   BaseReverseMode() {}
@@ -68,7 +72,7 @@ class BaseReverseMode {
   
   virtual void process_sac(const DerivativeInfo<locint, Base>& info) = 0;
 
-  virtual void init_dep_deriv(SingleDeriv& deriv, locint dep) = 0;
+  virtual void init_dep_deriv(locint dep, int dep_count) = 0;
 
   virtual DerivativeTensor<locint, Base> transcript_result() = 0;
 
@@ -77,6 +81,9 @@ class BaseReverseMode {
   std::map<locint, SingleDeriv> dep_deriv;
   std::map<locint, locint> indep_index_map;
   std::map<locint, locint> dep_index_map;
+  std::map<int, Base> dep_init_adjoint;
+  
+  bool _use_dep_init_adjoint;
 };
 
 } // namespace ReverseAD

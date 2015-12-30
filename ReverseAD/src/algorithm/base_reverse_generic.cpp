@@ -122,13 +122,18 @@ DerivativeTensor<locint, Base> BaseReverseGeneric<Base>::transcript_result() {
 
 // here we're NOT touching SingleDeriv, will change interface later
 template <typename Base>
-void BaseReverseGeneric<Base>::init_dep_deriv(SingleDeriv& deriv, locint dep) {
+void BaseReverseGeneric<Base>::init_dep_deriv(locint dep, int dep_count) {
   GenericDeriv<locint, Base> d_deriv(order);
   ReverseADMultiSet<locint> d_set;
   d_set.insert(dep);
-  d_deriv.increase(d_set, 1.0);
+  if (!_use_dep_init_adjoint) {
+    d_deriv.increase(d_set, 1.0);
+  } else {
+    d_deriv.increase(d_set, dep_init_adjoint[dep_count]);
+  }
   dep_deriv.insert(std::pair<locint, GenericDeriv<locint, Base>>(dep, d_deriv));
   //d_deriv.debug();
+  reverse_live[dep].insert(dep);
 }
 
 template <typename Base>

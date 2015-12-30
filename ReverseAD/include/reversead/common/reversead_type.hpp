@@ -16,6 +16,7 @@
 
 #endif // ENABLE_REVERSEAD_MPI
 
+#define MAX_LOC 0xfffffffffffffffful
 
 #define NULL_LOC 0
 

@@ -18,11 +18,13 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
   typedef typename SingleDerivative<Base>::type_adjoint type_adjoint;
   typedef SingleDerivative<Base> SingleDeriv;
 
+  using BaseReverseMode<Base>::_use_dep_init_adjoint;
   using BaseReverseMode<Base>::trace;
   using BaseReverseMode<Base>::dep_deriv;
   using BaseReverseMode<Base>::reverse_live;
   using BaseReverseMode<Base>::dep_index_map;
   using BaseReverseMode<Base>::indep_index_map;
+  using BaseReverseMode<Base>::dep_init_adjoint;
 
   using BaseReverseMode<Base>::compute_adjoint_sac;
   using BaseReverseMode<Base>::compute_adjoint_deriv;
@@ -44,7 +46,7 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
 
   void transcript_adjoint(DerivativeTensor<locint, Base>& tensor);
 
-  void init_dep_deriv(SingleDeriv& deriv, locint dep);
+  void init_dep_deriv(locint dep, int dep_count);
 
   virtual void accumulate_deriv(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv);
 

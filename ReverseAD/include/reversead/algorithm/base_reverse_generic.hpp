@@ -19,10 +19,12 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
  public:
   typedef SingleDerivative<Base> SingleDeriv;
 
+  using BaseReverseMode<Base>::_use_dep_init_adjoint;
   using BaseReverseMode<Base>::trace;
   using BaseReverseMode<Base>::reverse_live;
   using BaseReverseMode<Base>::indep_index_map;
   using BaseReverseMode<Base>::dep_index_map;
+  using BaseReverseMode<Base>::dep_init_adjoint;
 
   BaseReverseGeneric(const std::shared_ptr<TrivialTrace<Base>>& trace, int order);
 
@@ -33,14 +35,14 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
  protected:
   virtual DerivativeTensor<locint, Base> transcript_result();
 
-  // here we're NOT touching SingleDeriv, will change interface later
-  void init_dep_deriv(SingleDeriv& deriv, locint dep);
+  void init_dep_deriv(locint dep, int dep_count);
 
   void process_sac(const DerivativeInfo<locint, Base>& info);
 
-
  private:
   int order;
+
+  // this will shadow the same name in BaseReverseMode because it's a template
   std::map<locint, GenericDeriv<locint, Base> > dep_deriv;
 
   // some private temps used when accumulating, avoid pointers on stack
