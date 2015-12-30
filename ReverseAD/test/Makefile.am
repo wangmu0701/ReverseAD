@@ -1,4 +1,4 @@
-SUBDIRS = regression rosenbrock simple
+SUBDIRS = regression rosenbrock simple forward
 if ENABLE_REVERSEAD_MPI
 SUBDIRS += mpi
 endif

@@ -7,6 +7,7 @@
 *.spec
 *.in
 *.bak
+*.swp
 *~
 .libs
 .deps
@@ -24,6 +25,7 @@ test_square
 test_quad
 test_param
 test_preacc
+test_forward
 test_mpi
 test_mpi_reduce
 test_mpi_thomson

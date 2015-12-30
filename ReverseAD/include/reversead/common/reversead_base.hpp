@@ -146,7 +146,7 @@ namespace ReverseAD {
 
   template <typename Base>
   void trace_put_olllbb(opbyte op, locint res, locint arg1, locint arg2,
-                 double val1, double val2) {
+                 Base val1, Base val2) {
     if (is_tracing) {
       ((TrivialTrace<Base>*)global_trace)->put_op(op);
       ((TrivialTrace<Base>*)global_trace)->put_val(val1);

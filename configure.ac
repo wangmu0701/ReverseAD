@@ -37,12 +37,14 @@ AC_CONFIG_FILES(Makefile
                 ReverseAD/src/activetype/Makefile
                 ReverseAD/src/common/Makefile
                 ReverseAD/src/algorithm/Makefile
+                ReverseAD/src/forwardtype/Makefile
                 ReverseAD/src/util/Makefile
                 ReverseAD/src/rmpi/Makefile
                 ReverseAD/include/Makefile
                 ReverseAD/include/reversead/Makefile
                 ReverseAD/include/reversead/activetype/Makefile
                 ReverseAD/include/reversead/algorithm/Makefile
+                ReverseAD/include/reversead/forwardtype/Makefile
                 ReverseAD/include/reversead/common/Makefile
                 ReverseAD/include/reversead/tape/Makefile
                 ReverseAD/include/reversead/trace/Makefile
@@ -51,6 +53,7 @@ AC_CONFIG_FILES(Makefile
                 ReverseAD/include/reversead/common/reversead_config.h
                 ReverseAD/test/Makefile
                 ReverseAD/test/regression/Makefile
+                ReverseAD/test/forward/Makefile
                 ReverseAD/test/algorithm/Makefile
                 ReverseAD/test/tape/Makefile
                 ReverseAD/test/trace/Makefile

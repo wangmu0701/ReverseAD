@@ -3,8 +3,8 @@
 #include "reversead/common/reversead_config.h"
 
 #include "reversead/common/reversead_type.hpp"
-#include "reversead/activetype/base_active.hpp"
 #include "reversead/common/reversead_base.hpp"
+#include "reversead/activetype/base_active.hpp"
 #include "reversead/trace/trivial_trace.hpp"
 #include "reversead/algorithm/base_function_replay.hpp"
 #include "reversead/algorithm/base_reverse_mode.hpp"
