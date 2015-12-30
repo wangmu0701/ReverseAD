@@ -4,6 +4,7 @@
 
 #include "reversead/common/opcodes.hpp"
 #include "reversead/algorithm/base_reverse_adjoint.hpp"
+#include "reversead/forwardtype/single_forward.hpp"
 
 namespace ReverseAD {
 
@@ -44,7 +45,7 @@ void BaseReverseAdjoint<Base>::retrieve_adjoint_sparse_format(int* ssize,
   (*ssize) = total_size;
   (*rind) = new locint[total_size];
   (*cind) = new locint[total_size];
-  (*values) = new double[total_size];
+  (*values) = new Base[total_size];
   int l = 0;
   for (auto& kv : dep_deriv) {
     locint dep = dep_index_map[kv.first] - 1;
@@ -67,6 +68,7 @@ DerivativeTensor<locint, Base> BaseReverseAdjoint<Base>::transcript_result() {
   int dep_size = dep_deriv.size();
   int ind_size = indep_index_map.size();
   DerivativeTensor<locint, Base> ret(dep_size, ind_size, 1);
+  transcript_adjoint(ret);
   return ret;
 }
 
@@ -184,3 +186,4 @@ void BaseReverseAdjoint<Base>::compute_preacc(
 } // namespace ReverseAD
 
 template class ReverseAD::BaseReverseAdjoint<double>;
+template class ReverseAD::BaseReverseAdjoint<ReverseAD::SingleForward>;

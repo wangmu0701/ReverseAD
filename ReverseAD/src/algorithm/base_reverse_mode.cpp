@@ -3,6 +3,7 @@
 #include "reversead/common/reversead_base.hpp"
 #include "reversead/common/opcodes.hpp"
 #include "reversead/algorithm/base_reverse_mode.hpp"
+#include "reversead/forwardtype/single_forward.hpp"
 
 #define ENABLE_REVERSE_THIRD
 
@@ -31,10 +32,10 @@ DerivativeTensor<locint, Base> BaseReverseMode<Base>::compute(
   reverse_local_computation(ind_num, dep_num);
   time = get_timing();
   logger.info << "reverse local compute timing : " << time << std::endl;
-  for (auto& kv : dep_deriv) {
-    logger.info << "Dep : " << kv.first << std::endl;
-    kv.second.debug(logger.info);
-  }
+  //for (auto& kv : dep_deriv) {
+    //logger.info << "Dep : " << kv.first << std::endl;
+    //kv.second.debug(logger.info);
+  //}
   return transcript_result();
 }
 
@@ -53,6 +54,13 @@ DerivativeTensor<locint, Base> BaseReverseMode<Base>::compute(
 
 template <typename Base>
 void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) {
+  using std::sin;
+  using std::cos;
+  using std::sqrt;
+  using std::pow;
+  using std::log;
+  using std::exp;
+
     DerivativeInfo<locint, Base> info;
     
     if (ind_num != trace->get_num_ind()) {
@@ -461,7 +469,7 @@ void BaseReverseMode<Base>::compute_third_sac(
                                               const type_adjoint& r,
                                               const type_hessian& e) {
     locint p,q;
-    double pw;
+    Base pw;
     double coeff, xcoeff, ycoeff;
     
     typename type_hessian::enumerator e_enum = e.get_enumerator();
@@ -727,4 +735,4 @@ void BaseReverseMode<Base>::compute_third_deriv(
 } // namespace ReverseAD
 
 template class ReverseAD::BaseReverseMode<double>;
-
+template class ReverseAD::BaseReverseMode<ReverseAD::SingleForward>;

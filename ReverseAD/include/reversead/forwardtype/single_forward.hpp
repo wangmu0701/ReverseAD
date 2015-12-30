@@ -22,6 +22,9 @@ class SingleForward {
   SingleForward& operator--();
   SingleForward operator--(int);
 
+  SingleForward operator+() const;
+  SingleForward operator-() const;
+
   // binary arithmetic
   SingleForward& operator+=(const SingleForward& rhs);
   SingleForward& operator-=(const SingleForward& rhs);

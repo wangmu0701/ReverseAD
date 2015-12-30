@@ -29,6 +29,15 @@ SingleForward SingleForward::operator--(int) {
   this->_val--;
   return res;
 }
+
+SingleForward SingleForward::operator+() const {
+  return SingleForward(this->_val, this->_der);
+}
+
+SingleForward SingleForward::operator-() const {
+  return SingleForward(-this->_val, -this->_der);
+}
+
 // binary arithmetic
 SingleForward& SingleForward::operator+=(const SingleForward& rhs) {
   this->_val += rhs._val;
