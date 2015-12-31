@@ -52,7 +52,8 @@ class SingleForward {
   friend SingleForward asin(const SingleForward& rhs);
   friend SingleForward acos(const SingleForward& rhs);
   friend SingleForward atan(const SingleForward& rhs);
-
+ 
+  friend SingleForward fabs(const SingleForward& rhs);
 };
 
 // stream output
@@ -98,6 +99,8 @@ SingleForward tan(const SingleForward& rhs);
 SingleForward asin(const SingleForward& rhs);
 SingleForward acos(const SingleForward& rhs);
 SingleForward atan(const SingleForward& rhs);
+
+SingleForward fabs(const SingleForward& rhs);
 
 } // namespace ReverseAD
 

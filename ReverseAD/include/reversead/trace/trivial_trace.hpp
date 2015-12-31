@@ -20,39 +20,16 @@ class TrivialTrace : public AbstractTrace<Base> {
   using AbstractTrace<Base>::num_param;
 
  public:
-  TrivialTrace(const std::shared_ptr<TrivialTrace<Base>>& other,
-               const std::shared_ptr<TrivialTape<Base>>& val_tape,
-               const std::shared_ptr<TrivialTape<Base>>& param_tape) {
-    this->op_tape = other->op_tape;
-    this->loc_tape = other->loc_tape;
-    this->val_tape = val_tape;
-    this->param_tape = param_tape;
-    this->coval_tape = other->coval_tape;
-    this->num_ind = other->num_ind;
-    this->num_dep = other->num_dep;
-#ifdef ENABLE_REVERSEAD_MPI
-    this->sr_info_tape = other->sr_info_tape;
-    this->comm_loc_tape = other->comm_loc_tape;
-    this->num_dummy_ind = other->num_dummy_ind;
-    this->num_dummy_dep = other->num_dummy_dep;
-#endif
-  }
-  TrivialTrace(const std::shared_ptr<TrivialTrace<Base>>& other,
-               const std::shared_ptr<TrivialTape<Base>>& val_tape) {
-    this->op_tape = other->op_tape;
-    this->loc_tape = other->loc_tape;
-    this->val_tape = val_tape;
-    this->param_tape = other->param_tape;
-    this->coval_tape = other->coval_tape;
-    this->num_ind = other->num_ind;
-    this->num_dep = other->num_dep;
-#ifdef ENABLE_REVERSEAD_MPI
-    this->sr_info_tape = other->sr_info_tape;
-    this->comm_loc_tape = other->comm_loc_tape;
-    this->num_dummy_ind = other->num_dummy_ind;
-    this->num_dummy_dep = other->num_dummy_dep;
-#endif
-  }
+  template <typename OldBase, typename NewBase>
+  friend std::shared_ptr<TrivialTrace<NewBase>> copy_tape(
+    const std::shared_ptr<TrivialTrace<OldBase>>& other,
+    const std::shared_ptr<TrivialTape<NewBase>>& val_tape,
+    const std::shared_ptr<TrivialTape<NewBase>>& param_tape);
+  template <typename OldBase, typename NewBase>
+  friend std::shared_ptr<TrivialTrace<NewBase>> copy_tape(
+    const std::shared_ptr<TrivialTrace<OldBase>>& other,
+    const std::shared_ptr<TrivialTape<NewBase>>& val_tape);
+
   // Default c-tor and d-tor
   TrivialTrace() {
     op_tape = std::make_shared<TrivialTape<opbyte>>();
@@ -229,6 +206,38 @@ class TrivialTrace : public AbstractTrace<Base> {
   std::shared_ptr<TrivialTape<SendRecvInfo>> sr_info_tape;
   std::shared_ptr<TrivialTape<locint>> comm_loc_tape;
 };
+
+template <typename OldBase, typename NewBase>
+std::shared_ptr<TrivialTrace<NewBase>> copy_tape(
+      const std::shared_ptr<TrivialTrace<OldBase>>& other,
+      const std::shared_ptr<TrivialTape<NewBase>>& val_tape,
+      const std::shared_ptr<TrivialTape<NewBase>>& param_tape) {
+    std::shared_ptr<TrivialTrace<NewBase>> ret =
+        std::make_shared<TrivialTrace<NewBase>>();
+    ret->op_tape = other->op_tape;
+    ret->loc_tape = other->loc_tape;
+    ret->val_tape = val_tape;
+    ret->param_tape = param_tape;
+    ret->coval_tape = other->coval_tape;
+    ret->num_ind = other->num_ind;
+    ret->num_dep = other->num_dep;
+#ifdef ENABLE_REVERSEAD_MPI
+    ret->sr_info_tape = other->sr_info_tape;
+    ret->comm_loc_tape = other->comm_loc_tape;
+    ret->num_dummy_ind = other->num_dummy_ind;
+    ret->num_dummy_dep = other->num_dummy_dep;
+#endif
+    return ret;
+  }
+
+template <typename OldBase, typename NewBase>
+static std::shared_ptr<TrivialTrace<NewBase>> copy_tape(
+      const std::shared_ptr<TrivialTrace<OldBase>>& other,
+      const std::shared_ptr<TrivialTape<NewBase>>& val_tape) {
+    // TODO(some warning message when other trace has non empty parameter)
+    return copy_tape<OldBase, NewBase>(
+        other, val_tape, std::make_shared<TrivialTape<NewBase>>());
+}
 
 } // namespace ReverseAD
 

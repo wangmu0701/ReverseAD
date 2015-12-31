@@ -1,3 +1,3 @@
 pkginclude_HEADERS = reversead.hpp
 
-SUBDIRS = activetype algorithm common tape trace util rmpi forwardtype
+SUBDIRS = activetype algorithm common tape trace util rmpi forwardtype driver

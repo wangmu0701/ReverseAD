@@ -6,9 +6,11 @@
 #include "reversead/common/opcodes.hpp"
 #include "reversead/algorithm/base_function_replay.hpp"
 #include "reversead/tape/trivial_tape.hpp"
+#include "reversead/forwardtype/single_forward.hpp"
 
 using std::map;
 using ReverseAD::TrivialTrace;
+using ReverseAD::SingleForward;
 
 namespace ReverseAD {
 
@@ -23,6 +25,19 @@ template <typename Base>
                             true, // reset_dep,
                             false, // reset_ind,
                             false); // reset_param
+}
+
+template <typename OldBase, typename NewBase>
+std::shared_ptr<TrivialTrace<NewBase>> BaseFunctionReplay::replay_forward(
+    const std::shared_ptr<TrivialTrace<OldBase>>& trace,
+    const NewBase* const ind_val, int ind_num) {
+  return replay<OldBase, NewBase>(trace,
+                                  (NewBase*)nullptr, trace->get_num_dep(),
+                                  ind_val, ind_num,
+                                  (NewBase*)nullptr, trace->get_num_param(),
+                                  false, // reset_dep,
+                                  true, // reset_ind,
+                                  false); // reset_param
 }
 
 template <typename Base>
@@ -81,7 +96,7 @@ template <typename Base>
 
 template <typename Base>
  std::shared_ptr<TrivialTrace<Base>> BaseFunctionReplay::replay(
-    std::shared_ptr<TrivialTrace<Base>> trace,
+    const std::shared_ptr<TrivialTrace<Base>>& trace,
     Base* dep_val, int dep_num,
     const Base* const ind_val, int ind_num,
     const Base* const param_val, int param_num) {
@@ -93,14 +108,24 @@ template <typename Base>
                             true, // reset_ind,
                             true); // reset_param
 }
-
 template <typename OldBase, typename NewBase>
  std::shared_ptr<TrivialTrace<NewBase>> BaseFunctionReplay::replay(
-    std::shared_ptr<TrivialTrace<OldBase>> trace,
+    const std::shared_ptr<TrivialTrace<OldBase>>& trace,
     NewBase* dep_val, int dep_num,
     const NewBase* const ind_val, int ind_num,
     const NewBase* const param_val, int param_num,
     bool reset_dep, bool reset_ind, bool reset_param) {
+  using std::sin;
+  using std::cos;
+  using std::asin;
+  using std::acos;
+  using std::atan;
+  using std::sqrt;
+  using std::pow;
+  using std::log;
+  using std::exp;
+  using std::fabs; 
+
   map<locint, NewBase> val_map;
   trace->init_forward();
   opbyte op = trace->get_next_op_f();
@@ -130,7 +155,8 @@ template <typename OldBase, typename NewBase>
   locint res;
   locint arg1;
   locint arg2;
-  OldBase val, val1, val2;
+  OldBase tval;
+  NewBase val, val1, val2;
   double coval;
   while (op != end_of_tape) {
     switch (op) {
@@ -142,13 +168,13 @@ template <typename OldBase, typename NewBase>
           return nullptr;
         }
         res = trace->get_next_loc_f();
-        val = trace->get_next_val_f();
+        tval = trace->get_next_val_f();
         if (reset_ind) {
           // reset: value from function call
           val_map[res] = ind_val[ind_count++];
         } else {
           // no reset: value from trace
-          val_map[res] = val;
+          val_map[res] = tval;
         }
         val_tape->put(val_map[res]);
         break;
@@ -167,14 +193,14 @@ template <typename OldBase, typename NewBase>
         break;
       case assign_param:
         res = trace->get_next_loc_f();
-        val = trace->get_next_param_f();
+        tval = trace->get_next_param_f();
         if (reset_param) {
           // reset: value from function call
           val_map[res] = param_val[param_count++];
           param_tape->put(val_map[res]);
         } else {
           // no reset: value from trace
-          val_map[res] = val;
+          val_map[res] = tval;
         }
         break;
       case assign_d:
@@ -397,60 +423,70 @@ template <typename OldBase, typename NewBase>
     }
     op = trace->get_next_op_f();
   }
-  std::shared_ptr<TrivialTrace<NewBase>> ret = trace;
+  std::shared_ptr<TrivialTrace<NewBase>> ret;
   if (reset_param) {
     // a new set of param values
-    ret = std::make_shared<TrivialTrace<NewBase>>(trace, val_tape, param_tape);
+    ret = copy_tape<OldBase, NewBase>(trace, val_tape, param_tape);
   } else if (reset_ind) {
     // a new set of ind values
-    ret = std::make_shared<TrivialTrace<NewBase>>(trace, val_tape);
+    ret = copy_tape<OldBase, NewBase>(trace, val_tape);
   }
   return ret;
 }
 
 } // namespace ReverseAD
 
-template  std::shared_ptr<TrivialTrace<double>>
+template std::shared_ptr<TrivialTrace<double>>
     ReverseAD::BaseFunctionReplay::replay_dep<double>(
       const std::shared_ptr<TrivialTrace<double>>& trace,
       double* dep_val, int dep_num);
 
-template  std::shared_ptr<TrivialTrace<double>> 
+template std::shared_ptr<TrivialTrace<SingleForward>>
+    ReverseAD::BaseFunctionReplay::replay_forward<double, SingleForward>(
+      const std::shared_ptr<TrivialTrace<double>>& trace,
+      const SingleForward* const ind_val, int ind_num);
+
+template std::shared_ptr<TrivialTrace<double>> 
     ReverseAD::BaseFunctionReplay::replay_ind<double>(
       const std::shared_ptr<TrivialTrace<double>>& trace,
       const double* const ind_val, int ind_num);
 
-template  std::shared_ptr<TrivialTrace<double>>
+template std::shared_ptr<TrivialTrace<double>>
     ReverseAD::BaseFunctionReplay::replay_ind<double>(
       const std::shared_ptr<TrivialTrace<double>>& trace,
       double* dep_val, int dep_num,
       const double* const ind_val, int ind_num);
 
-template  std::shared_ptr<TrivialTrace<double>>
+template std::shared_ptr<TrivialTrace<double>>
     ReverseAD::BaseFunctionReplay::replay_param(
       const std::shared_ptr<TrivialTrace<double>>& trace,
       const double* const param_val, int param_num);
-
-template  std::shared_ptr<TrivialTrace<double>>
+template std::shared_ptr<TrivialTrace<double>>
     ReverseAD::BaseFunctionReplay::replay<double>(
       const std::shared_ptr<TrivialTrace<double>>& trace,
       const double* const ind_val, int ind_num,
       const double* const param_val, int param_num);
 
-template  std::shared_ptr<TrivialTrace<double>>
+template std::shared_ptr<TrivialTrace<double>>
     ReverseAD::BaseFunctionReplay::replay<double>(
-      std::shared_ptr<TrivialTrace<double>> trace,
+      const std::shared_ptr<TrivialTrace<double>>& trace,
       double* dep_val, int dep_num,
       const double* const ind_val, int ind_num,
       const double* const param_val, int param_num);
 
-template  std::shared_ptr<TrivialTrace<double>>
+template std::shared_ptr<TrivialTrace<double>>
     ReverseAD::BaseFunctionReplay::replay<double, double>(
-      std::shared_ptr<TrivialTrace<double>> trace,
+      const std::shared_ptr<TrivialTrace<double>>& trace,
       double* dep_val, int dep_num,
       const double* const ind_val, int ind_num,
       const double* const param_val, int param_num,
       bool reset_dep, bool reset_ind, bool reset_param);
 
-
+template std::shared_ptr<TrivialTrace<SingleForward>>
+    ReverseAD::BaseFunctionReplay::replay<double, SingleForward>(
+      const std::shared_ptr<TrivialTrace<double>>& trace,
+      SingleForward* dep_val, int dep_num,
+      const SingleForward* const ind_val, int ind_num,
+      const SingleForward* const param_val, int param_num,
+      bool reset_dep, bool reset_ind, bool reset_param);
 
