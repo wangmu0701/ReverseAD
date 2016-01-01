@@ -4,7 +4,8 @@
 #include <vector>
 #include <map>
 
-#include "reversead_multiset.hpp"
+#include "reversead/algorithm/algorithm_common.hpp"
+#include "reversead/algorithm/reversead_multiset.hpp"
 
 namespace ReverseAD {
 
@@ -18,6 +19,9 @@ class GenericDeriv {
     _data.resize(_order);
   }
   void increase(const ReverseADMultiSet<LocType>& set, Base v) {
+    if (IsZero(v)) {
+      return;
+    }
     int order = set.size();
     if (check_size_fail(order)) {
       return;

@@ -2,6 +2,7 @@
 
 #include "reversead/common/reversead_base.hpp"
 #include "reversead/common/opcodes.hpp"
+#include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/base_reverse_mode.hpp"
 #include "reversead/forwardtype/single_forward.hpp"
 
@@ -415,7 +416,7 @@ void BaseReverseMode<Base>::compute_hessian_sac(
     while (has_next) {
         has_next = r_enum.get_next(p, pw);
         //logger.info << "p = " << p << "pw = " << pw << std::endl;
-        if (pw != 0.0) {
+        if (!IsZero(pw)) {
             if (info.y != NULL_LOC) {
                 if (p != info.r) {
                     if (p == info.x) {
@@ -447,7 +448,7 @@ void BaseReverseMode<Base>::compute_hessian_sac(
         } // pw != 0.0
     } // while (has_next)
     
-    if (w != 0.0) {
+    if (!IsZero(w)) {
         if (info.pxx != 0.0) {
             hessian_vals.increase(info.x, info.x, info.pxx * w);
         }
@@ -476,13 +477,13 @@ void BaseReverseMode<Base>::compute_third_sac(
     while(e_enum.has_next()) {
         e_enum.get_next(p, q, pw);
         if (p != info.r && q != info.r) { // p!=r && q!=r
-            if (info.x != NULL_LOC && info.dx != 0.0) {
+            if (info.x != NULL_LOC && !IsZero(info.dx)) {
                 xcoeff = 1.0;
                 if (info.x == p) {xcoeff += 1.0;}
                 if (info.x == q) {xcoeff += 1.0;}
                 third_vals.increase(info.x, p, q, xcoeff * pw * info.dx);
             }
-            if (info.y != NULL_LOC && info.dy != 0.0) {
+            if (info.y != NULL_LOC && !IsZero(info.dy)) {
                 ycoeff = 1.0;
                 if (info.y == p) {ycoeff += 1.0;}
                 if (info.y == q) {ycoeff += 1.0;}
@@ -506,7 +507,7 @@ void BaseReverseMode<Base>::compute_third_sac(
             if (info.x != NULL_LOC) {
                 third_vals.increase(info.x, info.x, info.x,
                                     pw * info.dx * info.dx * info.dx);
-                if (info.y != NULL_LOC && info.dy != 0.0) {
+                if (info.y != NULL_LOC && !IsZero(info.dy)) {
                     third_vals.increase(info.x, info.x, info.y,
                                         pw * info.dx * info.dx * info.dy);
                     third_vals.increase(info.x, info.y, info.y,
@@ -550,7 +551,7 @@ void BaseReverseMode<Base>::compute_third_sac(
         }
     } // while
     
-    if (w != 0.0) {
+    if (!IsZero(w)) {
         if (info.x != NULL_LOC) {
             third_vals.increase(info.x, info.x, info.x, w*info.pxxx);
             if (info.y != NULL_LOC) {
@@ -568,7 +569,7 @@ void BaseReverseMode<Base>::compute_adjoint_deriv(
                                                   type_adjoint& global_adjoint,
                                                   const Base& w) {
     
-    if (w != 0.0) {
+    if (!IsZero(w)) {
         locint v;
         Base vw;
         typename type_adjoint::enumerator l_enum = local_adjoint.get_enumerator();
@@ -621,7 +622,7 @@ void BaseReverseMode<Base>::compute_hessian_deriv(
             }
         }
     }
-    if (w != 0.0) {
+    if (!IsZero(w)) {
         typename type_hessian::enumerator h_enum = local_hessian.get_enumerator();
         bool h_has_next = h_enum.has_next();
         while(h_has_next) {
@@ -722,7 +723,7 @@ void BaseReverseMode<Base>::compute_third_deriv(
         }
     } // while
     
-    if (w != 0.0) {
+    if (!IsZero(w)) {
         typename type_third::enumerator lt_enum =
         local_third.get_enumerator();
         while (lt_enum.has_next()) {

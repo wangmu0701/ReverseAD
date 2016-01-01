@@ -21,6 +21,9 @@ class TrivialHessian : public AbstractSerializable {
 
   void clear();
   void increase(const LocType& x, const LocType& y, const Base& w) {
+    if (IsZero(w)) {
+      return;
+    }
     if (x >= y) {
       _data[x][y] += w;
     } else {

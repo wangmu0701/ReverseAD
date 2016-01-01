@@ -5,6 +5,7 @@
 
 #include "reversead/algorithm/abstract_serializable.hpp"
 #include "reversead/util/logger.hpp"
+#include "reversead/algorithm/algorithm_common.hpp"
 
 namespace ReverseAD {
 
@@ -24,6 +25,9 @@ class TrivialAdjoint : public AbstractSerializable {
   void clear();
 
   void increase(const LocType& x, const Base& w) {
+    if (IsZero(w)) {
+      return;
+    }
     _data[x] += w;
   }
   // serializable

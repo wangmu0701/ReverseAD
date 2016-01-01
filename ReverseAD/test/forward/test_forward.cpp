@@ -56,7 +56,7 @@ int main() {
   check_answer(tensor);
 */
   std::shared_ptr<TrivialTrace<double>> trace = foo<double>(1,2);
-  double v[2] = {1, 2};
+  double v[2] = {0, 2};
   double a[2] = {3, 4};
   double* h = new double[2];
   forward_over_reverse(trace, 2, 1, v, a, &h);

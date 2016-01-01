@@ -4,6 +4,7 @@
 #include "reversead/common/reversead_type.hpp"
 #include "reversead/common/reversead_base.hpp"
 #include "reversead/common/opcodes.hpp"
+#include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/base_reverse_generic.hpp"
 
 namespace ReverseAD {
@@ -60,7 +61,7 @@ void BaseReverseGeneric<Base>::accumulate_deriv(
       for (int i=0; i<= order; i++) {
         ReverseADMultiSet<locint> ss_set(s_set);
         for(int j=0; j<=order; j++) {
-          if (ssw[i*(order+1)+j] != 0.0) {
+          if (!IsZero(ssw[i*(order+1)+j])) {
             global_deriv.increase(ss_set, ssw[i*(order+1)+j]);
           }
           ss_set.insert(info.y);
@@ -75,7 +76,7 @@ void BaseReverseGeneric<Base>::accumulate_deriv(
                             local_deriv.get_enumerator()); // initial enum
       for (int i=1; i<=order; i++) {
         s_set.insert(info.x);
-        if (ssw[i] != 0.0) {
+        if (!IsZero(ssw[i])) {
           global_deriv.increase(s_set, ssw[i]);
         }
       }
@@ -219,7 +220,7 @@ void BaseReverseGeneric<Base>::generate_binary_tuples(
     //std::cout << "curr_pair : ";
     //dc.debug();
     //std::cout << " w = " << w << std::endl;
-    if (w != 0.0) {
+    if (!IsZero(w)) {
       int size = dc.size();
       if (size * (max_level - curr_level + 1) + curr_order <= max_order) {
         dx[curr_level] = dc.count(temp_x);
@@ -248,7 +249,7 @@ void BaseReverseGeneric<Base>::generate_unary_tuples(
   Base w;
   while (s_enum.has_next()) {
     s_enum.get_curr_pair(dc, w);
-    if (w != 0.0) {
+    if (!IsZero(w)) {
       int size = dc.size();
       if (size * (max_level - curr_level + 1) + curr_order <= max_order) {
         dx[curr_level] = size;
@@ -320,7 +321,7 @@ void BaseReverseGeneric<Base>::check_and_increase(
     const ReverseADMultiSet<locint>& term,
     const Base& value,
     GenericDeriv<locint, Base>& local_deriv) {
-  if (value != 0.0) {
+  if (!IsZero(value)) {
     local_deriv.increase(term, value);
   }
 }
@@ -330,6 +331,12 @@ template <typename Base>
 void BaseReverseGeneric<Base>::fill_in_local_deriv(
     const DerivativeInfo<locint, Base>& info,
     GenericDeriv<locint, Base>& local_deriv) {
+  using std::sin;
+  using std::cos;
+  using std::sqrt;
+  using std::pow;
+  using std::log;
+  using std::exp;
   
   if (order <= 3) { // simple fill
     ReverseADMultiSet<locint> term;

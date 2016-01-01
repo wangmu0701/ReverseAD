@@ -3,8 +3,24 @@
 
 #include <iostream>
 #include "reversead/common/reversead_base.hpp"
+#include "reversead/forwardtype/single_forward.hpp"
 
 namespace ReverseAD {
+
+template <typename T>
+inline bool IsZero(const T& val) {
+  return val == 0.0;
+}
+
+template <>
+inline bool IsZero<double>(const double& val) {
+  return val == 0.0;
+}
+template <>
+inline bool IsZero<SingleForward>(const SingleForward& val) {
+  std::cout <<"Spec : " << val << std::endl; 
+  return (val.getVal() == 0.0 && val.getDer() == 0.0);
+}
 
 template <typename LocType, typename Base>
 class DerivativeInfo {

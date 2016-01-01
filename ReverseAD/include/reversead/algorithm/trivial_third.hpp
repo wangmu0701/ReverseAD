@@ -3,6 +3,7 @@
 
 #include <map>
 
+#include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/abstract_serializable.hpp"
 #include "reversead/algorithm/trivial_adjoint.hpp"
 #include "reversead/algorithm/trivial_hessian.hpp"
@@ -22,7 +23,7 @@ class TrivialThird : public AbstractSerializable {
   void clear();
   void increase(const LocType& x, const LocType& y, const LocType& z, 
                 const Base& w) {
-    if (w == 0.0) {return;}
+    if (IsZero(w)) {return;}
     if (x >= y) {
       if (z >= x) { // z>=x>=y
         _data[z][x][y] += w;
