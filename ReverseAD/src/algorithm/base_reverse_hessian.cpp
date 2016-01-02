@@ -1,5 +1,6 @@
 #include "reversead/common/opcodes.hpp"
 #include "reversead/algorithm/base_reverse_hessian.hpp"
+#include "reversead/forwardtype/single_forward.hpp"
 
 namespace ReverseAD {
 
@@ -45,6 +46,7 @@ DerivativeTensor<locint, Base> BaseReverseHessian<Base>::transcript_result() {
   int dep_size = dep_deriv.size();
   int ind_size = indep_index_map.size();
   DerivativeTensor<locint, Base> ret(dep_size, ind_size, 2);
+  BaseReverseMode<Base>::transcript_dep_value(ret);
   BaseReverseAdjoint<Base>::transcript_adjoint(ret);
   transcript_hessian(ret);
   return ret;
@@ -94,3 +96,4 @@ void BaseReverseHessian<Base>::process_single_deriv(locint local_dep,
 } // namespace ReverseAD
 
 template class ReverseAD::BaseReverseHessian<double>;
+template class ReverseAD::BaseReverseHessian<ReverseAD::SingleForward>;

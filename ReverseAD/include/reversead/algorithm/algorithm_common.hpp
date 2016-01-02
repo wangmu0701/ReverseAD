@@ -18,7 +18,6 @@ inline bool IsZero<double>(const double& val) {
 }
 template <>
 inline bool IsZero<SingleForward>(const SingleForward& val) {
-  std::cout <<"Spec : " << val << std::endl; 
   return (val.getVal() == 0.0 && val.getDer() == 0.0);
 }
 

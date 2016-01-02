@@ -68,6 +68,7 @@ DerivativeTensor<locint, Base> BaseReverseAdjoint<Base>::transcript_result() {
   int dep_size = dep_deriv.size();
   int ind_size = indep_index_map.size();
   DerivativeTensor<locint, Base> ret(dep_size, ind_size, 1);
+  BaseReverseMode<Base>::transcript_dep_value(ret);
   transcript_adjoint(ret);
   return ret;
 }

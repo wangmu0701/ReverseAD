@@ -6,6 +6,7 @@
 #include "reversead/common/opcodes.hpp"
 #include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/base_reverse_generic.hpp"
+#include "reversead/forwardtype/single_forward.hpp"
 
 namespace ReverseAD {
 
@@ -89,6 +90,7 @@ DerivativeTensor<locint, Base> BaseReverseGeneric<Base>::transcript_result() {
   int dep_size = dep_deriv.size();
   int ind_size = indep_index_map.size();
   DerivativeTensor<locint, Base> ret(dep_size, ind_size, order);
+  BaseReverseMode<Base>::transcript_dep_value(ret);
   int* size = new int[order];
   int* curr_l = new int[order];
   locint* t = new locint[order];
@@ -108,6 +110,11 @@ DerivativeTensor<locint, Base> BaseReverseGeneric<Base>::transcript_result() {
       g_enum.move_to_next();
       int t_order = s_set.size();
       s_set.to_array(t);
+      // The iterator of multiset puts small number fist
+      // reverse the order so it gives lower half
+      for (int i=0; i<t_order/2; i++) {
+        std::swap(t[i], t[t_order-1-i]);
+      }
       for (int i=0; i<t_order; i++) {
         t[i] = indep_index_map[t[i]] - 1;
       }
@@ -591,3 +598,4 @@ void BaseReverseGeneric<Base>::fill_in_local_deriv(
 } // namespace ReverseAD
 
 template class ReverseAD::BaseReverseGeneric<double>;
+template class ReverseAD::BaseReverseGeneric<ReverseAD::SingleForward>;

@@ -75,6 +75,8 @@ class BaseReverseMode {
   virtual void init_dep_deriv(locint dep, int dep_count) = 0;
 
   virtual DerivativeTensor<locint, Base> transcript_result() = 0;
+  
+  void transcript_dep_value(DerivativeTensor<locint, Base>& tensor);
 
   std::shared_ptr<TrivialTrace<Base>> trace;
   std::map<locint, std::set<locint> > reverse_live;
@@ -82,6 +84,7 @@ class BaseReverseMode {
   std::map<locint, locint> indep_index_map;
   std::map<locint, locint> dep_index_map;
   std::map<int, Base> dep_init_adjoint;
+  std::map<locint, Base> dep_value;
   
   bool _use_dep_init_adjoint;
 };
