@@ -27,7 +27,7 @@
 namespace ReverseAD {
 
 template <typename Base>
-DerivativeTensor<locint, Base> BaseReverseMode<Base>::compute(
+DerivativeTensor<int, Base> BaseReverseMode<Base>::compute(
     int ind_num, int dep_num) {
   double time = get_timing();
   reverse_local_computation(ind_num, dep_num);
@@ -42,15 +42,15 @@ DerivativeTensor<locint, Base> BaseReverseMode<Base>::compute(
 
 template <typename Base>
 void BaseReverseMode<Base>::transcript_dep_value(
-    DerivativeTensor<locint, Base>& tensor) {
+    DerivativeTensor<int, Base>& tensor) {
   for (auto& kv: dep_deriv) {
-    locint dep = dep_index_map[kv.first] - 1;
+    int dep = dep_index_map[kv.first] - 1;
     tensor.put_dep_value(dep, dep_value[kv.first]);
   }
 }
 
 template <typename Base>
-DerivativeTensor<locint, Base> BaseReverseMode<Base>::compute(
+DerivativeTensor<int, Base> BaseReverseMode<Base>::compute(
     int ind_num, int dep_num, Base* init_adjoint) {
   this->_use_dep_init_adjoint = true;
   if (dep_num != trace->get_num_dep()) {
@@ -107,8 +107,6 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
             case assign_dep:
                 res = trace->get_next_loc_r();
                 dep_value[res] = trace->get_next_val_r();
-                //init_dep_deriv(dep_deriv[res], res);
-                //reverse_live[res].insert(res);
                 init_dep_deriv(res, dep_count);
                 dep_index_map[res] = dep_count;
                 dep_count--;

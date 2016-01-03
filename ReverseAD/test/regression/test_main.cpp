@@ -1,6 +1,5 @@
 #include "reversead/reversead.hpp"
 
-using ReverseAD::locint;
 using ReverseAD::TrivialTrace;
 using ReverseAD::DerivativeTensor;
 
@@ -9,11 +8,11 @@ double myEps = 1.E-10;
 int run_function();
 
 void check_value(int t_order,
-                 DerivativeTensor<locint, double>& tensor,
+                 DerivativeTensor<int, double>& tensor,
                  double true_answer,
                  bool& done) {
   int size;
-  locint** tind;
+  int** tind;
   double* values;
   tensor.get_internal_coordinate_list(0, t_order, &size, &tind, &values);
   if (size > 1) {

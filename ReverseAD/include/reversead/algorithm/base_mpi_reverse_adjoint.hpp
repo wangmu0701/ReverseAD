@@ -47,8 +47,8 @@ class BaseMpiReverseAdjoint : public virtual BaseReverseAdjoint<Base> {
   BaseMpiReverseAdjoint() : BaseReverseAdjoint<Base>() {}
 
   // for MPI code, this is dummy
-  virtual DerivativeTensor<locint, Base> transcript_result() {
-    return DerivativeTensor<locint, Base>();
+  virtual DerivativeTensor<int, Base> transcript_result() {
+    return DerivativeTensor<int, Base>();
   }
 
   virtual void forward_global_phase() {

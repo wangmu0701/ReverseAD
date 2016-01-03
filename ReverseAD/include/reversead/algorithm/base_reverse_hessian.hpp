@@ -42,9 +42,9 @@ class BaseReverseHessian : public virtual BaseReverseAdjoint<Base> {
  protected:
   BaseReverseHessian() : BaseReverseAdjoint<Base>() {}
 
-  virtual DerivativeTensor<locint, Base> transcript_result();
+  virtual DerivativeTensor<int, Base> transcript_result();
 
-  void transcript_hessian(DerivativeTensor<locint, Base>& tensor);
+  void transcript_hessian(DerivativeTensor<int, Base>& tensor);
   virtual void process_single_deriv(locint local_dep,
                                     SingleDeriv& local_deriv,
                                     SingleDeriv& deriv);

@@ -3,16 +3,15 @@
 
 #include "reversead/reversead.hpp"
 
-using ReverseAD::locint;
 using ReverseAD::BaseReverseThird;
 using ReverseAD::BaseReverseGeneric;
 using ReverseAD::TrivialTrace;
 using ReverseAD::DerivativeTensor;
 
 
-void check_answer(DerivativeTensor<locint, double> tensor) {
+void check_answer(DerivativeTensor<int, double> tensor) {
   int size;
-  locint** tind;
+  int** tind;
   double* values;
 
   tensor.get_internal_coordinate_list(0, 1, &size, &tind, &values);
@@ -48,7 +47,7 @@ int main() {
   z >>= vz;
   std::shared_ptr<TrivialTrace<double>> trace = ReverseAD::trace_off<double>();
   std::cout << "z = " << z.getVal() << std::endl;
-  DerivativeTensor<locint, double> tensor;
+  DerivativeTensor<int, double> tensor;
   double az = 2.0;
   BaseReverseThird<double> third(trace);
   tensor = third.compute(4, 1, &az);

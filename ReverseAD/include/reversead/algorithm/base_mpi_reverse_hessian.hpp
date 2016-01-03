@@ -54,8 +54,8 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base>,
  protected:
   BaseMpiReverseHessian() {}
   
-  virtual DerivativeTensor<locint, Base> transcript_result() {
-    return DerivativeTensor<locint, Base>();
+  virtual DerivativeTensor<int, Base> transcript_result() {
+    return DerivativeTensor<int, Base>();
   }
 
 /*

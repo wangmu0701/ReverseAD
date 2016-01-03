@@ -33,7 +33,7 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
                         GenericDeriv<locint, Base>& global_deriv);
 
  protected:
-  virtual DerivativeTensor<locint, Base> transcript_result();
+  virtual DerivativeTensor<int, Base> transcript_result();
 
   void init_dep_deriv(locint dep, int dep_count);
 

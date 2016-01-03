@@ -2,7 +2,6 @@
 
 #include "reversead/reversead.hpp"
 
-using ReverseAD::locint;
 using ReverseAD::TrivialTrace;
 using ReverseAD::DerivativeTensor;
 
@@ -55,9 +54,9 @@ int main() {
   new_trace->dump_trace();
 
   ReverseAD::BaseReverseThird<double> third(new_trace);
-  DerivativeTensor<locint, double> tensor = third.compute(N, M);
+  DerivativeTensor<int, double> tensor = third.compute(N, M);
   int size;
-  locint** tind;
+  int** tind;
   double* values; 
 
   tensor.get_internal_coordinate_list(0, 1, &size, &tind, &values);

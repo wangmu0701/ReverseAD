@@ -36,14 +36,14 @@ void forward_over_reverse(std::shared_ptr<TrivialTrace<double>> trace,
       get_forward_trace(trace, ind_size, ind_init_value, adjoint_init_value);
 
   BaseReverseAdjoint<SingleForward> adjoint(new_trace);
-  DerivativeTensor<locint, SingleForward> tensor = adjoint.compute(ind_size, dep_size);
+  DerivativeTensor<int, SingleForward> tensor = adjoint.compute(ind_size, dep_size);
 
   if (tensor.get_dep_size() != dep_size) {
     // some error here.
   }
 
   int size;
-  locint** tind;
+  int** tind;
   SingleForward* values;
   for (int i=0; i<dep_size; i++) {
     tensor.get_internal_coordinate_list(i, 1, &size, &tind, &values);
@@ -71,13 +71,13 @@ void forward_over_second(std::shared_ptr<TrivialTrace<double>> trace,
       get_forward_trace(trace, ind_size, ind_init_value, adjoint_init_value);
 
   BaseReverseHessian<SingleForward> hessian(new_trace);
-  DerivativeTensor<locint, SingleForward> tensor = hessian.compute(ind_size, dep_size);
+  DerivativeTensor<int, SingleForward> tensor = hessian.compute(ind_size, dep_size);
 
   if (tensor.get_dep_size() != dep_size) {
     // some error here.
   }
   int size;
-  locint** tind;
+  int** tind;
   SingleForward* values;
   for (int i=0; i<dep_size; i++) {
     tensor.get_internal_coordinate_list(i, 2, &size, &tind, &values);
@@ -108,13 +108,13 @@ void forward_over_third(std::shared_ptr<TrivialTrace<double>> trace,
       get_forward_trace(trace, ind_size, ind_init_value, adjoint_init_value);
 
   BaseReverseThird<SingleForward> third(new_trace);
-  DerivativeTensor<locint, SingleForward> tensor = third.compute(ind_size, dep_size);
+  DerivativeTensor<int, SingleForward> tensor = third.compute(ind_size, dep_size);
 
   if (tensor.get_dep_size() != dep_size) {
     // some error here.
   }
   int size;
-  locint** tind;
+  int** tind;
   SingleForward* values;
   for (int i=0; i<dep_size; i++) {
     tensor.get_internal_coordinate_list(i, 3, &size, &tind, &values);
@@ -138,14 +138,14 @@ void forward_over_third(std::shared_ptr<TrivialTrace<double>> trace,
   } 
 }
 
-DerivativeTensor<locint, double> strip_derivative(
-    const DerivativeTensor<locint, SingleForward>& tensor,
+DerivativeTensor<int, double> strip_derivative(
+    const DerivativeTensor<int, SingleForward>& tensor,
     int t_order,
     int ind_size,
     int dep_size) {
-  DerivativeTensor<locint, double> ret(dep_size, ind_size, t_order);
+  DerivativeTensor<int, double> ret(dep_size, ind_size, t_order);
   int size;
-  locint** tind;
+  int** tind;
   SingleForward* value;
   for (int i=0; i<dep_size; i++) {
     ret.put_dep_value(i, tensor.get_dep_value(i).getDer());
@@ -159,7 +159,7 @@ DerivativeTensor<locint, double> strip_derivative(
   }
   return ret;
 }
-DerivativeTensor<locint, double> directional_reverse(
+DerivativeTensor<int, double> directional_reverse(
     std::shared_ptr<TrivialTrace<double>> trace,
     int t_order,
     int ind_size,
@@ -169,7 +169,7 @@ DerivativeTensor<locint, double> directional_reverse(
   std::shared_ptr<TrivialTrace<SingleForward>> new_trace =
       get_forward_trace(trace, ind_size, ind_init_value, adjoint_init_value);
 
-  DerivativeTensor<locint, SingleForward> tensor;
+  DerivativeTensor<int, SingleForward> tensor;
   if (t_order == 1) {
     BaseReverseAdjoint<SingleForward> adjoint(new_trace);
     tensor = adjoint.compute(ind_size, dep_size);

@@ -64,10 +64,10 @@ void BaseReverseAdjoint<Base>::retrieve_adjoint_sparse_format(int* ssize,
 }
 
 template <typename Base>
-DerivativeTensor<locint, Base> BaseReverseAdjoint<Base>::transcript_result() {
+DerivativeTensor<int, Base> BaseReverseAdjoint<Base>::transcript_result() {
   int dep_size = dep_deriv.size();
   int ind_size = indep_index_map.size();
-  DerivativeTensor<locint, Base> ret(dep_size, ind_size, 1);
+  DerivativeTensor<int, Base> ret(dep_size, ind_size, 1);
   BaseReverseMode<Base>::transcript_dep_value(ret);
   transcript_adjoint(ret);
   return ret;
@@ -75,19 +75,20 @@ DerivativeTensor<locint, Base> BaseReverseAdjoint<Base>::transcript_result() {
 
 template <typename Base>
 void BaseReverseAdjoint<Base>::transcript_adjoint(
-    DerivativeTensor<locint, Base>& tensor) {
+    DerivativeTensor<int, Base>& tensor) {
   for (auto& kv : dep_deriv) {
     locint dep = dep_index_map[kv.first] - 1;
     int size = kv.second.adjoint_vals->get_size();
     tensor.init_single_tensor(dep, 1, size);
-    locint x[1];
+    locint t[1];
+    int x[1];
     Base w;
     int l = 0;
     typename type_adjoint::enumerator a_enum = kv.second.adjoint_vals->get_enumerator();
     bool has_next = a_enum.has_next();
     while (has_next) {
-      has_next = a_enum.get_next(x[0], w);
-      x[0] = indep_index_map[x[0]] - 1;
+      has_next = a_enum.get_next(t[0], w);
+      x[0] = indep_index_map[t[0]] - 1;
       tensor.put_value(dep, 1, l, x, w);
       l++;
     }

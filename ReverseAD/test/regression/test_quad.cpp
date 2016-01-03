@@ -2,7 +2,6 @@
 
 #include "reversead/reversead.hpp"
 
-using ReverseAD::locint;
 using ReverseAD::TrivialTrace;
 using ReverseAD::BaseFunctionReplay;
 using ReverseAD::BaseReverseThird;
@@ -12,7 +11,7 @@ using ReverseAD::DerivativeTensor;
 
 extern double myEps;
 
-void check_value(int, DerivativeTensor<locint, double>&, double, bool&);
+void check_value(int, DerivativeTensor<int, double>&, double, bool&);
 
 void check_answer(std::shared_ptr<TrivialTrace<double>> trace,
                   double vx,
@@ -26,7 +25,7 @@ void check_answer(std::shared_ptr<TrivialTrace<double>> trace,
   }
 
   ReverseAD::BaseReverseThird<double> third_derivative(new_trace);
-  DerivativeTensor<locint, double> tensor = third_derivative.compute(1, 1);
+  DerivativeTensor<int, double> tensor = third_derivative.compute(1, 1);
   check_value(1, tensor, 4*vx*vx*vx, done);
   check_value(2, tensor, 12*vx*vx, done);
   check_value(3, tensor, 24*vx, done);

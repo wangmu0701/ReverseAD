@@ -18,8 +18,8 @@ class DerivativeTensor {
   friend class BaseReverseHessian<Base>;
   friend class BaseReverseThird<Base>;
   friend class BaseReverseGeneric<Base>;
-  friend DerivativeTensor<locint, double> strip_derivative(
-      const DerivativeTensor<locint, SingleForward>& tensor,
+  friend DerivativeTensor<int, double> strip_derivative(
+      const DerivativeTensor<int, SingleForward>& tensor,
       int t_order, int ind_size, int dep_size);
 
  public:

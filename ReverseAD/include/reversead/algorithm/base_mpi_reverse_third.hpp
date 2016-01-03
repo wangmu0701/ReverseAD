@@ -58,8 +58,8 @@ class BaseMpiReverseThird : public BaseReverseThird<Base>,
   }
 
  protected:
-  virtual DerivativeTensor<locint, Base> transcript_result() {
-    return DerivativeTensor<locint, Base>();
+  virtual DerivativeTensor<int, Base> transcript_result() {
+    return DerivativeTensor<int, Base>();
   }
 };
 

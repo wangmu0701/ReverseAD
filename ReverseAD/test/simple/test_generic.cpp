@@ -2,15 +2,14 @@
 
 #include "reversead/reversead.hpp"
 
-using ReverseAD::locint;
 using ReverseAD::BaseReverseGeneric;
 using ReverseAD::TrivialTrace;
 using ReverseAD::DerivativeTensor;
 
 void retrieve_value(int t_order,
-                    DerivativeTensor<locint, double>& tensor) {
+                    DerivativeTensor<int, double>& tensor) {
   int size;
-  locint** tind;
+  int** tind;
   double* values;
   tensor.get_internal_coordinate_list(0, t_order, &size, &tind, &values);
   for (int i=0;i<size; i++) {
@@ -51,7 +50,7 @@ int main() {
   std::cout << "y = " << y << std::endl;
 
   ReverseAD::BaseReverseGeneric<double> generic(trace, 4);
-  DerivativeTensor<locint, double> tensor = generic.compute(1, 1);
+  DerivativeTensor<int, double> tensor = generic.compute(1, 1);
   retrieve_value(1, tensor);
   retrieve_value(2, tensor);
   retrieve_value(3, tensor);

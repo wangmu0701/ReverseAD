@@ -42,9 +42,9 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
  protected:
   BaseReverseAdjoint() {}
   
-  virtual DerivativeTensor<locint, Base> transcript_result();
+  virtual DerivativeTensor<int, Base> transcript_result();
 
-  void transcript_adjoint(DerivativeTensor<locint, Base>& tensor);
+  void transcript_adjoint(DerivativeTensor<int, Base>& tensor);
 
   void init_dep_deriv(locint dep, int dep_count);
 

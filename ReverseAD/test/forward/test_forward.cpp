@@ -13,11 +13,10 @@ using ReverseAD::BaseFunctionReplay;
 using ReverseAD::BaseReverseAdjoint;
 using ReverseAD::BaseReverseHessian;
 using ReverseAD::BaseReverseThird;
-using ReverseAD::locint;
 using ReverseAD::DerivativeTensor;
 
 double myEps = 1.E-10;
-void symmetric_third_vector(int n, int t_size, locint** t_ind, double* t_value,
+void symmetric_third_vector(int n, int t_size, int** t_ind, double* t_value,
     double* v, double** tv) {
   for(int i=0;i<n;i++) {
     for(int j=0;j<n;j++) {
@@ -51,9 +50,9 @@ void check_forward_over_second(
     double* ind_init_values,
     double* adjoint_init_values) {
   BaseReverseThird<double> third(trace);
-  DerivativeTensor<locint, double> tensor = third.compute(ind_num, dep_num);
+  DerivativeTensor<int, double> tensor = third.compute(ind_num, dep_num);
   int t_size;
-  locint** t_tind;
+  int** t_tind;
   double* t_value;
   tensor.get_internal_coordinate_list(0, 3, &t_size, &t_tind, &t_value);
 //  std::cout << "t_size = " << t_size << std::endl;
@@ -88,7 +87,7 @@ void check_forward_over_second(
   delete[] tv;
   delete[] ctv; 
 }
-void symmetric_matrix_vector(int n, int h_size, locint** h_tind,
+void symmetric_matrix_vector(int n, int h_size, int** h_tind,
     double* h_value, double* v, double* hv) {
   for (int i=0; i<n; i++) {
     hv[i] = 0.0;
@@ -108,9 +107,9 @@ void check_forward_over_reverse(
     double* ind_init_values,
     double* adjoint_init_values) {
   BaseReverseHessian<double> hessian(trace);
-  DerivativeTensor<locint, double> tensor = hessian.compute(ind_num, dep_num);
+  DerivativeTensor<int, double> tensor = hessian.compute(ind_num, dep_num);
   int h_size;
-  locint** h_tind;
+  int** h_tind;
   double* h_value;
   tensor.get_internal_coordinate_list(0, 2, &h_size, &h_tind, &h_value);
 //  std::cout << "h_size = " << h_size << std::endl;

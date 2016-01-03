@@ -86,14 +86,15 @@ void BaseReverseGeneric<Base>::accumulate_deriv(
 }
 
 template <typename Base>
-DerivativeTensor<locint, Base> BaseReverseGeneric<Base>::transcript_result() {
+DerivativeTensor<int, Base> BaseReverseGeneric<Base>::transcript_result() {
   int dep_size = dep_deriv.size();
   int ind_size = indep_index_map.size();
-  DerivativeTensor<locint, Base> ret(dep_size, ind_size, order);
+  DerivativeTensor<int, Base> ret(dep_size, ind_size, order);
   BaseReverseMode<Base>::transcript_dep_value(ret);
   int* size = new int[order];
   int* curr_l = new int[order];
   locint* t = new locint[order];
+  int* x = new int[order];
   for (auto& kv : dep_deriv) {
     locint dep = dep_index_map[kv.first] - 1;
     for (int i = 0; i < order; i++) {
@@ -112,19 +113,17 @@ DerivativeTensor<locint, Base> BaseReverseGeneric<Base>::transcript_result() {
       s_set.to_array(t);
       // The iterator of multiset puts small number fist
       // reverse the order so it gives lower half
-      for (int i=0; i<t_order/2; i++) {
-        std::swap(t[i], t[t_order-1-i]);
-      }
       for (int i=0; i<t_order; i++) {
-        t[i] = indep_index_map[t[i]] - 1;
+        x[t_order - 1 - i] = indep_index_map[t[i]] - 1;
       }
-      ret.put_value(dep, t_order, curr_l[t_order-1], t, sw);
+      ret.put_value(dep, t_order, curr_l[t_order-1], x, sw);
       curr_l[t_order - 1]++;
     }
   }
   delete[] size;
   delete[] curr_l;
   delete[] t;
+  delete[] x;
   return ret;
 }
 

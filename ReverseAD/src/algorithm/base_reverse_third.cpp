@@ -46,10 +46,10 @@ int BaseReverseThird<Base>::retrieve_third_sparse_format(
 }
 
 template <typename Base>
-DerivativeTensor<locint, Base> BaseReverseThird<Base>::transcript_result() {
+DerivativeTensor<int, Base> BaseReverseThird<Base>::transcript_result() {
   int dep_size = dep_deriv.size();
   int ind_size = indep_index_map.size();
-  DerivativeTensor<locint, Base> ret(dep_size, ind_size, 3);
+  DerivativeTensor<int, Base> ret(dep_size, ind_size, 3);
   BaseReverseMode<Base>::transcript_dep_value(ret);
   BaseReverseAdjoint<Base>::transcript_adjoint(ret);
   BaseReverseHessian<Base>::transcript_hessian(ret);
@@ -59,21 +59,22 @@ DerivativeTensor<locint, Base> BaseReverseThird<Base>::transcript_result() {
 
 template <typename Base>
 void BaseReverseThird<Base>::transcript_third(
-    DerivativeTensor<locint, Base>& tensor) {
+    DerivativeTensor<int, Base>& tensor) {
   for (auto& kv : dep_deriv) {
     locint dep = dep_index_map[kv.first] - 1;
     int size = kv.second.third_vals->get_size();
     tensor.init_single_tensor(dep, 3, size);
-    locint x[3];
+    locint t[3];
+    int x[3];
     Base w;
     int l = 0;
     typename type_third::enumerator t_enum = kv.second.third_vals->get_enumerator();
     bool has_next = t_enum.has_next();
     while (has_next) {
-      has_next = t_enum.get_next(x[0], x[1], x[2], w);
-      x[0] = indep_index_map[x[0]] - 1;
-      x[1] = indep_index_map[x[1]] - 1;
-      x[2] = indep_index_map[x[2]] - 1;
+      has_next = t_enum.get_next(t[0], t[1], t[2], w);
+      x[0] = indep_index_map[t[0]] - 1;
+      x[1] = indep_index_map[t[1]] - 1;
+      x[2] = indep_index_map[t[2]] - 1;
       tensor.put_value(dep, 3, l, x, w);
       l++;
     }
