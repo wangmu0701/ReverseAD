@@ -33,11 +33,6 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
       : BaseReverseMode<Base>(trace), preacc_enabled(false) {}
 
   void enable_preacc();
-  int retrieve_adjoint(Base*** values);
-
-  void retrieve_adjoint_sparse_format(int* ssize,
-                                     locint** rind, locint** cind,
-                                     Base** values);
 
  protected:
   BaseReverseAdjoint() {}

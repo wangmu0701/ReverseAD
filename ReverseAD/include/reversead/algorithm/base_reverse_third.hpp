@@ -39,8 +39,6 @@ class BaseReverseThird : public virtual BaseReverseHessian<Base> {
 
   void accumulate_deriv(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv);
 
-  int retrieve_third_sparse_format(int** ssize, locint**** tind, Base*** values);
-
  protected:
   BaseReverseThird() : BaseReverseAdjoint<Base>() {}
  

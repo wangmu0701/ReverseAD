@@ -14,34 +14,6 @@ void BaseReverseHessian<Base>::accumulate_deriv(const DerivativeInfo<locint, Bas
 }
 
 template <typename Base>
-int BaseReverseHessian<Base>::retrieve_hessian_sparse_format(int** ssize, locint*** rind, locint*** cind, Base*** values) {
-  int dep_size = dep_deriv.size();
-  (*ssize) = new int[dep_size];
-  (*rind) = new locint*[dep_size];
-  (*cind) = new locint*[dep_size];
-  (*values) = new Base*[dep_size];
-  for (auto& kv : dep_deriv) {
-    locint dep = dep_index_map[kv.first] - 1;
-    int size = kv.second.hessian_vals->get_size();
-    (*ssize)[dep] = size;
-    (*rind)[dep] = new locint[size];
-    (*cind)[dep] = new locint[size];
-    (*values)[dep] = new Base[size];
-    typename type_hessian::enumerator h_enum = kv.second.hessian_vals->get_enumerator();
-    bool has_next = h_enum.has_next();
-    locint x,y;
-    int l =0;
-    while(has_next) {
-      has_next = h_enum.get_next(x, y, (*values)[dep][l]);
-      (*rind)[dep][l] = indep_index_map[x] - 1;
-      (*cind)[dep][l] = indep_index_map[y] - 1;
-      l++;
-    }
-  }
-  return dep_size;
-}
-
-template <typename Base>
 DerivativeTensor<int, Base> BaseReverseHessian<Base>::transcript_result() {
   int dep_size = dep_deriv.size();
   int ind_size = indep_index_map.size();

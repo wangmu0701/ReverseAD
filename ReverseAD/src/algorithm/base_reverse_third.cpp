@@ -17,35 +17,6 @@ void BaseReverseThird<Base>::accumulate_deriv(
 }
 
 template <typename Base>
-int BaseReverseThird<Base>::retrieve_third_sparse_format(
-    int** ssize, locint**** tind, Base*** values) {
-  int dep_size = dep_deriv.size();
-  (*ssize) = new int[dep_size];
-  (*tind) = new locint**[dep_size];
-  (*values) = new Base*[dep_size];
-  for (auto& kv : dep_deriv) {
-    locint dep = dep_index_map[kv.first] - 1;
-    int size = kv.second.third_vals->get_size();
-    (*ssize)[dep] = size;
-    (*tind)[dep] = new locint*[size];
-    (*values)[dep] = new Base[size];
-    typename type_third::enumerator t_enum =
-    kv.second.third_vals->get_enumerator();
-    int l = 0;
-    locint x,y,z;
-    while(t_enum.has_next()) {
-      t_enum.get_next(x, y, z, (*values)[dep][l]);
-      (*tind)[dep][l] = new locint[3];
-      (*tind)[dep][l][0] = indep_index_map[x];
-      (*tind)[dep][l][1] = indep_index_map[y];
-      (*tind)[dep][l][2] = indep_index_map[z];
-      l++;
-    }
-  }
-  return dep_size;
-}
-
-template <typename Base>
 DerivativeTensor<int, Base> BaseReverseThird<Base>::transcript_result() {
   int dep_size = dep_deriv.size();
   int ind_size = indep_index_map.size();

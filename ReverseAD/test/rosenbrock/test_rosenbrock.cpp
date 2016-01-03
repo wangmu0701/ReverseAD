@@ -4,8 +4,9 @@
 
 using ReverseAD::locint;
 using ReverseAD::TrivialTrace;
+using ReverseAD::DerivativeTensor;
 
-#define N 2
+#define N 4
 
 int main() {
   adouble* xad = new adouble[N];
@@ -13,7 +14,7 @@ int main() {
   double* x = new double[N];
   double y;
   for (int i = 0; i < N; i++) {
-    x[i] = i + 1;
+    x[i] = i;
   }
   ReverseAD::logging_on();
   ReverseAD::get_timing();
@@ -39,23 +40,18 @@ int main() {
     ReverseAD::BaseFunctionReplay::replay_ind(trace, ry,1 ,x, N); 
   std::cout << " ry = " << ry[0] << std::endl;
   ReverseAD::BaseReverseHessian<double> hessian(new_trace);
-  hessian.compute(N, 1);
-
-  double** adjoints;
-  hessian.retrieve_adjoint(&adjoints);
-  for(int i = 0; i < N; i++) {
-    std::cout << "A[" << i << "] = " << adjoints[0][i] << std::endl;
+  DerivativeTensor<int, double> tensor = hessian.compute(N, 1);
+  int size;
+  int** tind;
+  double* values;
+  tensor.get_internal_coordinate_list(0, 1, &size, &tind, &values);
+  std::cout << "adjoint size = " << size << std::endl;
+  for (int i=0; i<size; i++) {
+    std::cout << "A["<<tind[i][0] << "] = " << values[i] << std::endl;
   }
-
-  int *size;
-  locint **rind;
-  locint **cind;
-  double** values;
-  hessian.retrieve_hessian_sparse_format(&size, &rind, &cind, &values);
-  std::cout << "hessian size = "<<size[0] << std::endl;
-  for(int i = 0; i < size[0]; i++) {
-    std::cout << "H["<<rind[0][i]<<","<<cind[0][i]<<"] = "<<values[0][i] << std::endl;
+  tensor.get_internal_coordinate_list(0, 2, &size, &tind, &values);
+  std::cout << "hessian size = "<<size << std::endl;
+  for(int i = 0; i < size; i++) {
+    std::cout << "H["<<tind[i][0]<<","<<tind[i][1]<<"] = "<<values[i] << std::endl;
   }
-  delete[] x;
-  delete[] xad;
 }
