@@ -54,6 +54,8 @@ DerivativeTensor<int, Base> BaseReverseThird<Base>::transcript_result() {
   BaseReverseAdjoint<Base>::transcript_adjoint(ret);
   BaseReverseHessian<Base>::transcript_hessian(ret);
   transcript_third(ret);
+  
+  BaseReverseMode<Base>::clear();
   return ret;
 }
 

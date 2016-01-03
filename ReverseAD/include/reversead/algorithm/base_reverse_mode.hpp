@@ -1,5 +1,5 @@
-#ifndef BASE_REVERSE_MODE_H_
-#define BASE_REVERSE_MODE_H_
+#ifndef REVERSEAD_BASE_REVERSE_MODE_H_
+#define REVERSEAD_BASE_REVERSE_MODE_H_
 
 #include <set>
 #include <map>
@@ -33,6 +33,8 @@ class BaseReverseMode {
   BaseReverseMode() {}
 
   void reverse_local_computation(int, int);
+
+  void clear();
 
   void compute_adjoint_sac(const DerivativeInfo<locint, Base>& info,
                            type_adjoint& adjoint_vals,
@@ -68,7 +70,6 @@ class BaseReverseMode {
                            const Base& w,
                            const type_adjoint& r,
                            const type_hessian& e);
-
   
   virtual void process_sac(const DerivativeInfo<locint, Base>& info) = 0;
 
@@ -91,4 +92,4 @@ class BaseReverseMode {
 
 } // namespace ReverseAD
 
-#endif // BASE_REVERSE_MODE_H_
+#endif // REVERSEAD_BASE_REVERSE_MODE_H_

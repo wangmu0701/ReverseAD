@@ -59,6 +59,7 @@ class BaseMpiReverseThird : public BaseReverseThird<Base>,
 
  protected:
   virtual DerivativeTensor<int, Base> transcript_result() {
+    BaseReverseMode<Base>::clear();
     return DerivativeTensor<int, Base>();
   }
 };

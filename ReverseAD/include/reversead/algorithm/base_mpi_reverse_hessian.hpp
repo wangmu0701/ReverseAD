@@ -55,6 +55,7 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base>,
   BaseMpiReverseHessian() {}
   
   virtual DerivativeTensor<int, Base> transcript_result() {
+    BaseReverseMode<Base>::clear();
     return DerivativeTensor<int, Base>();
   }
 

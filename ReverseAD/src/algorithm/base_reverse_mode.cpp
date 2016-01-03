@@ -41,15 +41,6 @@ DerivativeTensor<int, Base> BaseReverseMode<Base>::compute(
 }
 
 template <typename Base>
-void BaseReverseMode<Base>::transcript_dep_value(
-    DerivativeTensor<int, Base>& tensor) {
-  for (auto& kv: dep_deriv) {
-    int dep = dep_index_map[kv.first] - 1;
-    tensor.put_dep_value(dep, dep_value[kv.first]);
-  }
-}
-
-template <typename Base>
 DerivativeTensor<int, Base> BaseReverseMode<Base>::compute(
     int ind_num, int dep_num, Base* init_adjoint) {
   this->_use_dep_init_adjoint = true;
@@ -60,6 +51,25 @@ DerivativeTensor<int, Base> BaseReverseMode<Base>::compute(
     dep_init_adjoint[i] = init_adjoint[i-1];
   }
   return compute(ind_num, dep_num);
+}
+
+template <typename Base>
+void BaseReverseMode<Base>::transcript_dep_value(
+    DerivativeTensor<int, Base>& tensor) {
+  for (auto& kv: dep_deriv) {
+    int dep = dep_index_map[kv.first] - 1;
+    tensor.put_dep_value(dep, dep_value[kv.first]);
+  }
+}
+
+template <typename Base>
+void BaseReverseMode<Base>::clear() {
+  reverse_live.clear();
+  dep_deriv.clear();
+  indep_index_map.clear();
+  dep_index_map.clear();
+  dep_init_adjoint.clear();
+  dep_value.clear();
 }
 
 template <typename Base>

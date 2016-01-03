@@ -70,6 +70,8 @@ DerivativeTensor<int, Base> BaseReverseAdjoint<Base>::transcript_result() {
   DerivativeTensor<int, Base> ret(dep_size, ind_size, 1);
   BaseReverseMode<Base>::transcript_dep_value(ret);
   transcript_adjoint(ret);
+
+  BaseReverseMode<Base>::clear();
   return ret;
 }
 

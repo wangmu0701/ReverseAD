@@ -48,6 +48,7 @@ class BaseMpiReverseAdjoint : public virtual BaseReverseAdjoint<Base> {
 
   // for MPI code, this is dummy
   virtual DerivativeTensor<int, Base> transcript_result() {
+    BaseReverseMode<Base>::clear();
     return DerivativeTensor<int, Base>();
   }
 
