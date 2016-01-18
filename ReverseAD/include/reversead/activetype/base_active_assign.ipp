@@ -83,10 +83,9 @@
     return *this;
   }
 
-#ifdef REVERSE_AD_CPP11 
   // move c-tor
   BaseActive(BaseActive<Base>&& other) {
-    this->val = other.val;
+    this->val = std::move(other.val);
     this->loc = get_next_loc();
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
     logger.info << "R-ctor: " << this <<"["<<this->loc<<"]" 
@@ -98,7 +97,7 @@
   // move assignment
   BaseActive<Base>& operator = (const BaseActive<Base>&& other) {
     if (this != &other) {
-      this->val = other.val;
+      this->val = std::move(other.val);
       this->loc = get_next_loc();
     }
     trace_put_oll<Base>(assign_a, this->loc, other.loc);
@@ -108,4 +107,3 @@
 #endif
     return *this;
   }
-#endif

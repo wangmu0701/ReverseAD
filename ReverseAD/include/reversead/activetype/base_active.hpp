@@ -8,8 +8,6 @@
 
 //#define REVERSEAD_BASE_ACTIVE_DEBUG
 
-#define REVERSE_AD_CPP11
-
 #define REVERSE_AD_ONLY_REVERSE
 
 namespace ReverseAD {

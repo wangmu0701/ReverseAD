@@ -43,27 +43,3 @@
                            pow_exp.val, pow_base);
     return res;
   } 
-#ifdef REVERSE_AD_CPP11 
-  friend BaseActive<Base>&& sqrt(BaseActive<Base>&& rhs) {
-    locint resloc = get_next_loc();
-    trace_put_ollb<Base>(sqrt_a, resloc, rhs.loc, rhs.val);
-    rhs.val = sqrt(rhs.val);
-    rhs.loc = resloc;
-    return std::move(rhs);
-  }
-  friend BaseActive<Base>&& exp(BaseActive<Base>&& rhs) {
-    locint resloc = get_next_loc();
-    trace_put_ollb<Base>(exp_a, resloc, rhs.loc, rhs.val);
-    rhs.val = exp(rhs.val);
-    rhs.loc = resloc;
-    return std::move(rhs);
-  }
-  friend BaseActive<Base>&& log(BaseActive<Base>&& rhs) {
-    locint resloc = get_next_loc();
-    trace_put_ollb<Base>(log_a, resloc, rhs.loc, rhs.val);
-    rhs.val = log(rhs.val);
-    rhs.loc = resloc;
-    return std::move(rhs);
-  }
-
-#endif // REVERSE_AD_CPP11
