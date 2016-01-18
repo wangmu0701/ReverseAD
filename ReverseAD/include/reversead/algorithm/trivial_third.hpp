@@ -1,4 +1,4 @@
-#ifndef TRIVIAL_THRID_H_
+#ifndef TRIVIAL_THIRD_H_
 #define TRIVIAL_THIRD_H_
 
 #include <map>

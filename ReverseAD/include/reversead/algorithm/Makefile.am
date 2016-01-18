@@ -16,4 +16,5 @@ libalgorithminclude_HEADERS = base_function_replay.hpp\
                               trivial_third.hpp\
                               generic_deriv.hpp\
                               reversead_multiset.hpp\
-                              base_reverse_generic.hpp
+                              base_reverse_generic.hpp\
+                              derivative_tensor.hpp
