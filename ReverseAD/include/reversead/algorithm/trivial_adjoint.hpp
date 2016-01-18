@@ -19,7 +19,7 @@ class TrivialAdjoint : public AbstractSerializable {
 
   ~TrivialAdjoint();
 
-  Base&& get_and_erase(LocType x);
+  Base get_and_erase(LocType x);
   Base& operator[] (LocType x);
   void erase(LocType x);
   void clear();
@@ -116,10 +116,10 @@ TrivialAdjoint<LocType, Base>::~TrivialAdjoint() {
 }
 
 template <typename LocType, typename Base>
-Base&& TrivialAdjoint<LocType, Base>::get_and_erase(LocType x) {
+Base TrivialAdjoint<LocType, Base>::get_and_erase(LocType x) {
   Base ret = std::move(_data[x]);
   _data.erase(x);
-  return std::move(ret);
+  return ret;
 }
 
 template <typename LocType, typename Base>

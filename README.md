@@ -12,9 +12,6 @@ make; make install
 ```
 To enable MPI wrapper, add `--enable-mpi` in `./configure`.
 
-**The code is tested under g++ 4.8.2**.
-
-**There is a 'unknown' bug when compiling with `clang` on `OSX`, for more detail, refer to [A ReverseAD bug](https://github.com/wangmu0701/RADBug).**
 ****
 ## One Minute Example
 ### Source code and sample result
