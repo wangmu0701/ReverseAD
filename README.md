@@ -1,5 +1,7 @@
 # ReverseAD
+****
 ## What is ReverseAD
+`ReverseAD` is a simple AD tool designed for evaluating high order derivative tensors directly via reverse mode AD.
 
 ## Download and Install
 ReverseAD uses GNU automake toolchain. So you should simply be able to compile and install the package following:
@@ -9,6 +11,11 @@ autoreconf -fi
 make; make install
 ```
 To enable MPI wrapper, add `--enable-mpi` in `./configure`.
+
+**The code is tested under g++ 4.8.2**.
+
+**There is a 'unknown' bug when compiling with `clang` on `OSX`, for more detail, refer to [A ReverseAD bug](https://github.com/wangmu0701/RADBug).**
+****
 ## One Minute Example
 ### Source code and sample result
 Let's begin with the following code `reversead_one_minute.cpp`
@@ -85,6 +92,7 @@ H[0, 0] = 38
 H[1, 0] = -8
 H[1, 1] = 2
 ```
+****
 ## In depth explanation
 ### Header files
 `reversead.hpp` packs all necessary header files for the package. This could be the only header file you need to include.
