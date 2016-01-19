@@ -36,10 +36,12 @@ class BaseReverseHessian : public virtual BaseReverseAdjoint<Base> {
   BaseReverseHessian(const std::shared_ptr<TrivialTrace<Base>>& trace)
       : BaseReverseAdjoint<Base>(trace) {}
 
+  ~BaseReverseHessian() = default;
+
   void accumulate_deriv(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv);
 
  protected:
-  BaseReverseHessian() : BaseReverseAdjoint<Base>() {}
+  BaseReverseHessian() = default;
 
   virtual DerivativeTensor<int, Base> transcript_result();
 

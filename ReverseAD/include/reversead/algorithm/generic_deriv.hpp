@@ -59,7 +59,7 @@ class GenericDeriv {
     }
   }
 
-  void find_and_erase(LocType target, GenericDeriv& gd) {
+  void get_and_erase(LocType target, GenericDeriv& gd) {
     gd.clear();
     typename std::vector<std::map<ReverseADMultiSet<LocType>, Base> >::iterator v_iter;
     typename std::map<ReverseADMultiSet<LocType>, Base>::iterator m_iter;

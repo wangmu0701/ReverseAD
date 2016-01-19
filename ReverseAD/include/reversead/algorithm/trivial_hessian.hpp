@@ -11,15 +11,16 @@ namespace ReverseAD {
 template <typename LocType, typename Base>
 class TrivialHessian : public AbstractSerializable {
  public:
-  TrivialHessian();
-  TrivialHessian(char* buf);
-
-  ~TrivialHessian();
+  TrivialHessian() = default;
+  TrivialHessian(const TrivialHessian<LocType, Base>&) = default;
+  TrivialHessian(TrivialHessian<LocType, Base>&&) = default;
+  TrivialHessian<LocType, Base>& operator=(const TrivialHessian<LocType, Base>&) = default;
+  TrivialHessian<LocType, Base>& operator=(TrivialHessian<LocType, Base>&&) = default;
+  ~TrivialHessian() = default;
   
   TrivialAdjoint<LocType, Base> get_and_erase(const LocType& x);
   TrivialAdjoint<LocType, Base>& operator [] (LocType x);
 
-  void clear();
   void increase(const LocType& x, const LocType& y, const Base& w) {
     if (IsZero(w)) {
       return;
@@ -30,13 +31,16 @@ class TrivialHessian : public AbstractSerializable {
       _data[y][x] += w;
     }
   }
+  void clear() {
+    _data.clear();
+  }
 
   // serializable
+  TrivialHessian(char* buf);
   int get_size() const;
   int byte_size() const;
   void write_to_byte(char*) const;
   void debug() const;
-  void debug(Logger&) const;
 
   class enumerator {
    public:
@@ -105,21 +109,6 @@ typename TrivialHessian<LocType, Base>::enumerator
 }
 
 template <typename LocType, typename Base>
-TrivialHessian<LocType, Base>::TrivialHessian() {
-  _data.clear();
-}
-
-template <typename LocType, typename Base>
-void TrivialHessian<LocType, Base>::clear() {
-  _data.clear();
-}
-
-template <typename LocType, typename Base>
-TrivialHessian<LocType, Base>::~TrivialHessian() {
-  _data.clear();
-}
-
-template <typename LocType, typename Base>
 TrivialAdjoint<LocType, Base> TrivialHessian<LocType, Base>::get_and_erase(
   const LocType& x) {
   TrivialAdjoint<LocType, Base> ret(std::move(_data[x]));
@@ -158,26 +147,6 @@ void TrivialHessian<LocType, Base>::debug() const {
     while (has_next) {
       has_next = t_enum.get_next(y, w);
       std::cout << "H[" << t_iter->first << "," <<y << "] = "
-                << w << std::endl;
-    }
-    ++t_iter;
-  }
-}
-
-template <typename LocType, typename Base>
-void TrivialHessian<LocType, Base>::debug(Logger& logger) const {
-  typename std::map<LocType, TrivialAdjoint<LocType, Base> >::const_iterator
-    t_iter;
-  t_iter = _data.begin();
-  while (t_iter != _data.end()) {
-    typename TrivialAdjoint<LocType, Base>::enumerator t_enum =
-      t_iter->second.get_enumerator();
-    bool has_next = t_enum.has_next();
-    LocType y;
-    Base w;
-    while (has_next) {
-      has_next = t_enum.get_next(y, w);
-      logger << "H[" << t_iter->first << "," <<y << "] = "
                 << w << std::endl;
     }
     ++t_iter;

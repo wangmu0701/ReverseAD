@@ -32,10 +32,12 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
   BaseReverseAdjoint(const std::shared_ptr<TrivialTrace<Base>>& trace)
       : BaseReverseMode<Base>(trace), preacc_enabled(false) {}
 
+  ~BaseReverseAdjoint() = default;
+
   void enable_preacc();
 
  protected:
-  BaseReverseAdjoint() {}
+  BaseReverseAdjoint() = default;
   
   virtual DerivativeTensor<int, Base> transcript_result();
 

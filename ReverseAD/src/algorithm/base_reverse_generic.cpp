@@ -36,7 +36,7 @@ void BaseReverseGeneric<Base>::accumulate_deriv(
     const GenericDeriv<locint, Base>& local_deriv,
     GenericDeriv<locint, Base>& global_deriv) {
   GenericDeriv<locint, Base> slice_deriv(order);
-  global_deriv.find_and_erase(info.r, slice_deriv);
+  global_deriv.get_and_erase(info.r, slice_deriv);
   //
   typename GenericDeriv<locint, Base>::enumerator s_enum =
   slice_deriv.get_enumerator();

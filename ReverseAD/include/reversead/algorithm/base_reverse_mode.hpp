@@ -24,13 +24,15 @@ class BaseReverseMode {
       : trace(_trace),
         _use_dep_init_adjoint(false) {}
 
+  virtual ~BaseReverseMode() = default;
+
   virtual DerivativeTensor<int, Base> compute(
       int ind_num, int dep_num);
   virtual DerivativeTensor<int, Base> compute(
       int ind_num, int dep_num, Base* init_dep_adjoints);
 
  protected:
-  BaseReverseMode() {}
+  BaseReverseMode() = default;
 
   void reverse_local_computation(int, int);
 

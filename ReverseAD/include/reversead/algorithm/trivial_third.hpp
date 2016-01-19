@@ -13,14 +13,15 @@ namespace ReverseAD {
 template <typename LocType, typename Base>
 class TrivialThird : public AbstractSerializable {
  public:
-  TrivialThird();
-  TrivialThird(char* buf);
-
-  ~TrivialThird();
+  TrivialThird() = default;
+  TrivialThird(const TrivialThird<LocType, Base>&) = default;
+  TrivialThird(TrivialThird<LocType, Base>&&) = default;
+  TrivialThird<LocType, Base>& operator=(const TrivialThird<LocType, Base>&) = default;
+  TrivialThird<LocType, Base>& operator=(TrivialThird<LocType, Base>&&) = default;
+  ~TrivialThird() = default;
   
   TrivialHessian<LocType, Base> get_and_erase(const LocType& x);
 
-  void clear();
   void increase(const LocType& x, const LocType& y, const LocType& z, 
                 const Base& w) {
     if (IsZero(w)) {return;}
@@ -43,12 +44,16 @@ class TrivialThird : public AbstractSerializable {
     }
   }
 
+  void clear() {
+    _data.clear();
+  }
+
   // serializable
+  TrivialThird(char* buf);
   int get_size() const;
   int byte_size() const;
   void write_to_byte(char*) const;
   void debug() const;
-  void debug(Logger&) const;
 
   class enumerator {
    public:
@@ -100,21 +105,6 @@ typename TrivialThird<LocType, Base>::enumerator
 }
 
 template <typename LocType, typename Base>
-TrivialThird<LocType, Base>::TrivialThird() {
-  _data.clear();
-}
-
-template <typename LocType, typename Base>
-void TrivialThird<LocType, Base>::clear() {
-  _data.clear();
-}
-
-template <typename LocType, typename Base>
-TrivialThird<LocType, Base>::~TrivialThird() {
-  _data.clear();
-}
-
-template <typename LocType, typename Base>
 TrivialHessian<LocType, Base> TrivialThird<LocType, Base>::get_and_erase(
   const LocType& x) {
   TrivialHessian<LocType, Base> ret(std::move(_data[x]));
@@ -144,19 +134,6 @@ void TrivialThird<LocType, Base>::debug() const {
     d_enum.get_next(x, y, z, w);
     std::cout << "T[" << x << ", " << y << ", " << z << "] = "
               << w << std::endl;
-  }
-}
-
-template <typename LocType, typename Base>
-void TrivialThird<LocType, Base>::debug(Logger& logger) const {
-  typename TrivialThird<LocType, Base>::enumerator d_enum =
-      this->get_enumerator();
-  LocType x, y, z;
-  Base w;
-  while (d_enum.has_next()) {
-    d_enum.get_next(x, y, z, w);
-    logger << "T[" << x << ", " << y << ", " << z << "] = "
-           << w << std::endl;
   }
 }
 
