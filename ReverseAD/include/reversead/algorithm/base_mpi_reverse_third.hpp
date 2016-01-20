@@ -41,9 +41,9 @@ class BaseMpiReverseThird : public BaseReverseThird<Base>,
 
     for (auto& kv : dep_deriv) {
       logger.info << "Dep : " << kv.first << std::endl;
-      kv.second.adjoint_vals->debug(logger.info);
-      kv.second.hessian_vals->debug(logger.info);
-      kv.second.third_vals->debug(logger.info);
+      kv.second.adjoint_vals->debug();
+      kv.second.hessian_vals->debug();
+      kv.second.third_vals->debug();
     }
 
     forward_global_phase();
@@ -51,9 +51,9 @@ class BaseMpiReverseThird : public BaseReverseThird<Base>,
     logger.warning << "forward global third order timing : " << time << std::endl;
     for (auto& kv : dep_deriv) {
       logger.info << "Dep : " << kv.first << std::endl;
-      kv.second.adjoint_vals->debug(logger.info);
-      kv.second.hessian_vals->debug(logger.info);
-      kv.second.third_vals->debug(logger.info);
+      kv.second.adjoint_vals->debug();
+      kv.second.hessian_vals->debug();
+      kv.second.third_vals->debug();
     }
   }
 

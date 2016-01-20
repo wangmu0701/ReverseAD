@@ -124,7 +124,8 @@ DerivativeTensor<int, Base> BaseReverseGeneric<Base>::transcript_result() {
   delete[] curr_l;
   delete[] t;
   delete[] x;
-
+ 
+  clear_private_temps();
   dep_deriv.clear();
   BaseReverseMode<Base>::clear();
   return ret;

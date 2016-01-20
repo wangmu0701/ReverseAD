@@ -26,9 +26,6 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
   using BaseReverseMode<Base>::indep_index_map;
   using BaseReverseMode<Base>::dep_init_adjoint;
 
-  using BaseReverseMode<Base>::compute_adjoint_sac;
-  using BaseReverseMode<Base>::compute_adjoint_deriv;
-
   BaseReverseAdjoint(const std::shared_ptr<TrivialTrace<Base>>& trace)
       : BaseReverseMode<Base>(trace), preacc_enabled(false) {}
 
@@ -38,21 +35,31 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
 
  protected:
   BaseReverseAdjoint() = default;
-  
+ 
+  // From BaseReverseMode 
+  virtual void init_dep_deriv(locint dep, int dep_count);
+
+  // here we can do something to enable preaccumulation
+  virtual void process_sac(const DerivativeInfo<locint, Base>& info) final;
+
   virtual DerivativeTensor<int, Base> transcript_result();
 
-  void transcript_adjoint(DerivativeTensor<int, Base>& tensor);
-
-  void init_dep_deriv(locint dep, int dep_count);
-
+  // From BaseReverseAdjoint
   virtual void accumulate_deriv(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv);
 
   virtual void process_single_deriv(locint local_dep,
                                     SingleDeriv& local_deriv,
                                     SingleDeriv& deriv);
 
-  // here we can do something to enable preaccumulation
-  virtual void process_sac(const DerivativeInfo<locint, Base>& info) final;
+  void transcript_adjoint(DerivativeTensor<int, Base>& tensor);
+
+  void compute_adjoint_sac(const DerivativeInfo<locint, Base>& info,
+                           type_adjoint& adjoint_vals,
+                           const Base& w);
+
+  void compute_adjoint_deriv(const type_adjoint& local_adjoint,
+                             type_adjoint& global_adjoint,
+                             const Base& w);
 
  // preaccumulation stuff
  private:

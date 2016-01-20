@@ -27,30 +27,43 @@ class BaseReverseThird : public virtual BaseReverseHessian<Base> {
   using BaseReverseMode<Base>::indep_index_map;
 
   // in template, name resolve will not look in base class
-  using BaseReverseMode<Base>::compute_adjoint_sac;
-  using BaseReverseMode<Base>::compute_hessian_sac;
-  using BaseReverseMode<Base>::compute_third_sac;
-  using BaseReverseMode<Base>::compute_adjoint_deriv;
-  using BaseReverseMode<Base>::compute_hessian_deriv;
-  using BaseReverseMode<Base>::compute_third_deriv;
+  using BaseReverseAdjoint<Base>::compute_adjoint_sac;
+  using BaseReverseAdjoint<Base>::compute_adjoint_deriv;
+  using BaseReverseHessian<Base>::compute_hessian_sac;
+  using BaseReverseHessian<Base>::compute_hessian_deriv;
 
   BaseReverseThird(const std::shared_ptr<TrivialTrace<Base>>& trace)
       : BaseReverseAdjoint<Base>(trace) {}
 
   ~BaseReverseThird() = default;
 
-  void accumulate_deriv(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv);
-
  protected:
   BaseReverseThird() = default;
  
   virtual DerivativeTensor<int, Base> transcript_result();
-    
-  void transcript_third(DerivativeTensor<int, Base>& tensor);
+
+  virtual void accumulate_deriv(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv);
 
   virtual void process_single_deriv(locint local_dep,
                                     SingleDeriv& local_deriv,
                                     SingleDeriv& deriv);
+    
+  void transcript_third(DerivativeTensor<int, Base>& tensor);
+
+  void compute_third_sac(const DerivativeInfo<locint, Base>& info,
+                         type_third& third_vals,
+                         const Base& w,
+                         const type_adjoint& r,
+                         const type_hessian& e);
+
+  void compute_third_deriv(locint local_dep,
+                           const type_adjoint& local_adjoint,
+                           const type_hessian& local_hessian,
+                           const type_third& local_third,
+                           type_third& global_third,
+                           const Base& w,
+                           const type_adjoint& r,
+                           const type_hessian& e);
 
 };
 

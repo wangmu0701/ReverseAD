@@ -68,6 +68,120 @@ void BaseReverseHessian<Base>::process_single_deriv(locint local_dep,
                         r);
 }
 
+template <typename Base>
+void BaseReverseHessian<Base>::compute_hessian_sac(
+    const DerivativeInfo<locint, Base>& info,
+    type_hessian& hessian_vals,
+    const Base& w,
+    const type_adjoint& r) {
+    
+  typename type_adjoint::enumerator r_enum =
+  r.get_enumerator();
+  bool has_next = r_enum.has_next();
+  locint p;
+  Base pw;
+  while (has_next) {
+    has_next = r_enum.get_next(p, pw);
+    //logger.info << "p = " << p << "pw = " << pw << std::endl;
+    if (!IsZero(pw)) {
+      if (info.y != NULL_LOC) {
+        if (p != info.r) {
+          if (p == info.x) {
+            hessian_vals.increase(p, p, 2 * info.dx * pw);
+          } else {
+            hessian_vals.increase(info.x, p, info.dx * pw);
+          }
+          if (p == info.y) {
+            hessian_vals.increase(p, p, 2 * info.dy * pw);
+          } else {
+            hessian_vals.increase(info.y, p, info.dy * pw);
+          }
+        } else { // p == info.r
+          hessian_vals.increase(info.x, info.x, info.dx*info.dx*pw);
+          hessian_vals.increase(info.x, info.y, info.dx*info.dy*pw);
+          hessian_vals.increase(info.y, info.y, info.dy*info.dy*pw);
+        }
+      } else if (info.x != NULL_LOC){
+        if (p != info.r) {
+          if (p == info.x) {
+            hessian_vals.increase(p, p, 2 * info.dx * pw);
+          } else {
+            hessian_vals.increase(info.x, p, info.dx * pw);
+          }
+        } else {
+          hessian_vals.increase(info.x, info.x, info.dx * info.dx * pw);
+        }
+      }
+    } // pw != 0.0
+  } // while (has_next)
+    
+  if (!IsZero(w)) {
+    if (info.pxx != 0.0) {
+      hessian_vals.increase(info.x, info.x, info.pxx * w);
+    }
+    if (info.pyy != 0.0) {
+      hessian_vals.increase(info.y, info.y, info.pyy * w);
+    }
+    if (info.pxy != 0.0) {
+      // already eliminate pseudo binary functions, menas info.x != info.y
+      hessian_vals.increase(info.x, info.y, w * info.pxy);
+    }
+  }
+}
+
+
+template <typename Base>
+void BaseReverseHessian<Base>::compute_hessian_deriv(
+    locint local_dep,
+    const type_adjoint& local_adjoint,
+    const type_hessian& local_hessian,
+    type_hessian& global_hessian,
+    const Base& w,
+    const type_adjoint& r) {
+    
+  locint p, v, u;
+  Base pw, vw, uw;
+    
+  typename type_adjoint::enumerator r_enum = r.get_enumerator();
+  bool r_has_next = r_enum.has_next();
+  while(r_has_next) {
+    r_has_next = r_enum.get_next(p, pw);
+    if (p == local_dep) {
+      typename type_adjoint::enumerator a_enum = local_adjoint.get_enumerator();
+      bool a_has_next = a_enum.has_next();
+      while(a_has_next) {
+        typename type_adjoint::enumerator a2_enum = a_enum;
+        a_has_next = a_enum.get_next(v, vw);
+        bool a2_has_next = true;
+        while(a2_has_next) {
+          a2_has_next = a2_enum.get_next(u, uw);
+          global_hessian.increase(v, u, pw * vw * uw);
+        }
+      }
+    } else {
+      typename type_adjoint::enumerator a_enum = local_adjoint.get_enumerator();
+      bool a_has_next = a_enum.has_next();
+      while(a_has_next) {
+        a_has_next = a_enum.get_next(v, vw);
+        if (p != v) {
+          global_hessian.increase(p, v, pw * vw);
+        } else {
+          global_hessian.increase(p, v, 2.0 * pw * vw);
+        }
+      }
+    }
+  }
+  if (!IsZero(w)) {
+    typename type_hessian::enumerator h_enum = local_hessian.get_enumerator();
+    bool h_has_next = h_enum.has_next();
+    while(h_has_next) {
+      h_has_next = h_enum.get_next(p, v, pw);
+      global_hessian.increase(p, v, w * pw);
+    }
+  }
+}
+
+
 } // namespace ReverseAD
 
 template class ReverseAD::BaseReverseHessian<double>;

@@ -28,16 +28,16 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
 
   BaseReverseGeneric(const std::shared_ptr<TrivialTrace<Base>>& trace, int order);
 
+
+
+ protected:
+  virtual void init_dep_deriv(locint dep, int dep_count);
+  virtual void process_sac(const DerivativeInfo<locint, Base>& info);
+  virtual DerivativeTensor<int, Base> transcript_result();
+
   void accumulate_deriv(const DerivativeInfo<locint, Base>& info,
                         const GenericDeriv<locint, Base>& local_deriv,
                         GenericDeriv<locint, Base>& global_deriv);
-
- protected:
-  virtual DerivativeTensor<int, Base> transcript_result();
-
-  void init_dep_deriv(locint dep, int dep_count);
-
-  void process_sac(const DerivativeInfo<locint, Base>& info);
 
  private:
   int order;

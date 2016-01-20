@@ -38,8 +38,8 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base>,
 
     for (auto& kv : dep_deriv) {
       logger.info << "Dep : " << kv.first << std::endl;
-      kv.second.adjoint_vals->debug(logger.info);
-      kv.second.hessian_vals->debug(logger.info);
+      kv.second.adjoint_vals->debug();
+      kv.second.hessian_vals->debug();
     }
 
     forward_global_phase();
@@ -47,8 +47,8 @@ class BaseMpiReverseHessian : public BaseReverseHessian<Base>,
     logger.warning << "forward global hessian timing : " << time << std::endl;
     for (auto& kv : dep_deriv) {
       logger.info << "Dep : " << kv.first << std::endl;
-      kv.second.adjoint_vals->debug(logger.info);
-      kv.second.hessian_vals->debug(logger.info);
+      kv.second.adjoint_vals->debug();
+      kv.second.hessian_vals->debug();
     }
   }
  protected:

@@ -33,14 +33,14 @@ class BaseMpiReverseAdjoint : public virtual BaseReverseAdjoint<Base> {
     logger.warning << "reverse  local adjoint timing : " << time << std::endl;
     for (auto& kv : dep_deriv) {
       logger.info << "Dep : " << kv.first << std::endl;
-      kv.second.adjoint_vals->debug(logger.info);
+      kv.second.adjoint_vals->debug();
     }
     forward_global_phase();
     time = get_timing();
     logger.warning << "forward global adjoint timing : " << time << std::endl;
     for (auto& kv : dep_deriv) {
       logger.info << "Dep : " << kv.first << std::endl;
-      kv.second.adjoint_vals->debug(logger.info);
+      kv.second.adjoint_vals->debug();
     }
   }
  protected:
@@ -91,7 +91,7 @@ class BaseMpiReverseAdjoint : public virtual BaseReverseAdjoint<Base> {
         for(int i = 0; i < sr_info.count; i++) {
           SingleDeriv local_deriv(&buf[total_buf_size]);
           total_buf_size += local_deriv.byte_size();
-          local_deriv.debug(logger.info);
+          local_deriv.debug();
           // we only remove things from reverse_live_set during forward
           locint dummy_ind = trace->get_next_comm_loc_f();
           logger.info << "dummy_ind = " << dummy_ind << std::endl;
@@ -99,9 +99,9 @@ class BaseMpiReverseAdjoint : public virtual BaseReverseAdjoint<Base> {
           reverse_live.erase(dummy_ind);
           for (const locint& dep : dep_set) {
             logger.info << "processing : " << dummy_ind << std::endl;
-            dep_deriv[dep].debug(logger.info);
+            dep_deriv[dep].debug();
             this->process_single_deriv(dummy_ind, local_deriv, dep_deriv[dep]);
-            dep_deriv[dep].debug(logger.info);
+            dep_deriv[dep].debug();
           }
         }
       }
