@@ -16,13 +16,15 @@ std::shared_ptr<TrivialTrace<SingleForward>> get_forward_trace(
     int ind_size,
     double* ind_init_value,
     double* adjoint_init_value) {
-  SingleForward* x = new SingleForward[ind_size];
+  void* raw_memory = ::operator new[](ind_size * sizeof(SingleForward));
+  SingleForward* x = static_cast<SingleForward*>(raw_memory);
   for(int i=0; i<ind_size; i++) {
-    x[i] = SingleForward(ind_init_value[i], adjoint_init_value[i]);
+    new(&x[i]) SingleForward(ind_init_value[i], adjoint_init_value[i]);
   }
   std::shared_ptr<TrivialTrace<SingleForward>> new_trace =
     BaseFunctionReplay::replay_forward<double, SingleForward>(
         trace, x, ind_size);
+  ::operator delete[](raw_memory);
   return new_trace;
 }
 

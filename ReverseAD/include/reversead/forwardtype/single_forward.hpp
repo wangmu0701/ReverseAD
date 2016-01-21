@@ -9,7 +9,8 @@ namespace ReverseAD {
 
 class SingleForward {
  public:
-  explicit SingleForward() : _val(0), _der(0) {}
+  // A default c-tor will make it POD
+  explicit SingleForward() = default;
   SingleForward(double val) : _val(val), _der(0) {}
   SingleForward(double val, double der) : _val(val), _der(der) {}
   
