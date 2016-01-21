@@ -26,6 +26,9 @@ namespace ReverseAD {
 
   template <typename Base>
   void trace_on() {
+    if (!std::is_pod<Base>::value) {
+      std::cerr << "ReverseAD works only with POD types!" << std::endl;
+    }
     global_trace = (void*)new TrivialTrace<Base>();
     ((TrivialTrace<Base>*)global_trace)->init_tracing();
     is_tracing = true;
