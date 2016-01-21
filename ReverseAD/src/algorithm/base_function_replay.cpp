@@ -149,8 +149,10 @@ template <typename OldBase, typename NewBase>
   }
   std::shared_ptr<TrivialTape<NewBase>> val_tape =
   std::make_shared<TrivialTape<NewBase>>();
+  val_tape->init_taping();
   std::shared_ptr<TrivialTape<NewBase>> param_tape =
   std::make_shared<TrivialTape<NewBase>>();
+  param_tape->init_taping();
   
   locint res;
   locint arg1;
@@ -423,6 +425,8 @@ template <typename OldBase, typename NewBase>
     }
     op = trace->get_next_op_f();
   }
+  val_tape->end_taping();
+  param_tape->end_taping();
   std::shared_ptr<TrivialTrace<NewBase>> ret;
   if (reset_param) {
     // a new set of param values
