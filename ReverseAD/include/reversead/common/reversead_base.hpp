@@ -27,6 +27,7 @@ namespace ReverseAD {
   template <typename Base>
   void trace_on() {
     global_trace = (void*)new TrivialTrace<Base>();
+    ((TrivialTrace<Base>*)global_trace)->init_tracing();
     is_tracing = true;
     curr_loc = BASE_LOC;
     curr_dummy_loc = BASE_LOC - 1;
@@ -43,6 +44,7 @@ namespace ReverseAD {
       logger.fatal << "Overflow in intermedite indexing" << std::endl;
     }
     ((TrivialTrace<Base>*)global_trace)->put_op(end_of_tape);
+    ((TrivialTrace<Base>*)global_trace)->end_tracing();
     is_tracing = false;
     return std::shared_ptr<TrivialTrace<Base>>((TrivialTrace<Base>*)global_trace);
   }

@@ -14,10 +14,16 @@ namespace ReverseAD {
 template <typename Type>
 class TrivialTape : public AbstractTape<Type> {
  public:
-  TrivialTape();
+  TrivialTape() = default;
+  TrivialTape(const TrivialTape&) = default;
+  TrivialTape(TrivialTape&&) = default;
+  TrivialTape<Type>& operator=(const TrivialTape&) = default;
+  TrivialTape<Type>& operator=(TrivialTape&&) = default;
+  ~TrivialTape() = default;
 
-  void clear();
+  void init_taping();
   void put(Type data);
+  void end_taping();
   int size();
   
   void init_forward();
@@ -37,23 +43,23 @@ class TrivialTape : public AbstractTape<Type> {
 
  private:
   std::vector<Type> data_;
-  typename std::vector<Type>::iterator forward_iter;
-  typename std::vector<Type>::reverse_iterator reverse_iter;
+  typename std::vector<Type>::const_iterator forward_iter;
+  typename std::vector<Type>::const_reverse_iterator reverse_iter;
 };
 
-template <typename Type>
-TrivialTape<Type>::TrivialTape() {
-  data_.reserve(INITIAL_TAPE_VECTOR_SIZE);
-}
-
-template <typename Type>
-void TrivialTape<Type>::clear() {
-  data_.clear();
-}
 template <typename Type>
 void TrivialTape<Type>::put(Type data) {
   data_.push_back(data);
 }
+template <typename Type>
+void TrivialTape<Type>::init_taping() {
+  data_.reserve(INITIAL_TAPE_VECTOR_SIZE);
+}
+
+template <typename Type>
+void TrivialTape<Type>::end_taping() {
+}
+
 template <typename Type>
 int TrivialTape<Type>::size() {
   return data_.size();

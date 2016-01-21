@@ -7,9 +7,11 @@ template <typename Type>
 class AbstractTape {
  public:  
   virtual ~AbstractTape() {}
-  virtual void clear() = 0;
+
+  virtual void init_taping() = 0;
   // put a Type data to the tape
   virtual void put(Type) = 0;
+  virtual void end_taping() = 0;
   
   // number of current elements
   virtual int size() = 0;

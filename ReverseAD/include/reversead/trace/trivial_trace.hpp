@@ -54,6 +54,28 @@ class TrivialTrace : public AbstractTrace<Base> {
 #endif
   }
 
+  void init_tracing() {
+    op_tape->init_taping();
+    loc_tape->init_taping();
+    val_tape->init_taping();
+    param_tape->init_taping();
+    coval_tape->init_taping();
+#ifdef ENABLE_REVERSEAD_MPI
+    sr_info_tape->init_taping();
+    comm_loc_tape->init_taping();
+#endif
+  }
+  void end_tracing() {
+    op_tape->end_taping();
+    loc_tape->end_taping();
+    val_tape->end_taping();
+    param_tape->end_taping();
+    coval_tape->end_taping();
+#ifdef ENABLE_REVERSEAD_MPI
+    sr_info_tape->end_taping();
+    comm_loc_tape->end_taping();
+#endif
+  }
   // Write
   inline void put_op(const opbyte& opcode) {
     op_tape->put(opcode);
