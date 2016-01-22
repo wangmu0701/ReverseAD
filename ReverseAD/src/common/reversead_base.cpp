@@ -5,6 +5,7 @@
 namespace ReverseAD {
   
   void* global_trace;
+  int _disk_tape_id = 0;
   bool is_tracing = false;
   locint curr_loc = 0;
   locint curr_ind_loc = 0;

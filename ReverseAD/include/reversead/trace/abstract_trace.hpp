@@ -54,7 +54,6 @@ class AbstractTrace {
 
   // for debug
   virtual void dump_trace() = 0;
-  virtual void dump_trace(Logger& logger) = 0;
   
   // independent and dependent counters
   void declare_ind() {num_ind++;}

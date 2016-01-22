@@ -403,6 +403,7 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
     info.clear();
     info.opcode = op;
     process_sac(info);
+    trace->end_reverse();
     return;
 }
 

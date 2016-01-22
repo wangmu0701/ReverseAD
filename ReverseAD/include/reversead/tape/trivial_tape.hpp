@@ -24,7 +24,7 @@ class TrivialTape : public AbstractTape<Type> {
   void init_taping();
   void put(Type data);
   void end_taping();
-  int size();
+  int size() const;
   
   void init_forward();
   void end_forward();
@@ -38,8 +38,7 @@ class TrivialTape : public AbstractTape<Type> {
   bool has_next_r();
   Type get_next_r();
 
-  void dump_tape();
-  void dump_tape(Logger& logger);
+  void dump_tape() const;
 
  private:
   std::vector<Type> data_;
@@ -61,7 +60,7 @@ void TrivialTape<Type>::end_taping() {
 }
 
 template <typename Type>
-int TrivialTape<Type>::size() {
+int TrivialTape<Type>::size() const {
   return data_.size();
 }
 
@@ -116,21 +115,12 @@ Type TrivialTape<Type>::get_next_r() {
 }
 
 template <typename Type>
-void TrivialTape<Type>::dump_tape() {
+void TrivialTape<Type>::dump_tape() const {
   std::cout << "[" << data_.size() << "]";
   for(size_t i = 0; i < data_.size(); i++) {
     std::cout << " " << data_[i];
   }
   std::cout << std::endl;
-}
-
-template <typename Type>
-void TrivialTape<Type>::dump_tape(Logger& logger) {
-  logger << "[" << data_.size() << "]";
-  for(size_t i = 0; i < data_.size(); i++) {
-    logger << " " << data_[i];
-  }
-  logger << std::endl;
 }
 
 } // namespace ReverseAD

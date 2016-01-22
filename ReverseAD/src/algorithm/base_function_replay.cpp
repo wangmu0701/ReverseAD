@@ -5,7 +5,6 @@
 #include "reversead/common/reversead_base.hpp"
 #include "reversead/common/opcodes.hpp"
 #include "reversead/algorithm/base_function_replay.hpp"
-#include "reversead/tape/trivial_tape.hpp"
 #include "reversead/forwardtype/single_forward.hpp"
 
 using std::map;
@@ -147,11 +146,11 @@ template <typename OldBase, typename NewBase>
     << " match the record on the trace (" << trace->get_num_dep()
     << ")." << std::endl;
   }
-  std::shared_ptr<TrivialTape<NewBase>> val_tape =
-  std::make_shared<TrivialTape<NewBase>>();
+  std::shared_ptr<VirtualTape<NewBase>> val_tape =
+  std::make_shared<VirtualTape<NewBase>>();
   val_tape->init_taping();
-  std::shared_ptr<TrivialTape<NewBase>> param_tape =
-  std::make_shared<TrivialTape<NewBase>>();
+  std::shared_ptr<VirtualTape<NewBase>> param_tape =
+  std::make_shared<VirtualTape<NewBase>>();
   param_tape->init_taping();
   
   locint res;
@@ -427,6 +426,7 @@ template <typename OldBase, typename NewBase>
   }
   val_tape->end_taping();
   param_tape->end_taping();
+  trace->end_forward();
   std::shared_ptr<TrivialTrace<NewBase>> ret;
   if (reset_param) {
     // a new set of param values

@@ -14,7 +14,7 @@ class AbstractTape {
   virtual void end_taping() = 0;
   
   // number of current elements
-  virtual int size() = 0;
+  virtual int size() const = 0;
 
   // forward sweep
   virtual void init_forward() = 0;
@@ -29,7 +29,7 @@ class AbstractTape {
   virtual Type get_next_r() = 0;  
   
   // for debug
-  virtual void dump_tape() = 0;
+  virtual void dump_tape() const = 0;
 };
 
 } // namespace ReverseAD

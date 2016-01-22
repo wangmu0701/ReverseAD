@@ -3,4 +3,6 @@
 
 @ENABLE_MPI@
 
+@ENABLE_DISK_TAPE@
+
 #endif // REVERSE_AD_CONFIG_H_

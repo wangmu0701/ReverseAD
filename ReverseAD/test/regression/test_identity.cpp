@@ -166,8 +166,8 @@ int run_function() {
     }
     double vy;
     y >>= vy;
+    std::shared_ptr<TrivialTrace<double>> trace = ReverseAD::trace_off<double>();
     if (!done) {
-      std::shared_ptr<TrivialTrace<double>> trace = ReverseAD::trace_off<double>();
       check_answer(trace, 2.0, done);
       check_answer(trace, 4.0, done);
       if (done) {

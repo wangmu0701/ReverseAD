@@ -29,6 +29,21 @@ else
 fi
 AC_SUBST(ENABLE_MPI)
 
+AC_MSG_CHECKING(whether to enable disk (file backed) tape.)
+AC_ARG_ENABLE(disk-tape, [AS_HELP_STRING([--enable-disk-tape],
+  [enable disk tape in ReverseAD [default=no]])],
+  [enable_disk_tape=$enableval], [enable_disk_tape=no])
+AC_MSG_RESULT($enable_disk_tape)
+
+AM_CONDITIONAL(ENABLE_DISK_TAPE, [test x$enable_disk_tape = xyes])
+
+if test x$enable_disk_tape = xyes ; then
+  ENABLE_DISK_TAPE="#define ENABLE_DISK_TAPE 1"
+else
+  ENABLE_DISK_TAPE="#undef ENABLE_DISK_TAPE"
+fi
+AC_SUBST(ENABLE_DISK_TAPE)
+
 
 # output
 AC_CONFIG_FILES(Makefile
