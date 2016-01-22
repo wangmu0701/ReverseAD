@@ -13,7 +13,7 @@ make; make install
 To enable MPI wrapper, add `--enable-mpi` in `./configure`.
 
 ****
-## One Minute Example
+## One (Ten) Minute Example
 ### Source code and sample result
 Let's begin with the following code `reversead_one_minute.cpp`
 ```c++
