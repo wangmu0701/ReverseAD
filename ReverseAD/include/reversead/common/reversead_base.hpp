@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "reversead/common/reversead_type.hpp"
+#include "reversead/common/runtime_env.hpp"
 #include "reversead/common/opcodes.hpp"
 #include "reversead/trace/trivial_trace.hpp"
 #include "reversead/util/logger.hpp"
@@ -14,9 +15,7 @@ namespace ReverseAD {
   extern Log logger; 
   extern void* global_trace;
   extern bool is_tracing;
-  extern locint curr_loc;
-  extern locint curr_ind_loc;
-  extern locint curr_dummy_loc;
+  extern RuntimeEnv* runtime_env;
   
   // declarions for indexing functions
   locint get_next_loc();
@@ -31,23 +30,19 @@ namespace ReverseAD {
     }
     global_trace = (void*)new TrivialTrace<Base>();
     ((TrivialTrace<Base>*)global_trace)->init_tracing();
+    runtime_env = new RuntimeEnv();
+    runtime_env->init();
     is_tracing = true;
-    curr_loc = BASE_LOC;
-    curr_dummy_loc = BASE_LOC - 1;
     // independent location begins with 1 so that null_loc can be 0
-    curr_ind_loc = 1;
     ((TrivialTrace<Base>*)global_trace)->put_op(start_of_tape);
   }
 
   template <typename Base>
   std::shared_ptr<TrivialTrace<Base>> trace_off() {
-    logger.info << "number of indepent = " << curr_ind_loc - 1 << std::endl;
-    logger.info << "number of intermediate = " << (curr_loc-BASE_LOC) << std::endl;
-    if (curr_loc >= BASE_LOC * 2) {
-      logger.fatal << "Overflow in intermedite indexing" << std::endl;
-    }
     ((TrivialTrace<Base>*)global_trace)->put_op(end_of_tape);
     ((TrivialTrace<Base>*)global_trace)->end_tracing();
+    runtime_env->end();
+    delete runtime_env; runtime_env = nullptr;
     is_tracing = false;
     return std::shared_ptr<TrivialTrace<Base>>((TrivialTrace<Base>*)global_trace);
   }
