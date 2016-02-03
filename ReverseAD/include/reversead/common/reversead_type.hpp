@@ -14,20 +14,28 @@
 #define COMM_RMPI_SEND 0
 #define COMM_RMPI_RECV 1
 
-#endif // ENABLE_REVERSEAD_MPI
-
 #define MAX_LOC 0xfffffffffffffffful
-
-#define NULL_LOC 0
-
 #define RANK_SHIFT 16
 #define RANK_BASE 0x000000000000fffful
 #define BASE_LOC 0x800000000000ul
 
+#else // no ENABLE_REVERSE_MPI
+
+#define MAX_LOC 0xffffffff
+#define BASE_LOC 0x00800000
+
+#endif // ENABLE_REVERSE_MPI
+
+#define NULL_LOC 0
+
 namespace ReverseAD {
 
   typedef uint8_t opbyte;
+#ifdef ENABLE_REVERSEAD_MPI
   typedef uint64_t locint;
+#else
+  typedef uint32_t locint;
+#endif // ENABLE_REVERSEAD_MPI
 
 #ifdef ENABLE_REVERSEAD_MPI
   class SendRecvInfo {

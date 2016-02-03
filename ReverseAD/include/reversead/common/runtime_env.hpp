@@ -54,7 +54,6 @@ class RuntimeEnv {
   locint curr_loc;
   locint curr_ind_loc;
   locint curr_dummy_loc;
-
 };
 
 } // namespace ReverseAD
