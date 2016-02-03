@@ -2,6 +2,7 @@
 #include <iostream>
 #include "reversead/reversead.hpp"
 
+using ReverseAD::adouble;
 using ReverseAD::RMPI_Send;
 using ReverseAD::RMPI_Recv;
 using ReverseAD::RMPI_ADOUBLE;

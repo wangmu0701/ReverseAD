@@ -53,8 +53,10 @@ class BaseActive {
   locint loc;
 };  
 
+typedef ReverseAD::BaseActive<double> adouble;
+
 } // namespace ReverseAD
 
-typedef ReverseAD::BaseActive<double> adouble;
+
 
 #endif // BASE_ACTIVE_H_

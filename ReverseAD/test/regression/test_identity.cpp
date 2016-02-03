@@ -2,6 +2,7 @@
 
 #include "reversead/reversead.hpp"
 
+using ReverseAD::adouble;
 using ReverseAD::TrivialTrace;
 using ReverseAD::DerivativeTensor;
 using ReverseAD::BaseFunctionReplay;

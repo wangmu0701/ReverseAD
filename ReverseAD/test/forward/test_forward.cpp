@@ -4,6 +4,7 @@
 #include "reversead/forwardtype/single_forward.hpp"
 #include "reversead/driver/forward_over_reverse.hpp"
 
+using ReverseAD::adouble;
 using ReverseAD::BaseActive;
 using ReverseAD::TrivialTrace;
 using ReverseAD::SingleForward;

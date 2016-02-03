@@ -22,6 +22,7 @@ Let's begin with the following code `reversead_one_minute.cpp`
 
 #include "reversead/reversead.hpp"
 
+using ReverseAD::adouble;
 using ReverseAD::TrivialTrace;
 using ReverseAD::BaseReverseHessian;
 using ReverseAD::DerivativeTensor;
@@ -99,6 +100,7 @@ H[1, 1] = 2
 ### ReverseAD namespace
 Almost all functions, types and classes provided by **ReverseAD** are within namespace `ReverseAD`.  So use using-directives for namespaces or using-declarations for namespace members to resolve references. As in the code :
 ```c++
+using ReverseAD::adouble;
 using ReverseAD::TrivialTrace;
 using ReverseAD::BaseReverseHessian;
 using ReverseAD::DerivativeTensor;
@@ -107,7 +109,7 @@ using ReverseAD::trace_off;
 ```
 
 ### Active type and active region
-1. ~Active Type~ : Variable with active type get involved in derivative evaluation. *ReverseAD* provides type `adouble` as the reverse active type with derivative part of `double` type. `adouble` is **NOT** within namespace `ReverseAD`.
+1. ~Active Type~ : Variable with active type get involved in derivative evaluation. *ReverseAD* provides type `adouble` as the reverse active type with derivative part of `double` type. `adouble` is **also** within namespace `ReverseAD`.
 2. ~Active Region~: An active region defines a objective function. It should contain declaration of `independent variables`, declaration of `dependent variables` and a `function body`. For `adouble`, the active region begins with `trace_on<double>()` and ends with `trace_off<double>()`.
 3. ~Trace ~ : A `Trace` returncd by `trace_off<double>()` contains all information one needs to evaluate the derivatives of that `active region`. We use `std::shared_ptr<TrivialTrace<double>>` as the type of trace.
 

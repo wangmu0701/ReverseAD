@@ -3,6 +3,7 @@
 
 #include "reversead/reversead.hpp"
 
+using ReverseAD::adouble;
 using ReverseAD::BaseReverseThird;
 using ReverseAD::BaseReverseGeneric;
 using ReverseAD::TrivialTrace;
