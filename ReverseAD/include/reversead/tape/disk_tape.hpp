@@ -6,12 +6,17 @@
 #include <string>
 #include <sys/stat.h>
 
+#include "reversead/common/reversead_config.h"
+
+#ifdef ENABLE_REVERSEAD_MPI
+#include "mpi.h"
+#endif
+
 #define DISK_TAPE_BUFF_SIZE 2000
 
 namespace ReverseAD {
 
 extern int _disk_tape_id;
-extern int rank;
 
 template <typename T>
 class DiskTape : public AbstractTape<T> {
@@ -53,8 +58,14 @@ class DiskTape : public AbstractTape<T> {
 };
 template <typename T>
 DiskTape<T>::DiskTape() {
+  int _rank = 0;
+#ifdef ENABLE_REVERSEAD_MPI
+  if (MPI::Is_initialized()) {
+    _rank = MPI::COMM_WORLD.Get_rank();
+  }
+#endif
   _tape_id = _disk_tape_id++;
-  _tape_name = "./Reverse_Tape_" + std::to_string(rank)
+  _tape_name = "./Reverse_Tape_" + std::to_string(_rank)
              + "_" + std::to_string(_tape_id) + ".tap";
   _buff_raw_memory = (char*)::operator new[](sizeof(T) * DISK_TAPE_BUFF_SIZE);
   _buff_tp = (T*)_buff_raw_memory;

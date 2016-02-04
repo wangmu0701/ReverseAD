@@ -19,12 +19,10 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
  public:
   typedef SingleDerivative<Base> SingleDeriv;
 
-  using BaseReverseMode<Base>::_use_dep_init_adjoint;
   using BaseReverseMode<Base>::trace;
   using BaseReverseMode<Base>::reverse_live;
   using BaseReverseMode<Base>::indep_index_map;
   using BaseReverseMode<Base>::dep_index_map;
-  using BaseReverseMode<Base>::dep_init_adjoint;
 
   BaseReverseGeneric(const std::shared_ptr<TrivialTrace<Base>>& trace, int order);
 

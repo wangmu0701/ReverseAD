@@ -10,6 +10,8 @@
 #include "reversead/algorithm/single_derivative.hpp"
 #include "reversead/algorithm/derivative_tensor.hpp"
 
+//class ReverseAD::IterativeFunc;
+
 namespace ReverseAD {
 
 template <typename Base>
@@ -21,15 +23,12 @@ class BaseReverseMode {
   typedef SingleDerivative<Base> SingleDeriv;
 
   BaseReverseMode(const std::shared_ptr<TrivialTrace<Base>>& _trace)
-      : trace(_trace),
-        _use_dep_init_adjoint(false) {}
+      : trace(_trace) {}
 
   virtual ~BaseReverseMode() = default;
 
   virtual DerivativeTensor<int, Base> compute(
       int ind_num, int dep_num);
-  virtual DerivativeTensor<int, Base> compute(
-      int ind_num, int dep_num, Base* init_dep_adjoints);
 
  protected:
   BaseReverseMode() = default;
@@ -51,10 +50,13 @@ class BaseReverseMode {
   std::map<locint, SingleDeriv> dep_deriv;
   std::map<locint, int> indep_index_map;
   std::map<locint, int> dep_index_map;
-  std::map<int, Base> dep_init_adjoint;
   std::map<locint, Base> dep_value;
-  
-  bool _use_dep_init_adjoint;
+
+ private:
+  // This class will only be invoked by InterativeFunc
+  void compute_iterative();
+  void reset_trace(std::shared_ptr<TrivialTrace<Base>> _trace);
+  friend class IterativeFunc;
 };
 
 } // namespace ReverseAD

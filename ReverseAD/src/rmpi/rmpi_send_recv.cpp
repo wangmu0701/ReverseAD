@@ -11,8 +11,6 @@ namespace ReverseAD {
   extern MPI_Datatype RMPI_ADOUBLE;
 
   extern void* global_trace;
-  extern bool is_tracing;
-  extern int rank;
 
   extern TempMemoryAllocator* temp_memory_allocator;
 
@@ -83,7 +81,7 @@ namespace ReverseAD {
         dummy_dep[i] >>= send_buf[i];
       }
 
-      if (is_tracing) {
+      if (global_trace) {
         for (int i = 0; i < count; i++) {
           trace_put_comm_loc(dummy_dep[i].getLoc());
         }
@@ -117,7 +115,7 @@ namespace ReverseAD {
       for (int i = 0; i < count; i++) {
         dummy_ind[i].markDummyInd(recv_buf[i]);
       }
-      if (is_tracing) {
+      if (global_trace) {
         for (int i = 0; i < count; i++) {
           trace_put_comm_loc(dummy_ind[i].getLoc());
         }

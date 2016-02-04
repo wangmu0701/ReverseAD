@@ -12,8 +12,11 @@ class RuntimeEnv {
   RuntimeEnv(const RuntimeEnv&) = default;
 
   void init() {
+    rank = 0;
 #ifdef ENABLE_REVERSEAD_MPI
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    if (MPI::Is_initialized()) {
+      rank = MPI::COMM_WORLD.Get_rank();
+    }
 #endif
     curr_loc = BASE_LOC;
     curr_dummy_loc = BASE_LOC - 1;

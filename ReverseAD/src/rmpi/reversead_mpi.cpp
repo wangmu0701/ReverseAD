@@ -14,15 +14,12 @@ namespace ReverseAD {
   MPI_Datatype RMPI_ADOUBLE;
 
   extern void* global_trace;
-  extern bool is_tracing;
-  extern int rank;
   TempMemoryAllocator* temp_memory_allocator;
  
   void RMPI_Init(int* argc, char** argv[]) {
     MPI_Init(argc, argv);
     MPI_Type_contiguous(1, MPI_DOUBLE, &RMPI_ADOUBLE);
     MPI_Type_commit(&RMPI_ADOUBLE);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     temp_memory_allocator = new TempMemoryAllocator();
   }
 

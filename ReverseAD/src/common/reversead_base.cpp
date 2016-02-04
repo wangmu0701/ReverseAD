@@ -5,10 +5,9 @@
 
 namespace ReverseAD {
   
-  void* global_trace;
+  void* global_trace = nullptr;
   RuntimeEnv* runtime_env = nullptr;
   int _disk_tape_id = 0;
-  bool is_tracing = false;
   
   extern Log logger;
 

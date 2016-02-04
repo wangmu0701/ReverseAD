@@ -137,11 +137,7 @@ void BaseReverseGeneric<Base>::init_dep_deriv(locint dep, int dep_count) {
   GenericDeriv<locint, Base> d_deriv(order);
   ReverseADMultiSet<locint> d_set;
   d_set.insert(dep);
-  if (!_use_dep_init_adjoint) {
-    d_deriv.increase(d_set, 1.0);
-  } else {
-    d_deriv.increase(d_set, dep_init_adjoint[dep_count]);
-  }
+  d_deriv.increase(d_set, 1.0);
   dep_deriv.insert(std::pair<locint, GenericDeriv<locint, Base>>(dep, d_deriv));
   //d_deriv.debug();
   reverse_live[dep].insert(dep);

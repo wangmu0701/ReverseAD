@@ -18,13 +18,11 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
   typedef typename SingleDerivative<Base>::type_adjoint type_adjoint;
   typedef SingleDerivative<Base> SingleDeriv;
 
-  using BaseReverseMode<Base>::_use_dep_init_adjoint;
   using BaseReverseMode<Base>::trace;
   using BaseReverseMode<Base>::dep_deriv;
   using BaseReverseMode<Base>::reverse_live;
   using BaseReverseMode<Base>::dep_index_map;
   using BaseReverseMode<Base>::indep_index_map;
-  using BaseReverseMode<Base>::dep_init_adjoint;
 
   BaseReverseAdjoint(const std::shared_ptr<TrivialTrace<Base>>& trace)
       : BaseReverseMode<Base>(trace), preacc_enabled(false) {}

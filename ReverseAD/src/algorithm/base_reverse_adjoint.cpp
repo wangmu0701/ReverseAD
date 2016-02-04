@@ -49,11 +49,7 @@ void BaseReverseAdjoint<Base>::transcript_adjoint(
 
 template <typename Base>
 void BaseReverseAdjoint<Base>::init_dep_deriv(locint dep, int dep_count) {
-  if (!_use_dep_init_adjoint) {
-    dep_deriv[dep].adjoint_vals->increase(dep, 1.0);
-  } else {
-    dep_deriv[dep].adjoint_vals->increase(dep, dep_init_adjoint[dep_count]);
-  }
+  dep_deriv[dep].adjoint_vals->increase(dep, 1.0);
   reverse_live[dep].insert(dep); 
 }
 

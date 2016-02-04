@@ -49,11 +49,10 @@ int main() {
   std::shared_ptr<TrivialTrace<double>> trace = ReverseAD::trace_off<double>();
   std::cout << "z = " << z.getVal() << std::endl;
   DerivativeTensor<int, double> tensor;
-  double az = 2.0;
   BaseReverseThird<double> third(trace);
-  tensor = third.compute(4, 1, &az);
+  tensor = third.compute(4, 1);
   check_answer(tensor);
   BaseReverseGeneric<double> generic(trace, 3);
-  tensor = generic.compute(4, 1, &az);
+  tensor = generic.compute(4, 1);
   check_answer(tensor);
 } 

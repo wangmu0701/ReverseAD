@@ -41,19 +41,6 @@ DerivativeTensor<int, Base> BaseReverseMode<Base>::compute(
 }
 
 template <typename Base>
-DerivativeTensor<int, Base> BaseReverseMode<Base>::compute(
-    int ind_num, int dep_num, Base* init_adjoint) {
-  this->_use_dep_init_adjoint = true;
-  if (dep_num != trace->get_num_dep()) {
-    logger.fatal << "dep_num error!" << std::endl;
-  }
-  for (int i=1; i<=dep_num; i++) {
-    dep_init_adjoint[i] = init_adjoint[i-1];
-  }
-  return compute(ind_num, dep_num);
-}
-
-template <typename Base>
 void BaseReverseMode<Base>::transcript_dep_value(
     DerivativeTensor<int, Base>& tensor) {
   for (auto& kv: dep_deriv) {
@@ -63,14 +50,23 @@ void BaseReverseMode<Base>::transcript_dep_value(
 }
 
 template <typename Base>
+void BaseReverseMode<Base>::compute_iterative() {
+  reverse_local_computation(trace->get_num_ind(), trace->get_num_dep());
+}
+
+template <typename Base>
+void BaseReverseMode<Base>::reset_trace(
+    std::shared_ptr<TrivialTrace<Base>> _trace) {
+  this->trace = std::move(_trace);
+}
+
+template <typename Base>
 void BaseReverseMode<Base>::clear() {
   reverse_live.clear();
   dep_deriv.clear();
   indep_index_map.clear();
   dep_index_map.clear();
-  dep_init_adjoint.clear();
   dep_value.clear();
-  _use_dep_init_adjoint = false;
 }
 
 template <typename Base>
