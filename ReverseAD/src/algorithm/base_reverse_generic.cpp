@@ -1,5 +1,6 @@
 #include <cmath>
 #include <map>
+#include <memory>
 
 #include "reversead/common/reversead_type.hpp"
 #include "reversead/common/reversead_base.hpp"
@@ -86,10 +87,12 @@ void BaseReverseGeneric<Base>::accumulate_deriv(
 }
 
 template <typename Base>
-DerivativeTensor<int, Base> BaseReverseGeneric<Base>::transcript_result() {
+std::shared_ptr<DerivativeTensor<int, Base>>
+    BaseReverseGeneric<Base>::get_tensor() const {
   int dep_size = dep_deriv.size();
   int ind_size = indep_index_map.size();
-  DerivativeTensor<int, Base> ret(dep_size, ind_size, order);
+  std::shared_ptr<DerivativeTensor<int, Base>> ret =
+      std::make_shared<DerivativeTensor<int, Base>>(dep_size, ind_size, order);
   BaseReverseMode<Base>::transcript_dep_value(ret);
   int* size = new int[order];
   int* curr_l = new int[order];
@@ -99,7 +102,7 @@ DerivativeTensor<int, Base> BaseReverseGeneric<Base>::transcript_result() {
     locint dep = dep_index_map[kv.first] - 1;
     for (int i = 0; i < order; i++) {
       size[i] = kv.second.get_size(i);
-      ret.init_single_tensor(dep, i+1, size[i]);
+      ret->init_single_tensor(dep, i+1, size[i]);
       curr_l[i] = 0;
     }
     ReverseADMultiSet<locint> s_set;
@@ -116,7 +119,7 @@ DerivativeTensor<int, Base> BaseReverseGeneric<Base>::transcript_result() {
       for (int i=0; i<t_order; i++) {
         x[t_order - 1 - i] = indep_index_map[t[i]] - 1;
       }
-      ret.put_value(dep, t_order, curr_l[t_order-1], x, sw);
+      ret->put_value(dep, t_order, curr_l[t_order-1], x, sw);
       curr_l[t_order - 1]++;
     }
   }
@@ -124,11 +127,15 @@ DerivativeTensor<int, Base> BaseReverseGeneric<Base>::transcript_result() {
   delete[] curr_l;
   delete[] t;
   delete[] x;
- 
+
+  return std::move(ret);
+}
+
+template <typename Base>
+void BaseReverseGeneric<Base>::clear() {
   clear_private_temps();
   dep_deriv.clear();
   BaseReverseMode<Base>::clear();
-  return ret;
 }
 
 // here we're NOT touching SingleDeriv, will change interface later

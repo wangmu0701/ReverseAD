@@ -27,8 +27,11 @@ class BaseReverseMode {
 
   virtual ~BaseReverseMode() = default;
 
-  virtual DerivativeTensor<int, Base> compute(
-      int ind_num, int dep_num);
+  BaseReverseMode<Base>& compute(int ind_num, int dep_num);
+
+  virtual std::shared_ptr<DerivativeTensor<int, Base>> get_tensor() const = 0;
+
+  virtual void clear();
 
  protected:
   BaseReverseMode() = default;
@@ -36,21 +39,17 @@ class BaseReverseMode {
   virtual void init_dep_deriv(locint dep, int dep_count) = 0;
 
   virtual void process_sac(const DerivativeInfo<locint, Base>& info) = 0;
-
-  virtual DerivativeTensor<int, Base> transcript_result() = 0;
-
-  void clear();
   
   void reverse_local_computation(int, int);
 
-  void transcript_dep_value(DerivativeTensor<int, Base>& tensor);
+  void transcript_dep_value(std::shared_ptr<DerivativeTensor<int, Base>> tensor) const;
 
   std::shared_ptr<TrivialTrace<Base>> trace;
   std::map<locint, std::set<locint> > reverse_live;
-  std::map<locint, SingleDeriv> dep_deriv;
-  std::map<locint, int> indep_index_map;
-  std::map<locint, int> dep_index_map;
-  std::map<locint, Base> dep_value;
+  mutable std::map<locint, SingleDeriv> dep_deriv;
+  mutable std::map<locint, int> indep_index_map;
+  mutable std::map<locint, int> dep_index_map;
+  mutable std::map<locint, Base> dep_value;
 
  private:
   // This class will only be invoked by InterativeFunc

@@ -48,20 +48,21 @@ int main() {
   std::cout << "y = " << vy << std::endl;
 
   BaseReverseHessian<double> hessian(trace);
-  DerivativeTensor<int, double> tensor = hessian.compute(2, 1);
+  std::shared_ptr<DerivativeTensor<int, double>> tensor =
+      hessian.compute(2, 1).get_tensor();
     
   // retrieve results
   int size;
   int** tind;
   double* values;
   // adjoints : dep[0].order[1]
-  tensor.get_internal_coordinate_list(0, 1, &size, &tind, &values);
+  tensor->get_internal_coordinate_list(0, 1, &size, &tind, &values);
   std::cout << "size of adjoints = " << size << std::endl;
   for (int i = 0; i < size; i++) {
     std::cout << "A["<< tind[i][0] << "] = " << values[i] << std::endl;
   }
   // hessian : dep[0].order[2]
-  tensor.get_internal_coordinate_list(0, 2, &size, &tind, &values);
+  tensor->get_internal_coordinate_list(0, 2, &size, &tind, &values);
   std::cout << "size of hessian = " << size << std::endl;
   for (int i = 0; i < size; i++) {
     std::cout << "H["<< tind[i][0] << ", " << tind[i][1]
@@ -120,9 +121,10 @@ Once we get a `trace` for an `active region`, we can pass it to a `derivative ev
 ```
 This code creates an instance of `BaseReverseHessian` namely `hessian`.
 ```c++
-  DerivativeTensor<int, double> tensor = hessian.compute(2, 1);
+  std::shared_ptr<DerivativeTensor<int, double>> tensor =
+      hessian.compute(2, 1).get_tensor();
 ```
-Then we can call the member function `compute(ind_num, dep_num)` to evaluate the derivatives for the `trace` up to second order and store the results into a `DerivativeTensor<int, double>`. 
+Then we can call the member function `compute(ind_num, dep_num)` to evaluate the derivatives for the `trace` up to second order and store the results into a `std::shared_ptr<DerivativeTensor<int, double>>` by calling `get_tensor()`. 
 
 Other `derivative evaluation class` are given in the following table:
 

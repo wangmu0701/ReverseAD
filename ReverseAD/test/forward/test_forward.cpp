@@ -51,11 +51,12 @@ void check_forward_over_second(
     double* ind_init_values,
     double* adjoint_init_values) {
   BaseReverseThird<double> third(trace);
-  DerivativeTensor<int, double> tensor = third.compute(ind_num, dep_num);
+  std::shared_ptr<DerivativeTensor<int, double>> tensor =
+      third.compute(ind_num, dep_num).get_tensor();
   int t_size;
   int** t_tind;
   double* t_value;
-  tensor.get_internal_coordinate_list(0, 3, &t_size, &t_tind, &t_value);
+  tensor->get_internal_coordinate_list(0, 3, &t_size, &t_tind, &t_value);
 //  std::cout << "t_size = " << t_size << std::endl;
 //  for (int i=0; i<t_size; i++) {
 //    std::cout<<"T["<<t_tind[i][0]<<", "<<t_tind[i][1]
@@ -108,11 +109,12 @@ void check_forward_over_reverse(
     double* ind_init_values,
     double* adjoint_init_values) {
   BaseReverseHessian<double> hessian(trace);
-  DerivativeTensor<int, double> tensor = hessian.compute(ind_num, dep_num);
+  std::shared_ptr<DerivativeTensor<int, double>> tensor =
+      hessian.compute(ind_num, dep_num).get_tensor();
   int h_size;
   int** h_tind;
   double* h_value;
-  tensor.get_internal_coordinate_list(0, 2, &h_size, &h_tind, &h_value);
+  tensor->get_internal_coordinate_list(0, 2, &h_size, &h_tind, &h_value);
 //  std::cout << "h_size = " << h_size << std::endl;
 //  for (int i=0; i<h_size; i++) {
 //    std::cout<<"H["<<h_tind[i][0]<<", "<<h_tind[i][1]<<"] = "<<h_value[i]<<std::endl;

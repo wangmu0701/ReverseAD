@@ -1,3 +1,4 @@
+#include <memory>
 #include "reversead/reversead.hpp"
 
 using ReverseAD::TrivialTrace;
@@ -8,13 +9,13 @@ double myEps = 1.E-10;
 int run_function();
 
 void check_value(int t_order,
-                 DerivativeTensor<int, double>& tensor,
+                 std::shared_ptr<DerivativeTensor<int, double>> tensor,
                  double true_answer,
                  bool& done) {
   int size;
   int** tind;
   double* values;
-  tensor.get_internal_coordinate_list(0, t_order, &size, &tind, &values);
+  tensor->get_internal_coordinate_list(0, t_order, &size, &tind, &values);
   if (size > 1) {
     std::cout << "size = " << size << std::endl;
     done = true;

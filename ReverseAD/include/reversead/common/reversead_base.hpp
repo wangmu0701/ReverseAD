@@ -14,25 +14,34 @@ namespace ReverseAD {
 
   extern Log logger; 
   extern void* global_trace;
-  extern RuntimeEnv* runtime_env;
+  //extern RuntimeEnv* runtime_env;
+  extern std::shared_ptr<RuntimeEnv> runtime_env;
   
   // declarions for indexing functions
   locint get_next_loc();
   locint get_next_ind_loc();
   locint get_next_dummy_loc();
   void logging_on();
+  void runtime_env_on(std::shared_ptr<RuntimeEnv> _runtime_env);
+  std::shared_ptr<RuntimeEnv> runtime_env_off();
 
   template <typename Base>
-  void trace_on() {
+  void trace_on_runtime_env(std::shared_ptr<RuntimeEnv> _runtime_env) {
     if (!std::is_pod<Base>::value) {
       std::cerr << "ReverseAD works only with POD types!" << std::endl;
     }
     global_trace = (void*)new TrivialTrace<Base>();
     ((TrivialTrace<Base>*)global_trace)->init_tracing();
-    runtime_env = new RuntimeEnv();
-    runtime_env->init();
+    runtime_env_on(_runtime_env);
     // independent location begins with 1 so that null_loc can be 0
     ((TrivialTrace<Base>*)global_trace)->put_op(start_of_tape);
+  }
+
+  template <typename Base>
+  void trace_on() {
+    std::shared_ptr<RuntimeEnv> _runtime_env = std::make_shared<RuntimeEnv>();
+    _runtime_env->init();
+    trace_on_runtime_env<Base>(_runtime_env);
   }
 
   template <typename Base>
@@ -41,11 +50,10 @@ namespace ReverseAD {
     ((TrivialTrace<Base>*)global_trace)->end_tracing();
     std::shared_ptr<TrivialTrace<Base>> ret((TrivialTrace<Base>*)global_trace);
     global_trace = nullptr;
-    runtime_env->end();
-    delete runtime_env; runtime_env = nullptr;
+    runtime_env_off();
     return std::move(ret);
   }
-  
+
   template <typename Base>
   void trace_declare_ind() {
     if (global_trace) {

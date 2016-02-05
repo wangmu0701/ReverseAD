@@ -2,6 +2,7 @@
 #define REVERSEAD_DERIVATIVE_TENSOR_H_
 
 #include <map>
+#include <memory>
 
 namespace ReverseAD {
 
@@ -18,8 +19,8 @@ class DerivativeTensor {
   friend class BaseReverseHessian<Base>;
   friend class BaseReverseThird<Base>;
   friend class BaseReverseGeneric<Base>;
-  friend DerivativeTensor<int, double> strip_derivative(
-      const DerivativeTensor<int, SingleForward>& tensor,
+  friend std::shared_ptr<DerivativeTensor<int, double>> strip_derivative(
+      const std::shared_ptr<DerivativeTensor<int, SingleForward>> tensor,
       int t_order, int ind_size, int dep_size);
 
  public:

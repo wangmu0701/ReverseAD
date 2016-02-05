@@ -1,3 +1,4 @@
+#include <memory>
 #include "reversead/algorithm/base_reverse_third.hpp"
 #include "reversead/forwardtype/single_forward.hpp"
 
@@ -17,26 +18,27 @@ void BaseReverseThird<Base>::accumulate_deriv(
 }
 
 template <typename Base>
-DerivativeTensor<int, Base> BaseReverseThird<Base>::transcript_result() {
+std::shared_ptr<DerivativeTensor<int, Base>>
+    BaseReverseThird<Base>::get_tensor() const {
   int dep_size = dep_deriv.size();
   int ind_size = indep_index_map.size();
-  DerivativeTensor<int, Base> ret(dep_size, ind_size, 3);
+  std::shared_ptr<DerivativeTensor<int, Base>> ret =
+      std::make_shared<DerivativeTensor<int, Base>>(dep_size, ind_size, 3);
   BaseReverseMode<Base>::transcript_dep_value(ret);
   BaseReverseAdjoint<Base>::transcript_adjoint(ret);
   BaseReverseHessian<Base>::transcript_hessian(ret);
   transcript_third(ret);
   
-  BaseReverseMode<Base>::clear();
-  return ret;
+  return std::move(ret);
 }
 
 template <typename Base>
 void BaseReverseThird<Base>::transcript_third(
-    DerivativeTensor<int, Base>& tensor) {
+    std::shared_ptr<DerivativeTensor<int, Base>> tensor) const {
   for (auto& kv : dep_deriv) {
     locint dep = dep_index_map[kv.first] - 1;
     int size = kv.second.third_vals->get_size();
-    tensor.init_single_tensor(dep, 3, size);
+    tensor->init_single_tensor(dep, 3, size);
     locint t[3];
     int x[3];
     Base w;
@@ -48,7 +50,7 @@ void BaseReverseThird<Base>::transcript_third(
       x[0] = indep_index_map[t[0]] - 1;
       x[1] = indep_index_map[t[1]] - 1;
       x[2] = indep_index_map[t[2]] - 1;
-      tensor.put_value(dep, 3, l, x, w);
+      tensor->put_value(dep, 3, l, x, w);
       l++;
     }
   }

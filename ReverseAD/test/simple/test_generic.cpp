@@ -8,11 +8,11 @@ using ReverseAD::TrivialTrace;
 using ReverseAD::DerivativeTensor;
 
 void retrieve_value(int t_order,
-                    DerivativeTensor<int, double>& tensor) {
+                    std::shared_ptr<DerivativeTensor<int, double>> tensor) {
   int size;
   int** tind;
   double* values;
-  tensor.get_internal_coordinate_list(0, t_order, &size, &tind, &values);
+  tensor->get_internal_coordinate_list(0, t_order, &size, &tind, &values);
   for (int i=0;i<size; i++) {
     std::cout << "T[ ";
     for (int j=0;j<t_order; j++) {
@@ -51,7 +51,9 @@ int main() {
   std::cout << "y = " << y << std::endl;
 
   ReverseAD::BaseReverseGeneric<double> generic(trace, 4);
-  DerivativeTensor<int, double> tensor = generic.compute(1, 1);
+  generic.compute(1,1);
+  std::shared_ptr<DerivativeTensor<int, double>> tensor = generic.get_tensor();
+  generic.clear();
   retrieve_value(1, tensor);
   retrieve_value(2, tensor);
   retrieve_value(3, tensor);

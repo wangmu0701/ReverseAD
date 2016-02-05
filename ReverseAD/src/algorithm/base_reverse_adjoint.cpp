@@ -14,24 +14,25 @@ void BaseReverseAdjoint<Base>::enable_preacc() {
 }
 
 template <typename Base>
-DerivativeTensor<int, Base> BaseReverseAdjoint<Base>::transcript_result() {
+std::shared_ptr<DerivativeTensor<int, Base>>
+    BaseReverseAdjoint<Base>::get_tensor() const {
   int dep_size = dep_deriv.size();
   int ind_size = indep_index_map.size();
-  DerivativeTensor<int, Base> ret(dep_size, ind_size, 1);
+  std::shared_ptr<DerivativeTensor<int, Base>> ret =
+    std::make_shared<DerivativeTensor<int, Base>>(dep_size, ind_size, 1);
   BaseReverseMode<Base>::transcript_dep_value(ret);
   transcript_adjoint(ret);
 
-  BaseReverseMode<Base>::clear();
-  return ret;
+  return std::move(ret);
 }
 
 template <typename Base>
 void BaseReverseAdjoint<Base>::transcript_adjoint(
-    DerivativeTensor<int, Base>& tensor) {
+    std::shared_ptr<DerivativeTensor<int, Base>> tensor) const{
   for (auto& kv : dep_deriv) {
     locint dep = dep_index_map[kv.first] - 1;
     int size = kv.second.adjoint_vals->get_size();
-    tensor.init_single_tensor(dep, 1, size);
+    tensor->init_single_tensor(dep, 1, size);
     locint t[1];
     int x[1];
     Base w;
@@ -41,7 +42,7 @@ void BaseReverseAdjoint<Base>::transcript_adjoint(
     while (has_next) {
       has_next = a_enum.get_next(t[0], w);
       x[0] = indep_index_map[t[0]] - 1;
-      tensor.put_value(dep, 1, l, x, w);
+      tensor->put_value(dep, 1, l, x, w);
       l++;
     }
   }

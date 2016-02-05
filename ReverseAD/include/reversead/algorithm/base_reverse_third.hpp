@@ -37,18 +37,18 @@ class BaseReverseThird : public virtual BaseReverseHessian<Base> {
 
   ~BaseReverseThird() = default;
 
+  std::shared_ptr<DerivativeTensor<int, Base>> get_tensor() const override;
+
  protected:
   BaseReverseThird() = default;
- 
-  virtual DerivativeTensor<int, Base> transcript_result();
 
-  virtual void accumulate_deriv(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv);
+  void accumulate_deriv(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) override;
 
-  virtual void process_single_deriv(locint local_dep,
-                                    SingleDeriv& local_deriv,
-                                    SingleDeriv& deriv);
+  void process_single_deriv(locint local_dep,
+                            SingleDeriv& local_deriv,
+                            SingleDeriv& deriv) override;
     
-  void transcript_third(DerivativeTensor<int, Base>& tensor);
+  void transcript_third(std::shared_ptr<DerivativeTensor<int, Base>> tensor) const;
 
   void compute_third_sac(const DerivativeInfo<locint, Base>& info,
                          type_third& third_vals,

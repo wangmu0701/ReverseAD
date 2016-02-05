@@ -36,18 +36,20 @@ class BaseReverseHessian : public virtual BaseReverseAdjoint<Base> {
 
   ~BaseReverseHessian() = default;
 
+  std::shared_ptr<DerivativeTensor<int, Base>> get_tensor() const override;
+  
  protected:
   BaseReverseHessian() = default;
 
-  virtual DerivativeTensor<int, Base> transcript_result();
+  void accumulate_deriv(
+      const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) override;
 
-  virtual void accumulate_deriv(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv);
+  void process_single_deriv(locint local_dep,
+                            SingleDeriv& local_deriv,
+                            SingleDeriv& deriv) override;
 
-  virtual void process_single_deriv(locint local_dep,
-                                    SingleDeriv& local_deriv,
-                                    SingleDeriv& deriv);
-
-  void transcript_hessian(DerivativeTensor<int, Base>& tensor);
+  void transcript_hessian(
+      std::shared_ptr<DerivativeTensor<int, Base>> tensor) const;
 
   void compute_hessian_sac(const DerivativeInfo<locint, Base>& info,
                            type_hessian& hessian_vals,

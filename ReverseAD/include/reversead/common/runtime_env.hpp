@@ -24,9 +24,6 @@ class RuntimeEnv {
     curr_ind_loc = 1;
   }
 
-  void end() {
-  }
-
   locint get_next_loc() {
     locint ret = curr_loc++;
 #ifdef ENABLE_REVERSEAD_MPI

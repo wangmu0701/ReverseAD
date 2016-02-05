@@ -27,8 +27,7 @@
 namespace ReverseAD {
 
 template <typename Base>
-DerivativeTensor<int, Base> BaseReverseMode<Base>::compute(
-    int ind_num, int dep_num) {
+BaseReverseMode<Base>& BaseReverseMode<Base>::compute(int ind_num, int dep_num) {
   double time = get_timing();
   reverse_local_computation(ind_num, dep_num);
   time = get_timing();
@@ -37,15 +36,15 @@ DerivativeTensor<int, Base> BaseReverseMode<Base>::compute(
     //logger.info << "Dep : " << kv.first << std::endl;
     //kv.second.debug(logger.info);
   //}
-  return transcript_result();
+  return *this;
 }
 
 template <typename Base>
 void BaseReverseMode<Base>::transcript_dep_value(
-    DerivativeTensor<int, Base>& tensor) {
+    std::shared_ptr<DerivativeTensor<int, Base>> tensor) const {
   for (auto& kv: dep_deriv) {
     int dep = dep_index_map[kv.first] - 1;
-    tensor.put_dep_value(dep, dep_value[kv.first]);
+    tensor->put_dep_value(dep, dep_value[kv.first]);
   }
 }
 

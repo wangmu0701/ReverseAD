@@ -1,3 +1,4 @@
+#include <memory>
 #include "reversead/common/opcodes.hpp"
 #include "reversead/algorithm/base_reverse_hessian.hpp"
 #include "reversead/forwardtype/single_forward.hpp"
@@ -14,25 +15,26 @@ void BaseReverseHessian<Base>::accumulate_deriv(const DerivativeInfo<locint, Bas
 }
 
 template <typename Base>
-DerivativeTensor<int, Base> BaseReverseHessian<Base>::transcript_result() {
+std::shared_ptr<DerivativeTensor<int, Base>>
+    BaseReverseHessian<Base>::get_tensor() const {
   int dep_size = dep_deriv.size();
   int ind_size = indep_index_map.size();
-  DerivativeTensor<int, Base> ret(dep_size, ind_size, 2);
+  std::shared_ptr<DerivativeTensor<int, Base>> ret =
+      std::make_shared<DerivativeTensor<int, Base>>(dep_size, ind_size, 2);
   BaseReverseMode<Base>::transcript_dep_value(ret);
   BaseReverseAdjoint<Base>::transcript_adjoint(ret);
   transcript_hessian(ret);
  
-  BaseReverseMode<Base>::clear();
-  return ret;
+  return std::move(ret);
 }
 
 template <typename Base>
 void BaseReverseHessian<Base>::transcript_hessian(
-    DerivativeTensor<int, Base>& tensor) {
+    std::shared_ptr<DerivativeTensor<int, Base>> tensor) const {
   for (auto& kv : dep_deriv) {
     locint dep = dep_index_map[kv.first] - 1;
     int size = kv.second.hessian_vals->get_size();
-    tensor.init_single_tensor(dep, 2, size);
+    tensor->init_single_tensor(dep, 2, size);
     locint t[2];
     int x[2];
     Base w;
@@ -43,7 +45,7 @@ void BaseReverseHessian<Base>::transcript_hessian(
       has_next = h_enum.get_next(t[0], t[1], w);
       x[0] = indep_index_map[t[0]] - 1;
       x[1] = indep_index_map[t[1]] - 1;
-      tensor.put_value(dep, 2, l, x, w);
+      tensor->put_value(dep, 2, l, x, w);
       l++;
     }
   }

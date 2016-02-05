@@ -29,27 +29,27 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
 
   ~BaseReverseAdjoint() = default;
 
+  std::shared_ptr<DerivativeTensor<int, Base>> get_tensor() const override;
+
   void enable_preacc();
 
  protected:
   BaseReverseAdjoint() = default;
  
   // From BaseReverseMode 
-  virtual void init_dep_deriv(locint dep, int dep_count);
+  void init_dep_deriv(locint dep, int dep_count) override final;
 
   // here we can do something to enable preaccumulation
-  virtual void process_sac(const DerivativeInfo<locint, Base>& info) final;
+  void process_sac(const DerivativeInfo<locint, Base>& info) override final;
 
-  virtual DerivativeTensor<int, Base> transcript_result();
-
-  // From BaseReverseAdjoint
+  // Originate BaseReverseAdjoint
   virtual void accumulate_deriv(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv);
 
   virtual void process_single_deriv(locint local_dep,
                                     SingleDeriv& local_deriv,
                                     SingleDeriv& deriv);
 
-  void transcript_adjoint(DerivativeTensor<int, Base>& tensor);
+  void transcript_adjoint(std::shared_ptr<DerivativeTensor<int, Base>> tensor) const;
 
   void compute_adjoint_sac(const DerivativeInfo<locint, Base>& info,
                            type_adjoint& adjoint_vals,

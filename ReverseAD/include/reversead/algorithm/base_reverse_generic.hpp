@@ -2,6 +2,7 @@
 #define REVERSEAD_BASE_REVERSE_GENERIC_H_
 
 #include <map>
+#include <memory>
 
 #include "reversead/common/reversead_type.hpp"
 #include "reversead/algorithm/base_reverse_mode.hpp"
@@ -26,12 +27,14 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
 
   BaseReverseGeneric(const std::shared_ptr<TrivialTrace<Base>>& trace, int order);
 
+  std::shared_ptr<DerivativeTensor<int, Base>> get_tensor() const override;
 
+  void clear() override final;
 
  protected:
-  virtual void init_dep_deriv(locint dep, int dep_count);
-  virtual void process_sac(const DerivativeInfo<locint, Base>& info);
-  virtual DerivativeTensor<int, Base> transcript_result();
+  void init_dep_deriv(locint dep, int dep_count) override final;
+
+  void process_sac(const DerivativeInfo<locint, Base>& info) override final;
 
   void accumulate_deriv(const DerivativeInfo<locint, Base>& info,
                         const GenericDeriv<locint, Base>& local_deriv,
@@ -41,7 +44,7 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
   int order;
 
   // this will shadow the same name in BaseReverseMode because it's a template
-  std::map<locint, GenericDeriv<locint, Base> > dep_deriv;
+  mutable std::map<locint, GenericDeriv<locint, Base> > dep_deriv;
 
   // some private temps used when accumulating, avoid pointers on stack
   int dx[100];
