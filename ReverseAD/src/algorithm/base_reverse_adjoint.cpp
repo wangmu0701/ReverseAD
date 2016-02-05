@@ -30,7 +30,7 @@ template <typename Base>
 void BaseReverseAdjoint<Base>::transcript_adjoint(
     std::shared_ptr<DerivativeTensor<int, Base>> tensor) const{
   for (auto& kv : dep_deriv) {
-    locint dep = dep_index_map[kv.first] - 1;
+    int dep = dep_index_map.find(kv.first)->second - 1;
     int size = kv.second.adjoint_vals->get_size();
     tensor->init_single_tensor(dep, 1, size);
     locint t[1];
@@ -41,7 +41,7 @@ void BaseReverseAdjoint<Base>::transcript_adjoint(
     bool has_next = a_enum.has_next();
     while (has_next) {
       has_next = a_enum.get_next(t[0], w);
-      x[0] = indep_index_map[t[0]] - 1;
+      x[0] = indep_index_map.find(t[0])->second - 1;
       tensor->put_value(dep, 1, l, x, w);
       l++;
     }

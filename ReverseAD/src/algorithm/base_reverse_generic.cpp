@@ -99,7 +99,7 @@ std::shared_ptr<DerivativeTensor<int, Base>>
   locint* t = new locint[order];
   int* x = new int[order];
   for (auto& kv : dep_deriv) {
-    locint dep = dep_index_map[kv.first] - 1;
+    locint dep = dep_index_map.find(kv.first)->second - 1;
     for (int i = 0; i < order; i++) {
       size[i] = kv.second.get_size(i);
       ret->init_single_tensor(dep, i+1, size[i]);
@@ -117,7 +117,7 @@ std::shared_ptr<DerivativeTensor<int, Base>>
       // The iterator of multiset puts small number fist
       // reverse the order so it gives lower half
       for (int i=0; i<t_order; i++) {
-        x[t_order - 1 - i] = indep_index_map[t[i]] - 1;
+        x[t_order - 1 - i] = indep_index_map.find(t[i])->second - 1;
       }
       ret->put_value(dep, t_order, curr_l[t_order-1], x, sw);
       curr_l[t_order - 1]++;

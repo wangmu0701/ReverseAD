@@ -43,8 +43,8 @@ template <typename Base>
 void BaseReverseMode<Base>::transcript_dep_value(
     std::shared_ptr<DerivativeTensor<int, Base>> tensor) const {
   for (auto& kv: dep_deriv) {
-    int dep = dep_index_map[kv.first] - 1;
-    tensor->put_dep_value(dep, dep_value[kv.first]);
+    int dep = dep_index_map.find(kv.first)->second - 1;
+    tensor->put_dep_value(dep, dep_value.find(kv.first)->second);
   }
 }
 

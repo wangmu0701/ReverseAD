@@ -46,10 +46,10 @@ class BaseReverseMode {
 
   std::shared_ptr<TrivialTrace<Base>> trace;
   std::map<locint, std::set<locint> > reverse_live;
-  mutable std::map<locint, SingleDeriv> dep_deriv;
-  mutable std::map<locint, int> indep_index_map;
-  mutable std::map<locint, int> dep_index_map;
-  mutable std::map<locint, Base> dep_value;
+  std::map<locint, SingleDeriv> dep_deriv;
+  std::map<locint, int> indep_index_map;
+  std::map<locint, int> dep_index_map;
+  std::map<locint, Base> dep_value;
 
  private:
   // This class will only be invoked by InterativeFunc

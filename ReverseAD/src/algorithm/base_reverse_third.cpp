@@ -36,7 +36,7 @@ template <typename Base>
 void BaseReverseThird<Base>::transcript_third(
     std::shared_ptr<DerivativeTensor<int, Base>> tensor) const {
   for (auto& kv : dep_deriv) {
-    locint dep = dep_index_map[kv.first] - 1;
+    locint dep = dep_index_map.find(kv.first)->second - 1;
     int size = kv.second.third_vals->get_size();
     tensor->init_single_tensor(dep, 3, size);
     locint t[3];
@@ -47,9 +47,9 @@ void BaseReverseThird<Base>::transcript_third(
     bool has_next = t_enum.has_next();
     while (has_next) {
       has_next = t_enum.get_next(t[0], t[1], t[2], w);
-      x[0] = indep_index_map[t[0]] - 1;
-      x[1] = indep_index_map[t[1]] - 1;
-      x[2] = indep_index_map[t[2]] - 1;
+      x[0] = indep_index_map.find(t[0])->second - 1;
+      x[1] = indep_index_map.find(t[1])->second - 1;
+      x[2] = indep_index_map.find(t[2])->second - 1;
       tensor->put_value(dep, 3, l, x, w);
       l++;
     }
