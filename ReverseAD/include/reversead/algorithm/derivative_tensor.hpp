@@ -42,9 +42,12 @@ class DerivativeTensor {
       // error message
       std::cout << "This derivative tensor does not have information about : "
                 << " dep = "<< dep << " order = " << order << std::endl;
+      (*size) = 0;
+      return;
     }
-    (*size) = _data[dep][order]->get_size();
-    _data[dep][order]->get_internal_coordinate_list(tind, values);
+    (*size) = ((_data.find(dep)->second).find(order))->second->get_size();
+    //_data[dep][order]->get_internal_coordinate_list(tind, values);
+    ((_data.find(dep)->second).find(order))->second->get_internal_coordinate_list(tind, values);
   }
   Base get_dep_value(int dep) const {
     return _dep_value[dep];
@@ -115,7 +118,7 @@ class DerivativeTensor {
   int _dep_size;
   int _ind_size;
   int _order; 
-  mutable std::map<int, std::map<int, std::shared_ptr<SingleTensor> > > _data; 
+  std::map<int, std::map<int, std::shared_ptr<SingleTensor> > > _data; 
   std::vector<Base> _dep_value;
 };
 

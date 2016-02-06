@@ -51,6 +51,13 @@ void BaseReverseMode<Base>::transcript_dep_value(
 template <typename Base>
 void BaseReverseMode<Base>::compute_iterative() {
   reverse_local_computation(trace->get_num_ind(), trace->get_num_dep());
+/*
+  std::cout << "one step : " << std::endl;
+  for (auto& kv : dep_deriv) {
+    logger.info << "Dep : " << kv.first << std::endl;
+    kv.second.debug();
+  }
+*/
 }
 
 template <typename Base>

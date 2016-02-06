@@ -3,6 +3,7 @@
 
 #include "reversead/common/reversead_config.h"
 #include "reversead/common/reversead_type.hpp"
+
 namespace ReverseAD {
 
 // make RuntimeEnv a POD
@@ -47,14 +48,13 @@ class RuntimeEnv {
     return ret;
   }
 
- private:
-#ifdef ENABLE_REVERSEAD_MPI
   int rank;
-#endif
   locint curr_loc;
   locint curr_ind_loc;
   locint curr_dummy_loc;
 };
+
+std::ostream& operator << (std::ostream& os, const RuntimeEnv& runtime_env);
 
 } // namespace ReverseAD
 #endif // REVERSEAD_RUNTIME_ENV_

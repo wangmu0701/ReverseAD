@@ -29,11 +29,11 @@ namespace ReverseAD {
   }
 
   void runtime_env_on(std::shared_ptr<RuntimeEnv> _runtime_env) {
-    runtime_env = std::move(_runtime_env);
+    runtime_env = _runtime_env;
   }
 
-  std::shared_ptr<RuntimeEnv> runtime_env_off() {
-    return std::move(runtime_env);
+  void runtime_env_off() {
+    runtime_env.reset();
   }
   
   // turn on some internal loggerging

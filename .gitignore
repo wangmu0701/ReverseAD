@@ -30,6 +30,7 @@ test_mpi
 test_mpi_reduce
 test_mpi_thomson
 test_base_reverse
+test_checkpointing
 nlp_problem.cpp
 compile
 Makefile

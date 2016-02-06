@@ -54,6 +54,7 @@ AC_CONFIG_FILES(Makefile
                 ReverseAD/src/algorithm/Makefile
                 ReverseAD/src/forwardtype/Makefile
                 ReverseAD/src/driver/Makefile
+                ReverseAD/src/checkpointing/Makefile
                 ReverseAD/src/util/Makefile
                 ReverseAD/src/rmpi/Makefile
                 ReverseAD/include/Makefile
@@ -62,6 +63,7 @@ AC_CONFIG_FILES(Makefile
                 ReverseAD/include/reversead/algorithm/Makefile
                 ReverseAD/include/reversead/forwardtype/Makefile
                 ReverseAD/include/reversead/driver/Makefile
+                ReverseAD/include/reversead/checkpointing/Makefile
                 ReverseAD/include/reversead/common/Makefile
                 ReverseAD/include/reversead/tape/Makefile
                 ReverseAD/include/reversead/trace/Makefile

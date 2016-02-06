@@ -12,6 +12,8 @@
 
 namespace ReverseAD {
 
+class CheckpointTrace;
+
 template <typename Base>
 class BaseActive {
  public:
@@ -51,6 +53,8 @@ class BaseActive {
 
   Base val;
   locint loc;
+
+  friend class CheckpointTrace;
 };  
 
 typedef ReverseAD::BaseActive<double> adouble;

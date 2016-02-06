@@ -23,7 +23,7 @@ namespace ReverseAD {
   locint get_next_dummy_loc();
   void logging_on();
   void runtime_env_on(std::shared_ptr<RuntimeEnv> _runtime_env);
-  std::shared_ptr<RuntimeEnv> runtime_env_off();
+  void runtime_env_off();
 
   template <typename Base>
   void trace_on_runtime_env(std::shared_ptr<RuntimeEnv> _runtime_env) {
