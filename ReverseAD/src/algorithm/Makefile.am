@@ -8,4 +8,5 @@ libalgorithm_la_SOURCES = base_reverse_mode.cpp\
                           base_reverse_hessian.cpp\
                           base_reverse_third.cpp\
                           base_reverse_generic.cpp\
-                          base_function_replay.cpp
+                          base_function_replay.cpp\
+                          base_reverse_generator.cpp

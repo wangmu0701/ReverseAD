@@ -5,6 +5,7 @@
 using ReverseAD::adouble;
 using ReverseAD::TrivialTrace;
 using ReverseAD::DerivativeTensor;
+using ReverseAD::BaseReverseGenerator;
 
 #define N 1
 #define M 1
@@ -39,7 +40,7 @@ int main() {
   std::shared_ptr<TrivialTrace<double>> new_trace = 
       ReverseAD::BaseFunctionReplay::replay(trace, y, 1, x, 1, &vp, 1);
 
-  ReverseAD::BaseReverseThird<double> third(new_trace);
+  ReverseAD::BaseReverseGenerator<double> third(new_trace, 2);
   third.compute(N, M);
   std::shared_ptr<DerivativeTensor<int, double>> tensor = third.get_tensor();
   third.clear();

@@ -18,8 +18,6 @@ namespace ReverseAD {
 template <typename Base>
 class BaseReverseGeneric : public BaseReverseMode<Base> {
  public:
-  typedef SingleDerivative<Base> SingleDeriv;
-
   using BaseReverseMode<Base>::trace;
   using BaseReverseMode<Base>::reverse_live;
   using BaseReverseMode<Base>::indep_index_map;
@@ -34,18 +32,18 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
  protected:
   void init_dep_deriv(locint dep, int dep_count) override final;
 
-  void process_sac(const DerivativeInfo<locint, Base>& info) override final;
+  void process_sac(const DerivativeInfo<locint, Base>& info) override;
 
   void accumulate_deriv(const DerivativeInfo<locint, Base>& info,
                         const GenericDeriv<locint, Base>& local_deriv,
                         GenericDeriv<locint, Base>& global_deriv);
 
- private:
   int order;
 
   // this will shadow the same name in BaseReverseMode because it's a template
   mutable std::map<locint, GenericDeriv<locint, Base> > dep_deriv;
 
+ private:
   // some private temps used when accumulating, avoid pointers on stack
   int dx[100];
   int dy[100];

@@ -40,7 +40,7 @@ void BaseReverseGeneric<Base>::accumulate_deriv(
   global_deriv.get_and_erase(info.r, slice_deriv);
   //
   typename GenericDeriv<locint, Base>::enumerator s_enum =
-  slice_deriv.get_enumerator();
+      slice_deriv.get_enumerator();
   ReverseADMultiSet<locint> s_set;
   Base sw;
   while (s_enum.has_next()) {
@@ -138,7 +138,6 @@ void BaseReverseGeneric<Base>::clear() {
   BaseReverseMode<Base>::clear();
 }
 
-// here we're NOT touching SingleDeriv, will change interface later
 template <typename Base>
 void BaseReverseGeneric<Base>::init_dep_deriv(locint dep, int dep_count) {
   GenericDeriv<locint, Base> d_deriv(order);
