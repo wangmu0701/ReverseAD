@@ -56,7 +56,7 @@ void BaseReverseGenerator<Base>::accumulate_deriv(
 /*
       generator_binary(s_set, t_size,         // Z, and r
                        s_set.count(ginfo.x), s_set.count(ginfo.y), // Z_x, Z_y
-                       order, sw,    // d, L,
+                       order - s_set.size(), sw,    // d-z, L,
                        ginfo,        // K
                        global_deriv) // T 
 */
@@ -64,7 +64,7 @@ void BaseReverseGenerator<Base>::accumulate_deriv(
 /*
       generator_unary(s_set, t_size,        // Z, and r
                       s_set.count(ginfo.x), // Z_x
-                      order, sw,    // d, L,
+                      order - s_set.size(), sw,    // d-z, L,
                       ginfo,        // K
                       global_deriv) // T 
 */

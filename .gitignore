@@ -8,6 +8,7 @@
 *.in
 *.bak
 *.swp
+*.class
 *~
 .libs
 .deps

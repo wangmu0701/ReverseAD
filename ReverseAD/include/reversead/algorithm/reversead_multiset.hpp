@@ -20,6 +20,7 @@ class ReverseADMultiSet {
   inline bool operator < (const ReverseADMultiSet<T>& rhs) const;
 
   int insert(T element);
+  int insert(T element, int count);
   int remove(T element);
   int size() const;
   void debug() const;
@@ -69,6 +70,14 @@ ReverseADMultiSet<T>& ReverseADMultiSet<T>::operator = (
 template <typename T>
 int ReverseADMultiSet<T>::insert(T element) {
   _data.insert(element);
+  return _data.count(element);
+}
+
+template <typename T>
+int ReverseADMultiSet<T>::insert(T element, int count) {
+  for(int i = 0; i < count; i++) {
+    _data.insert(element);
+  }
   return _data.count(element);
 }
 
