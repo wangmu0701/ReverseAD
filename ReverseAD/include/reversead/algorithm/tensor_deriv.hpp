@@ -32,24 +32,30 @@ class TensorDeriv {
       case 3:
         tensor3.increase(index.get_array(), v);
         break;
+      case 4:
+        tensor4.increase(index.get_array(), v);
+        break;
     }
   }
   void get_and_erase(LocType x, TensorDeriv<LocType, Base>& td) {
     td.tensor0 = this->tensor1.get_and_erase(x);
     td.tensor1 = this->tensor2.get_and_erase(x);
     td.tensor2 = this->tensor3.get_and_erase(x);
+    td.tensor3 = this->tensor4.get_and_erase(x);
   }
   void debug() {
     std::cout << "=====" << std::endl;
     tensor1.dump();
     tensor2.dump();
     tensor3.dump();
+    tensor4.dump();
   }
   int _order;
   Base tensor0;
   SymmetryTensor<LocType, Base, 1> tensor1;
   SymmetryTensor<LocType, Base, 2> tensor2;
   SymmetryTensor<LocType, Base, 3> tensor3;
+  SymmetryTensor<LocType, Base, 4> tensor4;
 };
 
 } // namespace ReverseAD

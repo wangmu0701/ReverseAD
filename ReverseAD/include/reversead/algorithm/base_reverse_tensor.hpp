@@ -7,7 +7,7 @@
 #include "reversead/algorithm/symmetry_tensor.hpp"
 #include "reversead/util/temp_memory_allocator.hpp"
 
-#define REVERSEAD_MAX_TENSOR_ORDER 3
+#define REVERSEAD_MAX_TENSOR_ORDER 4
 
 namespace ReverseAD {
 
@@ -37,6 +37,13 @@ class BaseReverseTensor : public BaseReverseMode<Base> {
   int order;
   GeneratorInfo<locint, Base> ginfo;
   std::map<locint, TensorDeriv<locint, Base>> dep_deriv;
+
+  // helper coefficient series for derivatives of asin/acos/atan/
+  double c_atan[REVERSEAD_MAX_TENSOR_ORDER + 1]
+      [REVERSEAD_MAX_TENSOR_ORDER + 1][REVERSEAD_MAX_TENSOR_ORDER + 1];
+  double c_asin[REVERSEAD_MAX_TENSOR_ORDER + 1]
+      [REVERSEAD_MAX_TENSOR_ORDER + 1][REVERSEAD_MAX_TENSOR_ORDER + 1];
+  void special_derivative_coeff();
 
   // make these private for some efficiency
   mutable TempMemoryAllocator temp_memory;

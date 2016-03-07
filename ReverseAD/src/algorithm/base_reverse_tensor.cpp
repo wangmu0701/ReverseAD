@@ -23,8 +23,32 @@ BaseReverseTensor<Base>::BaseReverseTensor(
   }
   this->order = order;
   //std::cout << "in reverse tensor. order = " << order << std::endl;
+  special_derivative_coeff();
 }
 
+template <typename Base>
+void BaseReverseTensor<Base>::special_derivative_coeff() {
+  for (int i=0;i<=REVERSEAD_MAX_TENSOR_ORDER; i++) {
+    for (int j=0;j<=REVERSEAD_MAX_TENSOR_ORDER; j++) {
+      for (int k=0;k<=REVERSEAD_MAX_TENSOR_ORDER; k++) {
+        c_atan[i][j][k] = c_asin[i][j][k] =  0.0;
+      }
+    }
+  }
+  c_atan[1][1][0] = c_asin[1][1][0] = 1.0;
+  for (int i=2; i <= REVERSEAD_MAX_TENSOR_ORDER; i++) {
+    for (int j = REVERSEAD_MAX_TENSOR_ORDER; j >= 2; j--) {
+      for (int k=0; k < REVERSEAD_MAX_TENSOR_ORDER; k++) {
+        c_atan[i][j][k] = c_atan[i-1][j][k+1] * (k+1);
+        c_asin[i][j][k] = c_asin[i-1][j][k+1] * (k+1);
+      }
+      for (int k=1; k <= REVERSEAD_MAX_TENSOR_ORDER; k++) {
+        c_atan[i][j][k] += c_atan[i-1][j-1][k-1] * 2 * (1-j);
+        c_asin[i][j][k] += c_asin[i-1][j-1][k-1] * -2 * (1.5 - j);
+      }
+    }
+  }
+}
 
 template <typename Base>
 void BaseReverseTensor<Base>::clear() {
@@ -79,6 +103,15 @@ std::shared_ptr<DerivativeTensor<int, Base>>
       ret->put_value(dep, 3, i, ttind, values[i]);
     }
     temp_memory.return_memory();
+    size = kv.second.tensor4.size();
+    ret->init_single_tensor(dep, 4, size);
+    assign_pointers(4);
+    kv.second.tensor4.to_array(tind, values, 0, 0);
+    for (int i = 0; i < size; i++) {
+      for (int j = 0; j < 4; j++) {ttind[j] = tind[i][j];}
+      ret->put_value(dep, 4, i, ttind, values[i]);
+    }
+    temp_memory.return_memory();
   }
   delete[] ttind;
   return ret;
@@ -87,6 +120,7 @@ std::shared_ptr<DerivativeTensor<int, Base>>
 template <typename Base>
 void BaseReverseTensor<Base>::process_sac(
     const DerivativeInfo<locint, Base>& info) {
+  ginfo.clear();
   if (info.r != NULL_LOC) {
     fill_in_ginfo(info);
     //info.debug();
@@ -209,28 +243,113 @@ void BaseReverseTensor<Base>::accumulate_deriv(
     unary_generator(2, global_deriv);
   }
   temp_memory.return_memory();
+  // 3rd order;
+  size = slice_deriv.tensor3.size();
+  assign_pointers(3);
+  slice_deriv.tensor3.to_array(tind, values, 0, 0);
+  if (ginfo.y != NULL_LOC) {
+    binary_generator(3, global_deriv);
+  } else if (ginfo.x != NULL_LOC) {
+    unary_generator(3, global_deriv);
+  }
+  temp_memory.return_memory();
 }
 
 template <typename Base>
 void BaseReverseTensor<Base>::fill_in_ginfo(
     const DerivativeInfo<locint, Base>& dinfo) {
-  // direct copy for order <= 3
-  // locs
-  ginfo.r = dinfo.r;
-  ginfo.x = dinfo.x;
-  ginfo.y = dinfo.y;
-  // 1st
-  ginfo.dx = dinfo.dx;
-  ginfo.dy = dinfo.dy;
-  // 2nd
-  ginfo.pxx = dinfo.pxx;
-  ginfo.pxy = dinfo.pxy;
-  ginfo.pyy = dinfo.pyy;
-  // 3rd
-  ginfo.pxxx = dinfo.pxxx;
-  ginfo.pxxy = dinfo.pxxy;
-  ginfo.pxyy = dinfo.pxyy;
-  ginfo.pyyy = dinfo.pyyy;
+  using std::sqrt;
+  using std::log;
+
+  switch (order) {
+    case 4:
+      switch (dinfo.opcode) {
+        case eq_div_a:
+        case div_a_a:
+          ginfo.pxyyy = -3.0 * dinfo.pxyy / dinfo.vy;
+          ginfo.pyyyy = -4.0 * dinfo.pyyy / dinfo.vy;
+          break;
+        case div_d_a:
+          ginfo.pxxxx = -4.0 * dinfo.pxxx / dinfo.vx;
+          break;
+        case sin_a:
+        case cos_a:
+          ginfo.pxxxx = -dinfo.pxx;
+          break;
+        case asin_a:
+        case acos_a:
+          {
+            Base c = 1.0 / (1.0 - dinfo.vx * dinfo.vx);
+            Base sw = 0;
+            Base w = 0;
+            Base s = sqrt(1.0 - dinfo.vx * dinfo.vx);
+            for (int i = 0; i <= 4; i++) {
+              w = 1.0;
+              for (int j = 0; j <=i; j++) {
+                sw += c_asin[4][i][j] * w * s;
+                w = w * dinfo.vx;
+              }
+              s = s * c;
+            }
+            if (dinfo.opcode == asin_a) {
+              ginfo.pxxxx = sw;
+            } else {
+              ginfo.pxxxx = -sw;
+            }
+          }
+          break;
+        case atan_a:
+          {
+            Base c = 1.0 / (1.0 + dinfo.vx * dinfo.vx);
+            Base sw = 0;
+            Base w = 0;
+            Base s = 1.0;
+            for (int i = 0; i <= 4; i++) {
+              w = 1.0;
+              for (int j = 0; j <=i; j++) {
+                sw += c_atan[4][i][j] * w * s;
+                w = w * dinfo.vx;
+              }
+              s = s * c;
+            }
+            ginfo.pxxxx = sw;
+          }
+          break;
+        case exp_a:
+          ginfo.pxxxx = dinfo.pxxx;
+          break;
+        case log_a:
+          ginfo.pxxxx = -3.0 * dinfo.pxxx / dinfo.vx;
+          break;
+        case sqrt_a:
+          ginfo.pxxxx = -2.5 * dinfo.pxxx / dinfo.vx;
+          break;
+        case pow_d_a:
+          ginfo.pxxxx = log(dinfo.coval) * dinfo.pxxx;
+          break;
+        case pow_a_d:
+          ginfo.pxxxx = (dinfo.coval - 3.0) * dinfo.pxxx / dinfo.vx;
+          break;
+      }
+    default:
+      // direct copy for order <= 3
+      // locs
+      ginfo.r = dinfo.r;
+      ginfo.x = dinfo.x;
+      ginfo.y = dinfo.y;
+      // 1st
+      ginfo.dx = dinfo.dx;
+      ginfo.dy = dinfo.dy;
+      // 2nd
+      ginfo.pxx = dinfo.pxx;
+      ginfo.pxy = dinfo.pxy;
+      ginfo.pyy = dinfo.pyy;
+      // 3rd
+      ginfo.pxxx = dinfo.pxxx;
+      ginfo.pxxy = dinfo.pxxy;
+      ginfo.pxyy = dinfo.pxyy;
+      ginfo.pyyy = dinfo.pyyy;
+  }
 }
 
 } // namespace ReverseAD

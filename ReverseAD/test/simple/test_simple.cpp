@@ -24,7 +24,8 @@ int main() {
   }
   //double vp = 3.0;
   //adouble p = adouble::markParam(vp);
-  yad[0] = xad[0] * xad[0] * xad[0] * xad[0] * xad[0];
+  yad[0] = xad[0] * (xad[0]+xad[0]-xad[0]) * (2*xad[0])/2 * sqrt(xad[0] * xad[0]);
+  //yad[0] = x*(x+x-x)*(2*x)/2*sqrt(x*x)
   //yad[0] = xad[0];
   yad[0] >>= y[0];
   //yad[1] >>= y[1];
@@ -41,15 +42,16 @@ int main() {
   std::shared_ptr<TrivialTrace<double>> new_trace = 
       ReverseAD::BaseFunctionReplay::replay(trace, y, 1, x, 1, &vp, 1);
 */
-  ReverseAD::BaseReverseTensor<double> third(trace, 3);
+  int order = 4;
+  ReverseAD::BaseReverseTensor<double> third(trace, order);
   third.compute(N, M);
   std::shared_ptr<DerivativeTensor<int, double>> tensor = third.get_tensor();
   third.clear();
   std::cout << "done" << std::endl;
   int size;
-  int** tind;
-  double* values; 
-
+  int** tind = nullptr;
+  double* values = nullptr; 
+/*
   tensor->get_internal_coordinate_list(0, 1, &size, &tind, &values);
   
   std::cout << "adjoint size = "<<size << std::endl;
@@ -68,5 +70,17 @@ int main() {
   for (int i=0; i<size; i++) {
     std::cout << "T[" << tind[i][0] << ", " << tind[i][1]
               << ", " << tind[i][2] << " ] =" << values[i] << std::endl;
+  }
+*/
+  for (int i = 1; i <= order; i++) {
+    tensor->get_internal_coordinate_list(0, i, &size, &tind, &values);
+    std::cout << "Order : " << i << " size = " << size << std::endl;
+    for (int j = 0; j < size; j++) {
+      std::cout << "T[" << tind[j][0];
+      for (int k = 1; k < i; k++) {
+        std::cout << ", " << tind[j][k];
+      }
+      std::cout << "] = " << values[j] << std::endl;
+    }
   }
 }
