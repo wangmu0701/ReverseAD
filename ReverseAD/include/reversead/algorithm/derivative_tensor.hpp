@@ -11,6 +11,7 @@ template <typename Base> class BaseReverseAdjoint;
 template <typename Base> class BaseReverseHessian;
 template <typename Base> class BaseReverseThird;
 template <typename Base> class BaseReverseGeneric;
+template <typename Base> class BaseReverseTensor;
 
 template <typename LocType, typename Base>
 class DerivativeTensor {
@@ -19,6 +20,7 @@ class DerivativeTensor {
   friend class BaseReverseHessian<Base>;
   friend class BaseReverseThird<Base>;
   friend class BaseReverseGeneric<Base>;
+  friend class BaseReverseTensor<Base>;
   friend std::shared_ptr<DerivativeTensor<int, double>> strip_derivative(
       const std::shared_ptr<DerivativeTensor<int, SingleForward>> tensor,
       int t_order, int ind_size, int dep_size);

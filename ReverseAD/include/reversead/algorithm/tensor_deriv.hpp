@@ -20,6 +20,8 @@ class TensorDeriv {
     if (IsZero(v)) {
       return;
     }
+//    printf("increase <%d> : [%d, %d, %d] += %.5lf\n",
+//           index.size(), index._data[0], index._data[1], index._data[2], v);
     switch (index.size()) {
       case 1:
         tensor1.increase(index.get_array(), v);
@@ -37,7 +39,12 @@ class TensorDeriv {
     td.tensor1 = this->tensor2.get_and_erase(x);
     td.tensor2 = this->tensor3.get_and_erase(x);
   }
-
+  void debug() {
+    std::cout << "=====" << std::endl;
+    tensor1.dump();
+    tensor2.dump();
+    tensor3.dump();
+  }
   int _order;
   Base tensor0;
   SymmetryTensor<LocType, Base, 1> tensor1;

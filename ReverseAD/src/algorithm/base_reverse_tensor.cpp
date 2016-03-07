@@ -22,7 +22,7 @@ BaseReverseTensor<Base>::BaseReverseTensor(
     std::cout << "Order(" << order << ") should be positive." << std::endl;
   }
   this->order = order;
-  std::cout << "in reverse tensor. order = " << order << std::endl;
+  //std::cout << "in reverse tensor. order = " << order << std::endl;
 }
 
 
@@ -45,16 +45,42 @@ void BaseReverseTensor<Base>::init_dep_deriv(locint dep, int dep_count) {
 template <typename Base>
 std::shared_ptr<DerivativeTensor<int, Base>>
     BaseReverseTensor<Base>::get_tensor() const {
+  int* ttind = new int[order];
   int dep_size = dep_deriv.size();
   int ind_size = indep_index_map.size();
   std::shared_ptr<DerivativeTensor<int, Base>> ret =
       std::make_shared<DerivativeTensor<int, Base>>(dep_size, ind_size, order);
-  for (const auto& kv : dep_deriv) {
-    std::cout << "Dep : " << kv.first << std::endl;
-    kv.second.tensor1.dump();
-    kv.second.tensor2.dump();
-    kv.second.tensor3.dump();
+  for (auto& kv : dep_deriv) {
+    locint dep = dep_index_map.find(kv.first)->second - 1;
+    size = kv.second.tensor1.size();
+    ret->init_single_tensor(dep, 1, size);
+    assign_pointers(1);
+    kv.second.tensor1.to_array(tind, values, 0, 0);
+    for (int i = 0; i < size; i++) {
+      for (int j = 0; j < 1; j++) {ttind[j] = tind[i][j];}
+      ret->put_value(dep, 1, i, ttind, values[i]);
+    }
+    temp_memory.return_memory();
+    size = kv.second.tensor2.size();
+    ret->init_single_tensor(dep, 2, size);
+    assign_pointers(2);
+    kv.second.tensor2.to_array(tind, values, 0, 0);
+    for (int i = 0; i < size; i++) {
+      for (int j = 0; j < 2; j++) {ttind[j] = tind[i][j];}
+      ret->put_value(dep, 2, i, ttind, values[i]);
+    }
+    temp_memory.return_memory();
+    size = kv.second.tensor3.size();
+    ret->init_single_tensor(dep, 3, size);
+    assign_pointers(3);
+    kv.second.tensor3.to_array(tind, values, 0, 0);
+    for (int i = 0; i < size; i++) {
+      for (int j = 0; j < 3; j++) {ttind[j] = tind[i][j];}
+      ret->put_value(dep, 3, i, ttind, values[i]);
+    }
+    temp_memory.return_memory();
   }
+  delete[] ttind;
   return ret;
 }
 
@@ -63,9 +89,12 @@ void BaseReverseTensor<Base>::process_sac(
     const DerivativeInfo<locint, Base>& info) {
   if (info.r != NULL_LOC) {
     fill_in_ginfo(info);
+    //info.debug();
     std::set<locint> dep_set = std::move(reverse_live[info.r]);
     reverse_live.erase(info.r);
     for (const locint& dep : dep_set) {
+      //std::cout << "dep = " << dep << std::endl;
+      //dep_deriv[dep].debug();
       accumulate_deriv(dep_deriv[dep]);
       if (info.x != NULL_LOC) {
         reverse_live[info.x].insert(dep);
@@ -73,12 +102,13 @@ void BaseReverseTensor<Base>::process_sac(
       if (info.y != NULL_LOC) {
         reverse_live[info.y].insert(dep);
       }
+      //dep_deriv[dep].debug();
     }
   }
 }
 
 template <typename Base>
-void BaseReverseTensor<Base>::assign_pointers(int s_order) {
+void BaseReverseTensor<Base>::assign_pointers(int s_order) const {
   temp = (char*)temp_memory.get_memory(
       size * (sizeof(locint*) + sizeof(locint)*s_order + sizeof(double)));
   tind = (locint**)temp;
@@ -93,23 +123,26 @@ void BaseReverseTensor<Base>::assign_pointers(int s_order) {
 template <typename Base>
 void BaseReverseTensor<Base>::unary_generator(
     int s_order, TensorDeriv<locint, Base>& global_deriv) {
+  //std::cout << "s_order = " << s_order << std::endl;
+  //std::cout << "size = " << size << std::endl;
   TensorIndex<locint> t_index;
   for (int i = 0; i < size; i++) {
+    t_index.clear();
+    r_count = 1; x_count = 0; y_count = 0;
     for (int j = 0; j < s_order; j++) {
-      t_index.clear();
-      r_count = 1; x_count = 0; y_count = 0;
       if (tind[i][j] == ginfo.r) {
         r_count++;
       } else {
         t_index.insert(tind[i][j]);
         if (tind[i][j] == ginfo.x) {x_count++;}
       }
-      if (order > t_index.size()) {
-        case_code = (order - t_index.size()) * kOrderShift
-                  + r_count * kRCountShift
-                  + x_count * kXCountShift;
-        generator_unary(case_code, t_index, values[i], ginfo, global_deriv);
-      }
+    }
+    if (order > t_index.size()) {
+      case_code = (order - t_index.size()) * kOrderShift
+                + r_count * kRCountShift
+                + x_count * kXCountShift;
+      //std::cout << "unary case_code = " << case_code << std::endl;
+      generator_unary(case_code, t_index, values[i], ginfo, global_deriv);
     }
   }
 }
@@ -119,9 +152,9 @@ void BaseReverseTensor<Base>::binary_generator(
     int s_order, TensorDeriv<locint, Base>& global_deriv) {
   TensorIndex<locint> t_index;
   for (int i = 0; i < size; i++) {
+    t_index.clear();
+    r_count = 1; x_count = 0; y_count = 0;
     for (int j = 0; j < s_order; j++) {
-      t_index.clear();
-      r_count = 1; x_count = 0; y_count = 0;
       if (tind[i][j] == ginfo.r) {
         r_count++;
       } else {
@@ -129,13 +162,13 @@ void BaseReverseTensor<Base>::binary_generator(
         if (tind[i][j] == ginfo.x) {x_count++;}
         if (tind[i][j] == ginfo.y) {y_count++;}
       }
-      if (order > t_index.size()) {
-        case_code = (order - t_index.size()) * kOrderShift
-                  + r_count * kRCountShift
-                  + x_count * kXCountShift
-                  + y_count * kYCountShift;
-        generator_binary(case_code, t_index, values[i], ginfo, global_deriv);
-      }
+    }
+    if (order > t_index.size()) {
+      case_code = (order - t_index.size()) * kOrderShift
+                + r_count * kRCountShift
+                + x_count * kXCountShift
+                + y_count * kYCountShift;
+      generator_binary(case_code, t_index, values[i], ginfo, global_deriv);
     }
   }
 }

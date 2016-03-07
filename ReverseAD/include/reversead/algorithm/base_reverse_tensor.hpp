@@ -39,17 +39,17 @@ class BaseReverseTensor : public BaseReverseMode<Base> {
   std::map<locint, TensorDeriv<locint, Base>> dep_deriv;
 
   // make these private for some efficiency
-  TempMemoryAllocator temp_memory;
+  mutable TempMemoryAllocator temp_memory;
   int r_count;
   int x_count;
   int y_count;
-  int size;
   double w;
-  locint** tind; 
-  double* values;
-  char* temp;
+  mutable int size;
+  mutable locint** tind; 
+  mutable double* values;
+  mutable char* temp;
   int case_code;
-  void assign_pointers(int s_order);
+  void assign_pointers(int s_order) const;
   void binary_generator(int s_order, TensorDeriv<locint, Base>&);
   void unary_generator(int s_order, TensorDeriv<locint, Base>&);
 };

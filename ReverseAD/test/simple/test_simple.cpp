@@ -24,7 +24,7 @@ int main() {
   }
   //double vp = 3.0;
   //adouble p = adouble::markParam(vp);
-  yad[0] = xad[0] * xad[0] * xad[0] * xad[0];
+  yad[0] = xad[0] * xad[0] * xad[0] * xad[0] * xad[0];
   //yad[0] = xad[0];
   yad[0] >>= y[0];
   //yad[1] >>= y[1];

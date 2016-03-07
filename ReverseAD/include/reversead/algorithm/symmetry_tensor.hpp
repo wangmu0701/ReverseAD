@@ -41,7 +41,6 @@ class TensorIndex {
   void clear() {_len = 0;}
   int size() const {return _len;}
   LocType* get_array() {return &(_data[0]);}
- private:
   LocType _data[10];
   int _len;
 };
