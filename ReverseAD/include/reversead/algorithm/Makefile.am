@@ -19,4 +19,6 @@ libalgorithminclude_HEADERS = base_function_replay.hpp\
                               base_reverse_generic.hpp\
                               derivative_tensor.hpp\
                               base_reverse_generator.hpp\
-                              base_reverse_tensor.hpp
+                              base_reverse_tensor.hpp\
+                              symmetry_tensor.hpp\
+                              tensor_deriv.hpp
