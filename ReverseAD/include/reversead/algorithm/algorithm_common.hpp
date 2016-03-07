@@ -53,6 +53,27 @@ class DerivativeInfo {
   Base pxxx, pxxy, pxyy, pyyy;
 };
 
+template <typename LocType, typename Base>
+class GeneratorInfo {
+ public:
+  GeneratorInfo() {
+    clear();
+  }
+  void clear() {
+    r = NULL_LOC; x = NULL_LOC; y = NULL_LOC;
+    dx = 0.0; dy = 0.0;
+    pxx = 0.0; pxy = 0.0; pyy = 0.0;
+    pxxx = 0.0; pxxy = 0.0; pxyy = 0.0; pyyy = 0.0;
+    pxxxx = 0.0; pxxxy = 0.0; pxxyy = 0.0; pxyyy = 0.0; pyyyy = 0.0;
+  }
+  opbyte opcode;
+  LocType r, x, y;
+  Base dx, dy;
+  Base pxx, pxy, pyy;
+  Base pxxx, pxxy, pxyy, pyyy;
+  Base pxxxx, pxxxy, pxxyy, pxyyy, pyyyy;
+};
+
 } // namespace ReverseAD
 
 #endif // ALGORITHM_COMMON_H_

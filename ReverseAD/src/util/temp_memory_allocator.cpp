@@ -21,8 +21,9 @@ TempMemoryAllocator::~TempMemoryAllocator() {
   free(buf);
 }
 
-void* TempMemoryAllocator::get_temp_memory(size_t size) {
+void* TempMemoryAllocator::get_memory(size_t size) {
   if (in_use) {
+    std::cerr << "Trying to get in_use temp memory, bug in code?" << std::endl;
     return nullptr;
   }
   if (curr_buf_size < size) {
@@ -34,7 +35,7 @@ void* TempMemoryAllocator::get_temp_memory(size_t size) {
   return buf;
 }
 
-void TempMemoryAllocator::return_temp_memory(void* temp_buf) {
+void TempMemoryAllocator::return_memory() {
   in_use = false;
 }
 

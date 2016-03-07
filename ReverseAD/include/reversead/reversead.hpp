@@ -16,6 +16,7 @@
 #include "reversead/algorithm/base_reverse_third.hpp"
 #include "reversead/algorithm/base_reverse_generic.hpp"
 #include "reversead/algorithm/base_reverse_generator.hpp"
+#include "reversead/algorithm/base_reverse_tensor.hpp"
 
 #ifdef ENABLE_REVERSEAD_MPI
 #include "reversead/rmpi/reversead_mpi.hpp"

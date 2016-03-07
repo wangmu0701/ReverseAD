@@ -45,6 +45,14 @@ class DerivativeTensor {
       (*size) = 0;
       return;
     }
+    if (_data.find(dep) == _data.end()) {
+      (*size) = 0;
+      return;
+    }
+    if (_data.find(dep)->second.find(order) == _data.find(dep)->second.end()) {
+      (*size) = 0;
+      return;
+    }
     (*size) = ((_data.find(dep)->second).find(order))->second->get_size();
     //_data[dep][order]->get_internal_coordinate_list(tind, values);
     ((_data.find(dep)->second).find(order))->second->get_internal_coordinate_list(tind, values);
