@@ -21,9 +21,9 @@ int main() {
   for (int i=0; i<N; i++) {
     xad[i] <<= x[i];
   }
-  double vp = 3.0;
-  adouble p = adouble::markParam(vp);
-  yad[0] = xad[0] * xad[0] * xad[0] * xad[0] * xad[0] * p;
+  //double vp = 3.0;
+  //adouble p = adouble::markParam(vp);
+  yad[0] = xad[0] * xad[0] * xad[0] * xad[0] * xad[0];
   //yad[0] = xad[0];
   yad[0] >>= y[0];
   //yad[1] >>= y[1];
@@ -34,13 +34,13 @@ int main() {
 
   //trace->dump_trace();
   //vp = 5.0;
-
+/*
   x[0] = 3;
   vp = 2; 
   std::shared_ptr<TrivialTrace<double>> new_trace = 
       ReverseAD::BaseFunctionReplay::replay(trace, y, 1, x, 1, &vp, 1);
-
-  ReverseAD::BaseReverseGenerator<double> third(new_trace, 2);
+*/
+  ReverseAD::BaseReverseGenerator<double> third(trace, 3);
   third.compute(N, M);
   std::shared_ptr<DerivativeTensor<int, double>> tensor = third.get_tensor();
   third.clear();

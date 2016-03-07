@@ -2,6 +2,8 @@
 
 namespace ReverseAD {
 
+#include "generator/generator.ipp"
+
 template <typename Base>
 BaseReverseGenerator<Base>::BaseReverseGenerator(
     const std::shared_ptr<TrivialTrace<Base>>& trace,
@@ -13,7 +15,6 @@ BaseReverseGenerator<Base>::BaseReverseGenerator(
   if (order <= 0) {
     std::cout << "Order(" << order << ") should be positive." << std::endl;
   }
-  std::cout << "In reverse generator" << std::endl;
 }
 
 template <typename Base>
@@ -52,22 +53,191 @@ void BaseReverseGenerator<Base>::accumulate_deriv(
     s_enum.move_to_next();
     int t_size = s_set.count(ginfo.r);
     for (int i = 0; i < t_size; i++) {s_set.remove(ginfo.r);}
+    // This is sooo ugly...
     if (ginfo.y != NULL_LOC) {
-/*
-      generator_binary(s_set, t_size,         // Z, and r
-                       s_set.count(ginfo.x), s_set.count(ginfo.y), // Z_x, Z_y
-                       order - s_set.size(), sw,    // d-z, L,
-                       ginfo,        // K
-                       global_deriv) // T 
-*/
+      switch (order - s_set.size()) {
+        case 1:
+          switch (s_set.count(ginfo.x)) {
+            case 0:
+              switch (s_set.count(ginfo.y)) {
+                case 0:
+                  generator_binary_1_1_0_0(s_set, sw, ginfo, global_deriv);
+                  break;
+                case 1:
+                  generator_binary_1_1_0_1(s_set, sw, ginfo, global_deriv);
+                  break;
+                case 2:
+                  generator_binary_1_1_0_2(s_set, sw, ginfo, global_deriv);
+                  break;
+              }
+              break;
+            case 1:
+              switch (s_set.count(ginfo.y)) {
+                case 0:
+                  generator_binary_1_1_1_0(s_set, sw, ginfo, global_deriv);
+                  break;
+                case 1:
+                  generator_binary_1_1_1_1(s_set, sw, ginfo, global_deriv);
+                  break;
+              }
+              break;
+            case 2:
+              switch (s_set.count(ginfo.y)) {
+                case 0:
+                  generator_binary_1_1_2_0(s_set, sw, ginfo, global_deriv);
+                  break;
+              }
+          }
+          break;
+        case 2:
+          switch (t_size) {
+            case 1:
+              switch (s_set.count(ginfo.x)) {
+                case 0:
+                  switch (s_set.count(ginfo.y)) {
+                    case 0:
+                      generator_binary_2_1_0_0(s_set, sw, ginfo, global_deriv);
+                      break;
+                    case 1:
+                      generator_binary_2_1_0_1(s_set, sw, ginfo, global_deriv);
+                      break;
+                  }
+                  break;
+                case 1:
+                  switch (s_set.count(ginfo.y)) {
+                    case 0:
+                      generator_binary_2_1_1_0(s_set, sw, ginfo, global_deriv);
+                      break;
+                  }
+                  break;
+              }
+              break;
+            case 2:
+              switch (s_set.count(ginfo.x)) {
+                case 0:
+                  switch (s_set.count(ginfo.y)) {
+                    case 0:
+                      generator_binary_2_2_0_0(s_set, sw, ginfo, global_deriv);
+                      break;
+                    case 1:
+                      generator_binary_2_2_0_1(s_set, sw, ginfo, global_deriv);
+                      break;
+                  }
+                  break;
+                case 1:
+                  switch (s_set.count(ginfo.y)) {
+                    case 0:
+                      generator_binary_2_2_1_0(s_set, sw, ginfo, global_deriv);
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+        case 3:
+          switch (t_size) {
+            case 1:
+              switch (s_set.count(ginfo.x)) {
+                case 0:
+                  switch (s_set.count(ginfo.y)) {
+                    case 0:
+                      generator_binary_3_1_0_0(s_set, sw, ginfo, global_deriv);
+                      break;
+                  }
+                  break;
+              }
+              break;
+            case 2:
+              switch (s_set.count(ginfo.x)) {
+                case 0:
+                  switch (s_set.count(ginfo.y)) {
+                    case 0:
+                      generator_binary_3_2_0_0(s_set, sw, ginfo, global_deriv);
+                      break;
+                  }
+                  break;
+              }
+              break;
+            case 3:
+              switch (s_set.count(ginfo.x)) {
+                case 0:
+                  switch (s_set.count(ginfo.y)) {
+                    case 0:
+                      generator_binary_3_3_0_0(s_set, sw, ginfo, global_deriv);
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
     } else if (ginfo.x != NULL_LOC) {
-/*
-      generator_unary(s_set, t_size,        // Z, and r
-                      s_set.count(ginfo.x), // Z_x
-                      order - s_set.size(), sw,    // d-z, L,
-                      ginfo,        // K
-                      global_deriv) // T 
-*/
+      switch (order - s_set.size()) {    // d-z
+        case 1:
+          switch (s_set.count(ginfo.x)) {
+            case 0:
+              generator_unary_1_1_0(s_set, sw, ginfo, global_deriv);
+              break;
+            case 1:
+              generator_unary_1_1_1(s_set, sw, ginfo, global_deriv);
+              break;
+            case 2:
+              generator_unary_1_1_2(s_set, sw, ginfo, global_deriv);
+              break;
+          }
+          break;
+        case 2:
+          switch (t_size) { // r
+            case 1:
+              switch (s_set.count(ginfo.x)) { // x_count
+                case 0:
+                  generator_unary_2_1_0(s_set, sw, ginfo, global_deriv);
+                  break;
+                case 1:
+                  generator_unary_2_1_1(s_set, sw, ginfo, global_deriv);
+                  break;
+              }
+              break;
+            case 2:
+              switch (s_set.count(ginfo.x)) { // x_count
+                case 0:
+                  generator_unary_2_2_0(s_set, sw, ginfo, global_deriv);
+                  break;
+                case 1:
+                  generator_unary_2_2_1(s_set, sw, ginfo, global_deriv);
+                  break;
+              }
+              break;
+          }
+          break;
+        case 3:
+          switch (t_size) { // r
+            case 1:
+              switch (s_set.count(ginfo.x)) { // x_count
+                case 0:
+                  generator_unary_3_1_0(s_set, sw, ginfo, global_deriv);
+                  break;
+              }
+              break;
+            case 2:
+              switch (s_set.count(ginfo.x)) { // x_count
+                case 0:
+                  generator_unary_3_2_0(s_set, sw, ginfo, global_deriv);
+                  break;
+              }
+              break;
+            case 3:
+              switch (s_set.count(ginfo.x)) { // x_count
+                case 0:
+                  generator_unary_3_3_0(s_set, sw, ginfo, global_deriv);
+                  break;
+              }
+              break;
+          }
+          break;
+      }
     }
   }
 }

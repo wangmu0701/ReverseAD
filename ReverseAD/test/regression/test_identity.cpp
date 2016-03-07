@@ -37,6 +37,12 @@ void check_answer(std::shared_ptr<TrivialTrace<double>> trace,
   check_value(1, tensor, 1, done);
   check_value(2, tensor, 0, done);
   check_value(3, tensor, 0, done);
+ 
+  ReverseAD::BaseReverseGenerator<double> generator_derivative(new_trace, 3);
+  tensor = generator_derivative.compute(1, 1).get_tensor();
+  check_value(1, tensor, 1, done);
+  check_value(2, tensor, 0, done);
+  check_value(3, tensor, 0, done);
 }
 
 int run_function() {

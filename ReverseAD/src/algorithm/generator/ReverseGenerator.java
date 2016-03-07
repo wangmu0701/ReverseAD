@@ -1,5 +1,8 @@
+import java.io.*;
+import java.util.*;
+
 public class ReverseGenerator {
-  public static final int ORDER = 2;
+  public static final int ORDER = 3;
   public static final String PREFIX_UNARY = "generator_unary";
   public static final String[] UNARY_X = {"vx", "dx", "pxx", "pxxx"};
   public static final int[] kFactorial =
@@ -17,15 +20,22 @@ public class ReverseGenerator {
   public int[] y_order;
   public int[] b_index;
   public int indent;
+  public PrintWriter fout;
  
   public ReverseGenerator() {
     indent = 0;
+    fout = null;
   }
 
   public void dumpToFile(String line) {
     String sindent = "";
     for (int i = 0; i < indent; i++) {sindent += " ";}
     System.out.println(sindent+line);
+    try {
+      fout.println(sindent+line);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
   public void generateUnarySingleCase(int max_level) {
     String multiSet = "";
@@ -54,8 +64,8 @@ public class ReverseGenerator {
       xTotal += x_order[i];
     }
     weight += ";";
-    multiSet = "D = Z; D.insert(x,"+xTotal+");";
-    String update = "global_deriv.insert(D, w)";
+    multiSet = "D = Z; D.insert(ginfo.x,"+xTotal+");";
+    String update = "global_deriv.increase(D, w);";
     dumpToFile(multiSet);
     dumpToFile(weight);
     dumpToFile(update);
@@ -81,13 +91,13 @@ public class ReverseGenerator {
     // (TODO) Generate function head
     String funcName = "generator_unary_"+d+"_"+r+"_"+xC;
     System.out.println("Function name : " + funcName);
-    String funcDecl = "void " + funcName +
-        "(const ReverseADMultiSet& Z, double sw, " +
+    String funcDecl = "inline void " + funcName +
+        "(const ReverseADMultiSet<locint>& Z, const double& sw, " +
         "const GeneratorInfo<locint, double>& ginfo, " +
         "GenericDeriv<locint, double>& global_deriv) {";
     dumpToFile(funcDecl);
     indent += 2;
-    dumpToFile("ReverseADMultiSet Z;");
+    dumpToFile("ReverseADMultiSet<locint> D;");
     dumpToFile("double w;");
     x_order = new int[r+1];
     x_order[0] = xC;
@@ -101,7 +111,7 @@ public class ReverseGenerator {
   public void generateUnary() {
     for (int i = 1; i <= ORDER; i++) {
       for (int r = 1; r <= i ; r++) {
-        for (int x_count = 0; x_count < i; x_count++) {
+        for (int x_count = 0; x_count <= ORDER - i; x_count++) {
           generateUnarySingleFunc(i, r, x_count);
         }
       }
@@ -142,8 +152,8 @@ public class ReverseGenerator {
       yTotal += y_order[i];
     }
     weight += ";";
-    multiSet = "D = Z; D.insert(x,"+xTotal+"); D.insert(y,"+yTotal+");";
-    String update = "global_deriv.insert(D, w)";
+    multiSet = "D = Z; D.insert(ginfo.x,"+xTotal+"); D.insert(ginfo.y,"+yTotal+");";
+    String update = "global_deriv.increase(D, w);";
     dumpToFile(multiSet);
     dumpToFile(weight);
     dumpToFile(update);
@@ -172,13 +182,13 @@ public class ReverseGenerator {
   public void generateBinarySingleFunc(int d, int r, int xC, int yC) {
     String funcName = "generator_binary_"+d+"_"+r+"_"+xC+"_"+yC;
     System.out.println("Function name : " + funcName);
-    String funcDecl = "void " + funcName +
-        "(const ReverseADMultiSet& Z, double sw, " +
+    String funcDecl = "inline void " + funcName +
+        "(const ReverseADMultiSet<locint>& Z, const double& sw, " +
         "const GeneratorInfo<locint, double>& ginfo, " +
         "GenericDeriv<locint, double>& global_deriv) {";
     dumpToFile(funcDecl);
     indent += 2;
-    dumpToFile("ReverseADMultiSet Z;");
+    dumpToFile("ReverseADMultiSet<locint> D;");
     dumpToFile("double w;");
     b_index = new int[r+1];
     x_order = new int[r+1];
@@ -195,8 +205,8 @@ public class ReverseGenerator {
   public void generateBinary() {
     for (int i = 1; i <= ORDER; i++) {
       for (int r = 1; r <= i; r++) {
-        for (int x_count = 0; x_count < i; x_count++) {
-          for (int y_count = 0; y_count < i; y_count++) {
+        for (int x_count = 0; x_count <= ORDER - i; x_count++) {
+          for (int y_count = 0; y_count <= ORDER - i - x_count; y_count++) {
             generateBinarySingleFunc(i, r, x_count, y_count);
           }
         }
@@ -204,8 +214,15 @@ public class ReverseGenerator {
     }      
   }
   public void doWork() {
-    generateUnary();
-    generateBinary();
+    try {
+      fout = new PrintWriter(
+          new BufferedWriter(new FileWriter("./generator.ipp")));
+      generateUnary();
+      generateBinary();
+      fout.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
   public static void main(String[] args) {
     System.out.printf("In ReverseGenerator.\n");
