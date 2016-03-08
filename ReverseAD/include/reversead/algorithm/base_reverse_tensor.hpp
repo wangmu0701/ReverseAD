@@ -35,7 +35,7 @@ class BaseReverseTensor : public BaseReverseMode<Base> {
   void fill_in_ginfo(const DerivativeInfo<locint, Base>& dinfo);
   
   int order;
-  GeneratorInfo<locint, Base> ginfo;
+  TensorInfo<locint, Base> ginfo;
   std::map<locint, TensorDeriv<locint, Base>> dep_deriv;
 
   // helper coefficient series for derivatives of asin/acos/atan/

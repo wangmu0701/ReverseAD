@@ -74,6 +74,7 @@ std::shared_ptr<DerivativeTensor<int, Base>>
   int ind_size = indep_index_map.size();
   std::shared_ptr<DerivativeTensor<int, Base>> ret =
       std::make_shared<DerivativeTensor<int, Base>>(dep_size, ind_size, order);
+  BaseReverseMode<Base>::transcript_dep_value(ret);
   for (auto& kv : dep_deriv) {
     locint dep = dep_index_map.find(kv.first)->second - 1;
     for (int d = 1; d <= order; d++) {
@@ -87,44 +88,6 @@ std::shared_ptr<DerivativeTensor<int, Base>>
       }
       temp_memory.return_memory();
     }
-/*
-    size = kv.second.tensor1.size();
-    ret->init_single_tensor(dep, 1, size);
-    assign_pointers(1);
-    kv.second.tensor1.to_array(tind, values, 0, 0);
-    for (int i = 0; i < size; i++) {
-      for (int j = 0; j < 1; j++) {ttind[j] = tind[i][j];}
-      ret->put_value(dep, 1, i, ttind, values[i]);
-    }
-    temp_memory.return_memory();
-    size = kv.second.tensor2.size();
-    ret->init_single_tensor(dep, 2, size);
-    assign_pointers(2);
-    kv.second.tensor2.to_array(tind, values, 0, 0);
-    for (int i = 0; i < size; i++) {
-      for (int j = 0; j < 2; j++) {ttind[j] = tind[i][j];}
-      ret->put_value(dep, 2, i, ttind, values[i]);
-    }
-    temp_memory.return_memory();
-    size = kv.second.tensor3.size();
-    ret->init_single_tensor(dep, 3, size);
-    assign_pointers(3);
-    kv.second.tensor3.to_array(tind, values, 0, 0);
-    for (int i = 0; i < size; i++) {
-      for (int j = 0; j < 3; j++) {ttind[j] = tind[i][j];}
-      ret->put_value(dep, 3, i, ttind, values[i]);
-    }
-    temp_memory.return_memory();
-    size = kv.second.tensor4.size();
-    ret->init_single_tensor(dep, 4, size);
-    assign_pointers(4);
-    kv.second.tensor4.to_array(tind, values, 0, 0);
-    for (int i = 0; i < size; i++) {
-      for (int j = 0; j < 4; j++) {ttind[j] = tind[i][j];}
-      ret->put_value(dep, 4, i, ttind, values[i]);
-    }
-    temp_memory.return_memory();
-*/
   }
   delete[] ttind;
   return ret;
@@ -237,58 +200,6 @@ void BaseReverseTensor<Base>::accumulate_deriv(
     }
     temp_memory.return_memory();
   }
-  // 0th order
-/*
-  w = slice_deriv.tensor0;
-  t_index.clear();
-  case_code = order * kOrderShift + 1 * kRCountShift; // x_count=y_count=0
-  if (ginfo.y != NULL_LOC) {
-    generator_binary(case_code, t_index, w, ginfo, global_deriv);
-  } else if (ginfo.x != NULL_LOC) {
-    generator_unary(case_code, t_index, w, ginfo, global_deriv);
-  }
-*/
-/*
-  size = slice_deriv.tensor0.size();
-  assign_pointers(0);
-  slice_deriv.tensor0.to_array(tind, values, 0, 0);
-  if (ginfo.y != NULL_LOC) {
-    binary_generator(0, global_deriv);
-  } else if (ginfo.x != NULL_LOC) {
-    unary_generator(0, global_deriv);
-  }
-  temp_memory.return_memory();
-  // 1st order;
-  size = slice_deriv.tensor1.size();
-  assign_pointers(1);
-  slice_deriv.tensor1.to_array(tind, values, 0, 0);
-  if (ginfo.y != NULL_LOC) {
-    binary_generator(1, global_deriv);
-  } else if (ginfo.x != NULL_LOC) {
-    unary_generator(1, global_deriv);
-  }
-  temp_memory.return_memory();
-  // 2st order;
-  size = slice_deriv.tensor2.size();
-  assign_pointers(2);
-  slice_deriv.tensor2.to_array(tind, values, 0, 0);
-  if (ginfo.y != NULL_LOC) {
-    binary_generator(2, global_deriv);
-  } else if (ginfo.x != NULL_LOC) {
-    unary_generator(2, global_deriv);
-  }
-  temp_memory.return_memory();
-  // 3rd order;
-  size = slice_deriv.tensor3.size();
-  assign_pointers(3);
-  slice_deriv.tensor3.to_array(tind, values, 0, 0);
-  if (ginfo.y != NULL_LOC) {
-    binary_generator(3, global_deriv);
-  } else if (ginfo.x != NULL_LOC) {
-    unary_generator(3, global_deriv);
-  }
-  temp_memory.return_memory();
-*/
 }
 
 template <typename Base>

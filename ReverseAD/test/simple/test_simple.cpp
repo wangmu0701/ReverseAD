@@ -5,7 +5,6 @@
 using ReverseAD::adouble;
 using ReverseAD::TrivialTrace;
 using ReverseAD::DerivativeTensor;
-using ReverseAD::BaseReverseGenerator;
 using ReverseAD::BaseReverseTensor;
 
 #define N 1

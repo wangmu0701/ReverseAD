@@ -54,9 +54,9 @@ class DerivativeInfo {
 };
 
 template <typename LocType, typename Base>
-class GeneratorInfo {
+class TensorInfo {
  public:
-  GeneratorInfo() {
+  TensorInfo() {
     clear();
   }
   void clear() {
