@@ -76,6 +76,18 @@ std::shared_ptr<DerivativeTensor<int, Base>>
       std::make_shared<DerivativeTensor<int, Base>>(dep_size, ind_size, order);
   for (auto& kv : dep_deriv) {
     locint dep = dep_index_map.find(kv.first)->second - 1;
+    for (int d = 1; d <= order; d++) {
+      size = kv.second.tensor[d]->size();
+      ret->init_single_tensor(dep, d, size);
+      assign_pointers(d);
+      kv.second.tensor[d]->to_array(tind, values, 0, 0);
+      for (int i = 0; i < size; i++) {
+        for (int j = 0; j < d; j++) {ttind[j] = tind[i][j];}
+        ret->put_value(dep, d, i, ttind, values[i]);
+      }
+      temp_memory.return_memory();
+    }
+/*
     size = kv.second.tensor1.size();
     ret->init_single_tensor(dep, 1, size);
     assign_pointers(1);
@@ -112,6 +124,7 @@ std::shared_ptr<DerivativeTensor<int, Base>>
       ret->put_value(dep, 4, i, ttind, values[i]);
     }
     temp_memory.return_memory();
+*/
   }
   delete[] ttind;
   return ret;
@@ -123,7 +136,6 @@ void BaseReverseTensor<Base>::process_sac(
   ginfo.clear();
   if (info.r != NULL_LOC) {
     fill_in_ginfo(info);
-    //info.debug();
     std::set<locint> dep_set = std::move(reverse_live[info.r]);
     reverse_live.erase(info.r);
     for (const locint& dep : dep_set) {
@@ -214,7 +226,19 @@ void BaseReverseTensor<Base>::accumulate_deriv(
   TensorDeriv<locint, Base> slice_deriv(order);
   global_deriv.get_and_erase(ginfo.r, slice_deriv);
   TensorIndex<locint> t_index;
+  for (int d = 0; d < order; d++) {
+    size = slice_deriv.tensor[d]->size();
+    assign_pointers(d);
+    slice_deriv.tensor[d]->to_array(tind, values, 0, 0);
+    if (ginfo.y != NULL_LOC) {
+      binary_generator(d, global_deriv);
+    } else if (ginfo.x != NULL_LOC) {
+      unary_generator(d, global_deriv);
+    }
+    temp_memory.return_memory();
+  }
   // 0th order
+/*
   w = slice_deriv.tensor0;
   t_index.clear();
   case_code = order * kOrderShift + 1 * kRCountShift; // x_count=y_count=0
@@ -223,6 +247,17 @@ void BaseReverseTensor<Base>::accumulate_deriv(
   } else if (ginfo.x != NULL_LOC) {
     generator_unary(case_code, t_index, w, ginfo, global_deriv);
   }
+*/
+/*
+  size = slice_deriv.tensor0.size();
+  assign_pointers(0);
+  slice_deriv.tensor0.to_array(tind, values, 0, 0);
+  if (ginfo.y != NULL_LOC) {
+    binary_generator(0, global_deriv);
+  } else if (ginfo.x != NULL_LOC) {
+    unary_generator(0, global_deriv);
+  }
+  temp_memory.return_memory();
   // 1st order;
   size = slice_deriv.tensor1.size();
   assign_pointers(1);
@@ -253,6 +288,7 @@ void BaseReverseTensor<Base>::accumulate_deriv(
     unary_generator(3, global_deriv);
   }
   temp_memory.return_memory();
+*/
 }
 
 template <typename Base>
