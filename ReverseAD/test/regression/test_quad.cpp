@@ -40,13 +40,13 @@ void check_answer(std::shared_ptr<TrivialTrace<double>> trace,
   check_value(4, tensor, 24, done);
   check_value(5, tensor, 0, done);
 
-  ReverseAD::BaseReverseTensor<double> tensor_derivative(new_trace, 4);
+  ReverseAD::BaseReverseTensor<double> tensor_derivative(new_trace, 5);
   tensor = tensor_derivative.compute(1, 1).get_tensor();
   check_value(1, tensor, 4*vx*vx*vx, done);
   check_value(2, tensor, 12*vx*vx, done);
   check_value(3, tensor, 24*vx, done);
   check_value(4, tensor, 24, done);
-  //check_value(5, tensor, 0, done);
+  check_value(5, tensor, 0, done);
 }
 
 int run_function() {

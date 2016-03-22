@@ -2,22 +2,27 @@ import java.io.*;
 import java.util.*;
 
 public class ReverseGeneratorT {
-  public static final int ORDER = 4;
+  public static final int ORDER = 6;
   public static final String PREFIX_UNARY = "generator_unary";
   public static final String[] UNARY_X =
-      {"vx", "dx", "pxx", "pxxx", "pxxxx"};
+      {"vx", "dx", "pxx", "pxxx", "pxxxx", "pxxxxx", "pxxxxxx"};
   public static final int[] kFactorial =
       {1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800};
   public static final String[] BINARY_XY =
       {"dx", "dy", "pxx", "pxy", "pyy", "pxxx", "pxxy", "pxyy", "pyyy",
-       "pxxxx", "pxxxy", "pxxyy", "pxyyy", "pyyyy"};
+       "pxxxx", "pxxxy", "pxxyy", "pxyyy", "pyyyy",
+       "pxxxxx", "pxxxxy", "pxxxyy", "pxxyyy", "pxyyyy", "pyyyyy",
+       "pxxxxxx", "pxxxxxy", "pxxxxyy", "pxxxyyy", "pxxyyyy", "pxyyyyy", "pyyyyyy"};
   public static final int[] binary_order =
-      {1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4};
+      {1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4,
+       5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6};
   public static final int[] binary_x =
-      {1, 0, 2, 1, 0, 3, 2, 1, 0, 4, 3, 2, 1, 0};
+      {1, 0, 2, 1, 0, 3, 2, 1, 0, 4, 3, 2, 1, 0,
+       5, 4, 3, 2, 1, 0, 6, 5, 4, 3, 2, 1, 0};
   public static final int[] binary_y = 
-      {0, 1, 0, 1, 2, 0, 1, 2, 3, 0, 1, 2, 3, 4};
-  public static final int BINARY_MAX_INDEX = 14;
+      {0, 1, 0, 1, 2, 0, 1, 2, 3, 0, 1, 2, 3, 4,
+       0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 6};
+  public static final int BINARY_MAX_INDEX = 27;
   public static final int D_SHIFT = 1000000;
   public static final int R_SHIFT =   10000;
   public static final int X_SHIFT =     100;

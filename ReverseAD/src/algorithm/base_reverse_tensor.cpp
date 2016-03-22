@@ -209,6 +209,144 @@ void BaseReverseTensor<Base>::fill_in_ginfo(
   using std::log;
 
   switch (order) {
+    case 6:
+      switch (dinfo.opcode) {
+        case eq_div_a:
+        case div_a_a:
+          ginfo.pxyyyyy = -60.0 * dinfo.pxyy / (dinfo.vy * dinfo.vy * dinfo.vy);
+          ginfo.pyyyyyy = -120.0 * dinfo.pyyy / (dinfo.vy * dinfo.vy * dinfo.vy);
+          break;
+        case div_d_a:
+          ginfo.pxxxxxx = -120.0 * dinfo.pxxx / (dinfo.vx * dinfo.vx * dinfo.vx);
+          break;
+        case sin_a:
+        case cos_a:
+          ginfo.pxxxxxx = dinfo.pxx;
+          break;
+        case asin_a:
+        case acos_a:
+          {
+            Base c = 1.0 / (1.0 - dinfo.vx * dinfo.vx);
+            Base sw = 0;
+            Base w = 0;
+            Base s = sqrt(1.0 - dinfo.vx * dinfo.vx);
+            for (int i = 0; i <= 6; i++) {
+              w = 1.0;
+              for (int j = 0; j <=i; j++) {
+                sw += c_asin[6][i][j] * w * s;
+                w = w * dinfo.vx;
+              }
+              s = s * c;
+            }
+            if (dinfo.opcode == asin_a) {
+              ginfo.pxxxxxx = sw;
+            } else {
+              ginfo.pxxxxxx = -sw;
+            }
+          }
+          break;
+        case atan_a:
+          {
+            Base c = 1.0 / (1.0 + dinfo.vx * dinfo.vx);
+            Base sw = 0;
+            Base w = 0;
+            Base s = 1.0;
+            for (int i = 0; i <= 6; i++) {
+              w = 1.0;
+              for (int j = 0; j <=i; j++) {
+                sw += c_atan[6][i][j] * w * s;
+                w = w * dinfo.vx;
+              }
+              s = s * c;
+            }
+            ginfo.pxxxxxx = sw;
+          }
+          break;
+        case exp_a:
+          ginfo.pxxxxxx = dinfo.pxxx;
+          break;
+        case log_a:
+          ginfo.pxxxxxx = -60.0 * dinfo.pxxx / (dinfo.vx * dinfo.vx * dinfo.vx);
+          break;
+        case sqrt_a:
+          ginfo.pxxxxxx = (-2.5 * -3.5 * -4.5) * dinfo.pxxx / (dinfo.vx * dinfo.vx * dinfo.vx);
+          break;
+        case pow_d_a:
+          ginfo.pxxxxxx = log(dinfo.coval) * log(dinfo.coval) * log(dinfo.coval) * dinfo.pxxx;
+          break;
+        case pow_a_d:
+          ginfo.pxxxxxx = (dinfo.coval - 3.0) * (dinfo.coval - 4.0) * (dinfo.coval - 5.0) * dinfo.pxxx / (dinfo.vx * dinfo.vx * dinfo.vx);
+          break;
+      }
+    case 5:
+      switch (dinfo.opcode) {
+        case eq_div_a:
+        case div_a_a:
+          ginfo.pxyyyy = 12.0 * dinfo.pxyy / (dinfo.vy * dinfo.vy);
+          ginfo.pyyyyy = 20.0 * dinfo.pyyy / (dinfo.vy * dinfo.vy);
+          break;
+        case div_d_a:
+          ginfo.pxxxxx = 20.0 * dinfo.pxxx / (dinfo.vx * dinfo.vx);
+          break;
+        case sin_a:
+        case cos_a:
+          ginfo.pxxxxx = dinfo.dx;
+          break;
+        case asin_a:
+        case acos_a:
+          {
+            Base c = 1.0 / (1.0 - dinfo.vx * dinfo.vx);
+            Base sw = 0;
+            Base w = 0;
+            Base s = sqrt(1.0 - dinfo.vx * dinfo.vx);
+            for (int i = 0; i <= 5; i++) {
+              w = 1.0;
+              for (int j = 0; j <=i; j++) {
+                sw += c_asin[5][i][j] * w * s;
+                w = w * dinfo.vx;
+              }
+              s = s * c;
+            }
+            if (dinfo.opcode == asin_a) {
+              ginfo.pxxxxx = sw;
+            } else {
+              ginfo.pxxxxx = -sw;
+            }
+          }
+          break;
+        case atan_a:
+          {
+            Base c = 1.0 / (1.0 + dinfo.vx * dinfo.vx);
+            Base sw = 0;
+            Base w = 0;
+            Base s = 1.0;
+            for (int i = 0; i <= 5; i++) {
+              w = 1.0;
+              for (int j = 0; j <=i; j++) {
+                sw += c_atan[5][i][j] * w * s;
+                w = w * dinfo.vx;
+              }
+              s = s * c;
+            }
+            ginfo.pxxxxx = sw;
+          }
+          break;
+        case exp_a:
+          ginfo.pxxxxx = dinfo.pxxx;
+          break;
+        case log_a:
+          ginfo.pxxxxx = 12.0 * dinfo.pxxx / (dinfo.vx * dinfo.vx);
+          break;
+        case sqrt_a:
+          ginfo.pxxxxx = (-2.5 * -3.5) * dinfo.pxxx / (dinfo.vx * dinfo.vx);
+          break;
+        case pow_d_a:
+          ginfo.pxxxxx = log(dinfo.coval) * log(dinfo.coval) * dinfo.pxxx;
+          break;
+        case pow_a_d:
+          ginfo.pxxxxx = (dinfo.coval - 3.0) * (dinfo.coval - 4.0) * dinfo.pxxx / (dinfo.vx * dinfo.vx);
+          break;
+      }
     case 4:
       switch (dinfo.opcode) {
         case eq_div_a:

@@ -40,6 +40,14 @@ class TensorDeriv {
           tensor.push_back(
               std::make_shared<SymmetryTensor<LocType, Base, 4>>());
           break;
+        case 5:
+          tensor.push_back(
+              std::make_shared<SymmetryTensor<LocType, Base, 5>>());
+          break;
+        case 6:
+          tensor.push_back(
+              std::make_shared<SymmetryTensor<LocType, Base, 6>>());
+          break;
       }
     }
   }
@@ -55,6 +63,18 @@ class TensorDeriv {
   }
   void get_and_erase(LocType x, TensorDeriv<LocType, Base>& td) {
     switch (_order) {
+      case 6:
+        {
+          SymmetryTensor<LocType, Base, 5>& tensor5 =
+              dynamic_cast<SymmetryTensor<LocType, Base, 5>&>(*(td.tensor[5]));
+          tensor5 = (std::dynamic_pointer_cast<SymmetryTensor<LocType, Base, 6>>(tensor[6]))->get_and_erase(x);
+        }
+      case 5:
+        {
+          SymmetryTensor<LocType, Base, 4>& tensor4 =
+              dynamic_cast<SymmetryTensor<LocType, Base, 4>&>(*(td.tensor[4]));
+          tensor4 = (std::dynamic_pointer_cast<SymmetryTensor<LocType, Base, 5>>(tensor[5]))->get_and_erase(x);
+        }
       case 4:
         {
           SymmetryTensor<LocType, Base, 3>& tensor3 =

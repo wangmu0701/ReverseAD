@@ -7,7 +7,7 @@
 #include "reversead/algorithm/symmetry_tensor.hpp"
 #include "reversead/util/temp_memory_allocator.hpp"
 
-#define REVERSEAD_MAX_TENSOR_ORDER 4
+#define REVERSEAD_MAX_TENSOR_ORDER 6
 
 namespace ReverseAD {
 
