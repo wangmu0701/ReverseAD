@@ -30,7 +30,7 @@ void forward_over_third(std::shared_ptr<TrivialTrace<double>> trace,
                          double* adjoint_init_value,
                          double**** fourth_vector);
 
-std::shared_ptr<DerivativeTensor<locint, double>> directional_reverse(
+std::shared_ptr<DerivativeTensor<int, double>> directional_reverse(
     std::shared_ptr<TrivialTrace<double>> trace,
     int t_order,
     int ind_num,
