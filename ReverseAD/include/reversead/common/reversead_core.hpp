@@ -1,3 +1,5 @@
+/* Core runtime functions for ReverseAD : tracing and indexing */
+
 #ifndef REVERSEAD_BASE_H_
 #define REVERSEAD_BASE_H_
 

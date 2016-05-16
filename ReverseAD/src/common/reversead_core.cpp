@@ -1,5 +1,6 @@
 #include <memory>
 
+#include "reversead/common/reversead_core.hpp"
 #include "reversead/common/reversead_type.hpp"
 #include "reversead/common/runtime_env.hpp"
 #include "reversead/common/opcodes.hpp"

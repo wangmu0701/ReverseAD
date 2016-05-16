@@ -2,7 +2,7 @@
 #include <map>
 
 #include "reversead/common/reversead_type.hpp"
-#include "reversead/common/reversead_base.hpp"
+#include "reversead/common/reversead_core.hpp"
 #include "reversead/common/opcodes.hpp"
 #include "reversead/algorithm/base_function_replay.hpp"
 #include "reversead/forwardtype/single_forward.hpp"

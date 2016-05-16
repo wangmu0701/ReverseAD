@@ -1,3 +1,15 @@
+/* Distributed with ReverseAD
+ * A RuntimeEnv manages indexing of variables.
+ * Independent variables : 1 -> BASE_LOC - 1
+ * Intermediate variables : BASE_LOC -> MAX_LOC
+ * Dummy Independents (only in mpi mode) : BASE_LOC - 1 -> 1
+ *
+ * We breakthis out since in checkpointing, we only want to trace the
+ * timestep function, and exclude termination condition from tracing.
+ * Also, we want to make indexing consistance when reversely retrace each
+ * timestep function.
+ */
+
 #ifndef REVERSEAD_RUNTIME_ENV_
 #define REVERSEAD_RUNTIME_ENV_
 

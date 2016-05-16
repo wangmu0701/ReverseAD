@@ -1,6 +1,6 @@
 #include <cmath>
 
-#include "reversead/common/reversead_base.hpp"
+#include "reversead/common/reversead_core.hpp"
 #include "reversead/common/opcodes.hpp"
 #include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/base_reverse_mode.hpp"

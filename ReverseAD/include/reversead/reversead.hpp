@@ -3,7 +3,7 @@
 #include "reversead/common/reversead_config.h"
 
 #include "reversead/common/reversead_type.hpp"
-#include "reversead/common/reversead_base.hpp"
+#include "reversead/common/reversead_core.hpp"
 #include "reversead/activetype/base_active.hpp"
 #include "reversead/trace/trivial_trace.hpp"
 #include "reversead/forwardtype/single_forward.hpp"

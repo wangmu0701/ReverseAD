@@ -2,7 +2,7 @@
 
 #include "reversead/activetype/base_active.hpp"
 #include "reversead/algorithm/base_reverse_hessian.hpp"
-#include "reversead/common/reversead_base.hpp"
+#include "reversead/common/reversead_core.hpp"
 #include "reversead/common/runtime_env.hpp"
 #include "reversead/checkpointing/iterative_func.hpp"
 #include "reversead/checkpointing/checkpoint_trace.hpp"
