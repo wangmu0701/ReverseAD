@@ -4,6 +4,8 @@
 #include <iostream>
 #include <map>
 
+#include "reversead/algorithm/algorithm_common.hpp"
+
 namespace ReverseAD {
 
 template <typename LocType>
@@ -41,7 +43,7 @@ class TensorIndex {
   void clear() {_len = 0;}
   int size() const {return _len;}
   LocType* get_array() {return &(_data[0]);}
-  LocType _data[10];
+  LocType _data[REVERSEAD_MAX_TENSOR_ORDER];
   int _len;
 };
 

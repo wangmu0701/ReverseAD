@@ -53,6 +53,8 @@ class DerivativeInfo {
   Base pxxx, pxxy, pxyy, pyyy;
 };
 
+#define REVERSEAD_MAX_TENSOR_ORDER 6
+
 template <typename LocType, typename Base>
 class TensorInfo {
  public:
