@@ -13,12 +13,6 @@ libreversead_la_LIBADD += src/forwardtype/libforwardtype.la
 libreversead_la_LIBADD += src/driver/libdriver.la
 libreversead_la_LIBADD += src/checkpointing/libcheckpointing.la
 
-if ENABLE_REVERSEAD_MPI
-
-libreversead_la_LIBADD += src/rmpi/librmpi.la
-
-endif
-
 test:
 	cd test; $(MAKE) test
 

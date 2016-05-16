@@ -16,7 +16,7 @@ AC_MSG_RESULT($ac_reversead_cxxflags)
 
 AC_MSG_CHECKING(whether to enable mpi)
 AC_ARG_ENABLE(mpi, [AS_HELP_STRING([--enable-mpi],
-  [enable mpi in ReverseAD [default=no]])],
+  [enable mpi in ReverseAD [default=no], (DISABLED)])],
   [enable_mpi=$enableval], [enable_mpi=no])
 AC_MSG_RESULT($enable_mpi)
 
@@ -56,7 +56,6 @@ AC_CONFIG_FILES(Makefile
                 ReverseAD/src/driver/Makefile
                 ReverseAD/src/checkpointing/Makefile
                 ReverseAD/src/util/Makefile
-                ReverseAD/src/rmpi/Makefile
                 ReverseAD/include/Makefile
                 ReverseAD/include/reversead/Makefile
                 ReverseAD/include/reversead/activetype/Makefile
@@ -68,7 +67,6 @@ AC_CONFIG_FILES(Makefile
                 ReverseAD/include/reversead/tape/Makefile
                 ReverseAD/include/reversead/trace/Makefile
                 ReverseAD/include/reversead/util/Makefile
-                ReverseAD/include/reversead/rmpi/Makefile
                 ReverseAD/include/reversead/common/reversead_config.h
                 ReverseAD/test/Makefile
                 ReverseAD/test/regression/Makefile
@@ -78,7 +76,6 @@ AC_CONFIG_FILES(Makefile
                 ReverseAD/test/trace/Makefile
                 ReverseAD/test/rosenbrock/Makefile
                 ReverseAD/test/simple/Makefile
-                ReverseAD/test/mpi/Makefile
 )
 
 AC_OUTPUT
