@@ -5,9 +5,9 @@ libalgorithminclude_HEADERS = base_function_replay.hpp\
                               base_reverse_adjoint.hpp\
                               base_reverse_hessian.hpp\
                               base_reverse_third.hpp\
-                              single_derivative.hpp\
                               algorithm_common.hpp\
-                              abstract_serializable.hpp\
+                              derivative_info.hpp\
+                              trivial_deriv.hpp\
                               trivial_adjoint.hpp\
                               trivial_hessian.hpp\
                               trivial_third.hpp\
@@ -17,4 +17,5 @@ libalgorithminclude_HEADERS = base_function_replay.hpp\
                               derivative_tensor.hpp\
                               base_reverse_tensor.hpp\
                               symmetry_tensor.hpp\
+                              tensor_derivative_info.hpp\
                               tensor_deriv.hpp

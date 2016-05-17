@@ -1,5 +1,5 @@
-#ifndef SINGLE_DERIVATIVE_H_
-#define SINGLE_DERIVATIVE_H_
+#ifndef REVERSEAD_TRIVIAL_DERIV_H_
+#define REVERSEAD_TRIVIAL_DERIV_H_
 
 #include <memory>
 
@@ -11,20 +11,20 @@
 namespace ReverseAD {
 
 template <typename Base>
-class SingleDerivative : AbstractSerializable{
+class TrivialDeriv {
  public:
 
   typedef TrivialAdjoint<locint, Base> type_adjoint;
   typedef TrivialHessian<locint, Base> type_hessian;
   typedef TrivialThird<locint, Base> type_third;
 
-  SingleDerivative() {
+  TrivialDeriv() {
     adjoint_vals.reset(new type_adjoint());
     hessian_vals.reset(new type_hessian());
     third_vals.reset(new type_third());
   }
 
-  SingleDerivative(char* buf) {
+  TrivialDeriv(char* buf) {
     int buf_size = 0;
     adjoint_vals.reset(new type_adjoint(buf));
     buf_size += adjoint_vals->byte_size();
@@ -72,4 +72,4 @@ class SingleDerivative : AbstractSerializable{
 
 }
 
-#endif // SINGLE_DERIVATIVE_H_
+#endif // REVERSEAD_TRIVIAL_DERIV_H_

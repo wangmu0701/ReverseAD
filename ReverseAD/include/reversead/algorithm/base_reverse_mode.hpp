@@ -6,8 +6,8 @@
 #include <memory>
 
 #include "reversead/trace/trivial_trace.hpp"
-#include "reversead/algorithm/algorithm_common.hpp"
-#include "reversead/algorithm/single_derivative.hpp"
+#include "reversead/algorithm/derivative_info.hpp"
+#include "reversead/algorithm/trivial_deriv.hpp"
 #include "reversead/algorithm/derivative_tensor.hpp"
 
 //class ReverseAD::IterativeFunc;
@@ -17,10 +17,10 @@ namespace ReverseAD {
 template <typename Base>
 class BaseReverseMode {
  public:
-  typedef typename SingleDerivative<Base>::type_adjoint type_adjoint;
-  typedef typename SingleDerivative<Base>::type_hessian type_hessian;
-  typedef typename SingleDerivative<Base>::type_third type_third;
-  typedef SingleDerivative<Base> SingleDeriv;
+  typedef typename TrivialDeriv<Base>::type_adjoint type_adjoint;
+  typedef typename TrivialDeriv<Base>::type_hessian type_hessian;
+  typedef typename TrivialDeriv<Base>::type_third type_third;
+  typedef TrivialDeriv<Base> SingleDeriv;
 
   BaseReverseMode(const std::shared_ptr<TrivialTrace<Base>>& _trace)
       : trace(_trace) {}

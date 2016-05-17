@@ -1,5 +1,6 @@
 #include <memory>
-#include "reversead/common/opcodes.hpp"
+
+#include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/base_reverse_hessian.hpp"
 #include "reversead/forwardtype/single_forward.hpp"
 

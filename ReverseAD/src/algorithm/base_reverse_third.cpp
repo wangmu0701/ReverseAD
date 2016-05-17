@@ -1,4 +1,6 @@
 #include <memory>
+
+#include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/base_reverse_third.hpp"
 #include "reversead/forwardtype/single_forward.hpp"
 

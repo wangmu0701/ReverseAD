@@ -1,7 +1,7 @@
 /* Core runtime functions for ReverseAD : tracing and indexing */
 
-#ifndef REVERSEAD_BASE_H_
-#define REVERSEAD_BASE_H_
+#ifndef REVERSEAD_CORE_H_
+#define REVERSEAD_CORE_H_
 
 #include <cstdint>
 #include <memory>
@@ -171,4 +171,4 @@ namespace ReverseAD {
   }
 } // namespace ReverseAD
 
-#endif // REVERSEAD_BASE_H_
+#endif // REVERSEAD_CORE_H_

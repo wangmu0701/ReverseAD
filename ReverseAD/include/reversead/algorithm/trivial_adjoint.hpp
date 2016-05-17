@@ -3,14 +3,13 @@
 
 #include <map>
 
-#include "reversead/algorithm/abstract_serializable.hpp"
 #include "reversead/util/logger.hpp"
 #include "reversead/algorithm/algorithm_common.hpp"
 
 namespace ReverseAD {
 
 template <typename LocType, typename Base>
-class TrivialAdjoint : public AbstractSerializable {
+class TrivialAdjoint {
  public:
   TrivialAdjoint() = default;
   TrivialAdjoint(const TrivialAdjoint<LocType, Base>&) = default;

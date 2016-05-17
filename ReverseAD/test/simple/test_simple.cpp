@@ -23,7 +23,8 @@ int main() {
   }
   //double vp = 3.0;
   //adouble p = adouble::markParam(vp);
-  yad[0] = (xad[0] * (xad[0]+xad[0]-xad[0]) * (2*xad[0])/2 * sqrt(xad[0] * xad[0]) * xad[0] * xad[0] * log(exp(xad[0]))) / (xad[0] * 2);
+  //yad[0] = (xad[0] * (xad[0]+xad[0]-xad[0]) * (2*xad[0])/2 * sqrt(xad[0] * xad[0]) * xad[0] * xad[0] * log(exp(xad[0]))) / (xad[0] * 2);
+  yad[0] = (xad[0] * xad[0]) / xad[0];
   //yad[0] = x*(x+x-x)*(2*x)/2*sqrt(x*x)
   //yad[0] = xad[0];
   yad[0] >>= y[0];

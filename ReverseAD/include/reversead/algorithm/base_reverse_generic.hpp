@@ -5,13 +5,10 @@
 #include <memory>
 
 #include "reversead/common/reversead_type.hpp"
-#include "reversead/algorithm/base_reverse_mode.hpp"
 #include "reversead/algorithm/algorithm_common.hpp"
+#include "reversead/algorithm/base_reverse_mode.hpp"
 #include "reversead/algorithm/reversead_multiset.hpp"
-#include "reversead/algorithm/single_derivative.hpp"
 #include "reversead/algorithm/generic_deriv.hpp"
-
-#define REVERSEAD_MAX_GENERIC_ORDER 10
 
 namespace ReverseAD {
 

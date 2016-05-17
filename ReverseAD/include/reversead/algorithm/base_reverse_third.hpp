@@ -6,19 +6,19 @@
 #include <memory>
 
 #include "reversead/common/reversead_type.hpp"
-#include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/base_reverse_hessian.hpp"
-#include "reversead/algorithm/single_derivative.hpp"
+#include "reversead/algorithm/derivative_info.hpp"
+#include "reversead/algorithm/trivial_deriv.hpp"
 
 namespace ReverseAD {
 
 template <typename Base>
 class BaseReverseThird : public virtual BaseReverseHessian<Base> {
  public:
-  typedef typename SingleDerivative<Base>::type_adjoint type_adjoint;
-  typedef typename SingleDerivative<Base>::type_hessian type_hessian;
-  typedef typename SingleDerivative<Base>::type_third type_third;
-  typedef SingleDerivative<Base> SingleDeriv;
+  typedef typename TrivialDeriv<Base>::type_adjoint type_adjoint;
+  typedef typename TrivialDeriv<Base>::type_hessian type_hessian;
+  typedef typename TrivialDeriv<Base>::type_third type_third;
+  typedef TrivialDeriv<Base> SingleDeriv;
 
   using BaseReverseMode<Base>::trace;
   using BaseReverseMode<Base>::dep_deriv;

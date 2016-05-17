@@ -4,6 +4,7 @@
 #include "reversead/common/reversead_type.hpp"
 #include "reversead/algorithm/base_reverse_mode.hpp"
 #include "reversead/algorithm/tensor_deriv.hpp"
+#include "reversead/algorithm/tensor_derivative_info.hpp"
 #include "reversead/algorithm/symmetry_tensor.hpp"
 #include "reversead/util/temp_memory_allocator.hpp"
 
@@ -33,7 +34,7 @@ class BaseReverseTensor : public BaseReverseMode<Base> {
   void fill_in_ginfo(const DerivativeInfo<locint, Base>& dinfo);
   
   int order;
-  TensorInfo<locint, Base> ginfo;
+  TensorDerivativeInfo<locint, Base> ginfo;
   std::map<locint, TensorDeriv<locint, Base>> dep_deriv;
 
   // helper coefficient series for derivatives of asin/acos/atan/
