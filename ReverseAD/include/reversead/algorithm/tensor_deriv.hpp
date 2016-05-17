@@ -6,7 +6,7 @@
 #include <memory>
 
 #include "reversead/algorithm/algorithm_common.hpp"
-#include "reversead/algorithm/symmetry_tensor.hpp"
+#include "reversead/algorithm/tensor_index.hpp"
 
 namespace ReverseAD {
 

@@ -1,10 +1,8 @@
-#ifndef REVERSEAD_SYMMETRY_TENSOR_H_
-#define REVERSEAD_SYMMETRY_TENSOR_H_
+#ifndef REVERSEAD_TENSOR_INDEX_H_
+#define REVERSEAD_TENSOR_INDEX_H_
 
 #include <iostream>
 #include <map>
-
-#include "reversead/algorithm/algorithm_common.hpp"
 
 namespace ReverseAD {
 
@@ -184,4 +182,4 @@ class SymmetryTensor<LocType, Base, 0> : public SymmetryTensorBase<LocType, Base
 
 } // namespace ReverseAD
 
-#endif // REVERSEAD_SYMMETRY_TENSOR_H_
+#endif // REVERSEAD_TENSOR_INDEX_H_

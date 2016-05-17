@@ -5,7 +5,7 @@
 #include "reversead/algorithm/base_reverse_mode.hpp"
 #include "reversead/algorithm/tensor_deriv.hpp"
 #include "reversead/algorithm/tensor_derivative_info.hpp"
-#include "reversead/algorithm/symmetry_tensor.hpp"
+#include "reversead/algorithm/tensor_index.hpp"
 #include "reversead/util/temp_memory_allocator.hpp"
 
 namespace ReverseAD {
