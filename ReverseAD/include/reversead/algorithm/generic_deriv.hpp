@@ -5,7 +5,7 @@
 #include <map>
 
 #include "reversead/algorithm/algorithm_common.hpp"
-#include "reversead/algorithm/reversead_multiset.hpp"
+#include "reversead/algorithm/generic_multiset.hpp"
 
 namespace ReverseAD {
 
@@ -18,7 +18,7 @@ class GenericDeriv {
     _data.clear();
     _data.resize(_order);
   }
-  void increase(const ReverseADMultiSet<LocType>& set, Base v) {
+  void increase(const GenericMultiset<LocType>& set, Base v) {
     if (IsZero(v)) {
       return;
     }
@@ -33,7 +33,7 @@ class GenericDeriv {
     return _data[order].size();
   }
 
-  Base get(const ReverseADMultiSet<LocType>& set) {
+  Base get(const GenericMultiset<LocType>& set) {
     int order = set.size();
     if (check_size_fail(order)) {
       return;
@@ -44,8 +44,8 @@ class GenericDeriv {
     return _data[order - 1][set];
   }
   void debug() const {
-    typename std::vector<std::map<ReverseADMultiSet<LocType>, Base> >::const_iterator v_iter;
-    typename std::map<ReverseADMultiSet<LocType>, Base >::const_iterator m_iter;
+    typename std::vector<std::map<GenericMultiset<LocType>, Base> >::const_iterator v_iter;
+    typename std::map<GenericMultiset<LocType>, Base >::const_iterator m_iter;
     v_iter = _data.begin();
     while(v_iter != _data.end()) {
       m_iter = (*v_iter).begin();
@@ -61,8 +61,8 @@ class GenericDeriv {
 
   void get_and_erase(LocType target, GenericDeriv& gd) {
     gd.clear();
-    typename std::vector<std::map<ReverseADMultiSet<LocType>, Base> >::iterator v_iter;
-    typename std::map<ReverseADMultiSet<LocType>, Base>::iterator m_iter;
+    typename std::vector<std::map<GenericMultiset<LocType>, Base> >::iterator v_iter;
+    typename std::map<GenericMultiset<LocType>, Base>::iterator m_iter;
     v_iter = _data.begin();
     while(v_iter != _data.end()) {
       m_iter = v_iter->begin();
@@ -80,7 +80,7 @@ class GenericDeriv {
 
   class enumerator {
    public:
-    void get_curr_pair(ReverseADMultiSet<LocType>& multi_set, Base& w) const {
+    void get_curr_pair(GenericMultiset<LocType>& multi_set, Base& w) const {
       multi_set = m_iter->first;
       w = m_iter->second;
     }
@@ -114,7 +114,7 @@ class GenericDeriv {
 
    private:
 
-    enumerator(const typename std::vector<std::map<ReverseADMultiSet<LocType>, Base> > * const p_data) {
+    enumerator(const typename std::vector<std::map<GenericMultiset<LocType>, Base> > * const p_data) {
       this->_p_data = p_data;
       this->v_iter = _p_data->begin();
       while (v_iter != _p_data->end()) {
@@ -126,9 +126,9 @@ class GenericDeriv {
       }
     }
 
-    const std::vector<std::map<ReverseADMultiSet<LocType>, Base> > * _p_data;
-    mutable typename std::vector<std::map<ReverseADMultiSet<LocType>, Base> >::const_iterator v_iter;
-    mutable typename std::map<ReverseADMultiSet<LocType>, Base>::const_iterator m_iter;
+    const std::vector<std::map<GenericMultiset<LocType>, Base> > * _p_data;
+    mutable typename std::vector<std::map<GenericMultiset<LocType>, Base> >::const_iterator v_iter;
+    mutable typename std::map<GenericMultiset<LocType>, Base>::const_iterator m_iter;
 
    friend class GenericDeriv<LocType, Base>;
   };
@@ -140,7 +140,7 @@ class GenericDeriv {
 
  private:
   int _order; // LocTypehe highest order
-  std::vector<std::map<ReverseADMultiSet<LocType>, Base> > _data;
+  std::vector<std::map<GenericMultiset<LocType>, Base> > _data;
   
   bool check_size_fail(int order) {
     if (order < 1 || order > _order) {

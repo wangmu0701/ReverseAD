@@ -7,7 +7,7 @@
 #include "reversead/common/reversead_type.hpp"
 #include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/base_reverse_mode.hpp"
-#include "reversead/algorithm/reversead_multiset.hpp"
+#include "reversead/algorithm/generic_multiset.hpp"
 #include "reversead/algorithm/generic_deriv.hpp"
 
 namespace ReverseAD {
@@ -42,9 +42,9 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
 
  private:
   // some private temps used when accumulating, avoid pointers on stack
-  int dx[100];
-  int dy[100];
-  Base ssw[100];
+  int dx[REVERSEAD_MAX_GENERIC_ORDER + 1];
+  int dy[REVERSEAD_MAX_GENERIC_ORDER + 1];
+  Base ssw[(REVERSEAD_MAX_GENERIC_ORDER + 1) * (REVERSEAD_MAX_GENERIC_ORDER + 1)];
   int max_level;
   int max_order;
   int cx;
@@ -72,7 +72,7 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
 
   double unary_sym_coeff();
 
-  void check_and_increase(const ReverseADMultiSet<locint>& term,
+  void check_and_increase(const GenericMultiset<locint>& term,
                         const Base& value,
                         GenericDeriv<locint, Base>& local_deriv);
 

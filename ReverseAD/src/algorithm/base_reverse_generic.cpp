@@ -41,7 +41,7 @@ void BaseReverseGeneric<Base>::accumulate_deriv(
   //
   typename GenericDeriv<locint, Base>::enumerator s_enum =
       slice_deriv.get_enumerator();
-  ReverseADMultiSet<locint> s_set;
+  GenericMultiset<locint> s_set;
   Base sw;
   while (s_enum.has_next()) {
     s_enum.get_curr_pair(s_set, sw);
@@ -61,7 +61,7 @@ void BaseReverseGeneric<Base>::accumulate_deriv(
                              sw,
                              local_deriv.get_enumerator()); // initial enum)
       for (int i=0; i<= order; i++) {
-        ReverseADMultiSet<locint> ss_set(s_set);
+        GenericMultiset<locint> ss_set(s_set);
         for(int j=0; j<=order; j++) {
           if (!IsZero(ssw[i*(order+1)+j])) {
             global_deriv.increase(ss_set, ssw[i*(order+1)+j]);
@@ -105,7 +105,7 @@ std::shared_ptr<DerivativeTensor<int, Base>>
       ret->init_single_tensor(dep, i+1, size[i]);
       curr_l[i] = 0;
     }
-    ReverseADMultiSet<locint> s_set;
+    GenericMultiset<locint> s_set;
     Base sw;
     typename GenericDeriv<locint, Base>::enumerator g_enum =
     kv.second.get_enumerator();
@@ -141,7 +141,7 @@ void BaseReverseGeneric<Base>::clear() {
 template <typename Base>
 void BaseReverseGeneric<Base>::init_dep_deriv(locint dep, int dep_count) {
   GenericDeriv<locint, Base> d_deriv(order);
-  ReverseADMultiSet<locint> d_set;
+  GenericMultiset<locint> d_set;
   d_set.insert(dep);
   d_deriv.increase(d_set, 1.0);
   dep_deriv.insert(std::pair<locint, GenericDeriv<locint, Base>>(dep, d_deriv));
@@ -225,7 +225,7 @@ void BaseReverseGeneric<Base>::generate_binary_tuples(
     return;
   }
   typename GenericDeriv<locint, Base>::enumerator s_enum = curr_enum;
-  ReverseADMultiSet<locint> dc;
+  GenericMultiset<locint> dc;
   Base w;
   while(s_enum.has_next()) {
     s_enum.get_curr_pair(dc, w);
@@ -257,7 +257,7 @@ void BaseReverseGeneric<Base>::generate_unary_tuples(
     return;
   }
   typename GenericDeriv<locint, Base>::enumerator s_enum = curr_enum;
-  ReverseADMultiSet<locint> dc;
+  GenericMultiset<locint> dc;
   Base w;
   while (s_enum.has_next()) {
     s_enum.get_curr_pair(dc, w);
@@ -330,7 +330,7 @@ double BaseReverseGeneric<Base>::unary_sym_coeff() {
 
 template <typename Base>
 void BaseReverseGeneric<Base>::check_and_increase(
-    const ReverseADMultiSet<locint>& term,
+    const GenericMultiset<locint>& term,
     const Base& value,
     GenericDeriv<locint, Base>& local_deriv) {
   if (!IsZero(value)) {
@@ -351,7 +351,7 @@ void BaseReverseGeneric<Base>::fill_in_local_deriv(
   using std::exp;
   
   if (order <= 3) { // simple fill
-    ReverseADMultiSet<locint> term;
+    GenericMultiset<locint> term;
     // dx
     term.insert(info.x);
     check_and_increase(term, info.dx, local_deriv);
@@ -394,7 +394,7 @@ void BaseReverseGeneric<Base>::fill_in_local_deriv(
     }
     return;
   }
-  ReverseADMultiSet<locint> term;
+  GenericMultiset<locint> term;
   switch(info.opcode) {
     case assign_ind:
     case assign_dep:

@@ -1,5 +1,5 @@
-#ifndef REVERSEAD_MULTISET
-#define REVERSEAD_MULTISET
+#ifndef REVERSEAD_GENERIC_MULTISET_H_
+#define REVERSEAD_GENERIC_MULTISET_H_
 
 #include <set>
 #include <iostream>
@@ -7,17 +7,17 @@
 namespace ReverseAD {
 
 template <typename T>
-class ReverseADMultiSet {
+class GenericMultiset {
  public:
-  ReverseADMultiSet();
-  ReverseADMultiSet(const ReverseADMultiSet& rsh);
-  ReverseADMultiSet(const ReverseADMultiSet&& rhs);
-  ReverseADMultiSet(char* const buf, const int t_size);
-  ReverseADMultiSet& operator = (const ReverseADMultiSet& rhs);
-  ReverseADMultiSet& operator = (const ReverseADMultiSet&& rhs);
-  inline bool operator == (const ReverseADMultiSet<T>& rhs) const;
-  inline bool operator != (const ReverseADMultiSet<T>& rhs) const;
-  inline bool operator < (const ReverseADMultiSet<T>& rhs) const;
+  GenericMultiset();
+  GenericMultiset(const GenericMultiset& rsh);
+  GenericMultiset(const GenericMultiset&& rhs);
+  GenericMultiset(char* const buf, const int t_size);
+  GenericMultiset& operator = (const GenericMultiset& rhs);
+  GenericMultiset& operator = (const GenericMultiset&& rhs);
+  inline bool operator == (const GenericMultiset<T>& rhs) const;
+  inline bool operator != (const GenericMultiset<T>& rhs) const;
+  inline bool operator < (const GenericMultiset<T>& rhs) const;
 
   int insert(T element);
   int insert(T element, int count);
@@ -35,46 +35,46 @@ class ReverseADMultiSet {
 };
 
 template <typename T>
-ReverseADMultiSet<T>::ReverseADMultiSet() {
+GenericMultiset<T>::GenericMultiset() {
   _data.clear();
 }
 
 template <typename T>
-ReverseADMultiSet<T>::ReverseADMultiSet(const ReverseADMultiSet& rhs) {
-//  std::cout << "ReverseADMultiSet L-ctor" << std::endl;
+GenericMultiset<T>::GenericMultiset(const GenericMultiset& rhs) {
+//  std::cout << "GenericMultiset L-ctor" << std::endl;
   _data = rhs._data;
 }
 
 template <typename T>
-ReverseADMultiSet<T>::ReverseADMultiSet(const ReverseADMultiSet&& rhs) {
-//  std::cout << "ReverseADMultiSet R-ctor" << std::endl;
+GenericMultiset<T>::GenericMultiset(const GenericMultiset&& rhs) {
+//  std::cout << "GenericMultiset R-ctor" << std::endl;
   _data = std::move(rhs._data);
 }
 
 template <typename T>
-ReverseADMultiSet<T>& ReverseADMultiSet<T>::operator = (
-    const ReverseADMultiSet<T>& rhs) {
-//  std::cout << "ReverseADMultiSet L-assign" << std::endl;
+GenericMultiset<T>& GenericMultiset<T>::operator = (
+    const GenericMultiset<T>& rhs) {
+//  std::cout << "GenericMultiset L-assign" << std::endl;
   this->_data = rhs._data;
   return *this;
 }
 
 template <typename T>
-ReverseADMultiSet<T>& ReverseADMultiSet<T>::operator = (
-    const ReverseADMultiSet<T>&& rhs) {
-//  std::cout << "ReverseADMultiSet R-assign" << std::endl;
+GenericMultiset<T>& GenericMultiset<T>::operator = (
+    const GenericMultiset<T>&& rhs) {
+//  std::cout << "GenericMultiset R-assign" << std::endl;
   this->_data = std::move(rhs._data);
   return *this;
 }
 
 template <typename T>
-int ReverseADMultiSet<T>::insert(T element) {
+int GenericMultiset<T>::insert(T element) {
   _data.insert(element);
   return _data.count(element);
 }
 
 template <typename T>
-int ReverseADMultiSet<T>::insert(T element, int count) {
+int GenericMultiset<T>::insert(T element, int count) {
   for(int i = 0; i < count; i++) {
     _data.insert(element);
   }
@@ -82,7 +82,7 @@ int ReverseADMultiSet<T>::insert(T element, int count) {
 }
 
 template <typename T>
-int ReverseADMultiSet<T>::remove(T element) {
+int GenericMultiset<T>::remove(T element) {
   typename std::multiset<T>::iterator hit(_data.find(element));
   if (hit != _data.end()) {
     _data.erase(hit);
@@ -91,7 +91,7 @@ int ReverseADMultiSet<T>::remove(T element) {
 }
 
 template <typename T>
-void ReverseADMultiSet<T>::to_array(T* array) const {
+void GenericMultiset<T>::to_array(T* array) const {
   typename std::multiset<T>::const_iterator iter = _data.begin();
   int l = 0;
   while (iter != _data.end()) {
@@ -101,12 +101,12 @@ void ReverseADMultiSet<T>::to_array(T* array) const {
 }
 
 template <typename T>
-int ReverseADMultiSet<T>::size() const {
+int GenericMultiset<T>::size() const {
   return _data.size();
 }
 
 template <typename T>
-bool ReverseADMultiSet<T>::find(T target) const {
+bool GenericMultiset<T>::find(T target) const {
   if (_data.find(target) != _data.end()) {
     return true;
   }
@@ -114,12 +114,12 @@ bool ReverseADMultiSet<T>::find(T target) const {
 }
 
 template <typename T>
-int ReverseADMultiSet<T>::count(T target) const {
+int GenericMultiset<T>::count(T target) const {
   return _data.count(target);
 }
 
 template <typename T>
-void ReverseADMultiSet<T>::debug() const {
+void GenericMultiset<T>::debug() const {
   typename std::multiset<T>::iterator iter;
   std::cout << "{ ";
   for(iter = _data.begin(); iter != _data.end(); ++iter) {
@@ -129,15 +129,15 @@ void ReverseADMultiSet<T>::debug() const {
 }
 
 template <typename T>
-void ReverseADMultiSet<T>::clear() {
+void GenericMultiset<T>::clear() {
   _data.clear();
 }
 
 // kind of redundent because we have < operator.
 // But it's more efficient to keep it.
 template <typename T>
-inline bool ReverseADMultiSet<T>::operator == (
-    const ReverseADMultiSet<T>& rhs) const {
+inline bool GenericMultiset<T>::operator == (
+    const GenericMultiset<T>& rhs) const {
   typename std::multiset<T>::iterator iter1;
   typename std::multiset<T>::iterator iter2;
   if (this->_data.size() != rhs._data.size()) {
@@ -156,14 +156,14 @@ inline bool ReverseADMultiSet<T>::operator == (
 }
 
 template <typename T> 
-inline bool ReverseADMultiSet<T>::operator != (
-    const ReverseADMultiSet<T>& rhs) const{
+inline bool GenericMultiset<T>::operator != (
+    const GenericMultiset<T>& rhs) const{
   return !((*this) == rhs);
 }
 
 template <typename T> 
-inline bool ReverseADMultiSet<T>::operator < (
-    const ReverseADMultiSet<T>& rhs) const{
+inline bool GenericMultiset<T>::operator < (
+    const GenericMultiset<T>& rhs) const{
   typename std::multiset<T>::iterator iter1;
   typename std::multiset<T>::iterator iter2;
   if (this->_data.size() < rhs._data.size()) {
@@ -187,4 +187,4 @@ inline bool ReverseADMultiSet<T>::operator < (
 
 } // namespace ReverseAD
 
-#endif // REVERSEAD_MULTISET
+#endif // REVERSEAD_GENERIC_MULTISET_H_
