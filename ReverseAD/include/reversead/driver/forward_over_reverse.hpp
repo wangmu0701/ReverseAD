@@ -38,17 +38,6 @@ std::shared_ptr<DerivativeTensor<int, double>> directional_reverse(
     double* ind_init_value,
     double* adjoint_init_value);
  
-/*
-void forward_over_generic(std::shared_ptr<TrivialTrace<double>> trace,
-                          int ind_num,
-                          int dep_num,
-                          double* ind_init_value,
-                          double* adjoint_init_value,
-                          int t_order,
-                          int* size;
-                          locint*** tind,
-                          double** values);
-*/
 } // namespace ReverseAD
 
 #endif // REVERSEAD_FORWARD_OVER_REVERSE_H_

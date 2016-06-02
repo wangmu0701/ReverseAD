@@ -27,7 +27,6 @@ int main() {
   double y;
   adouble yad;
   adouble xad;
-  ReverseAD::logging_on();
   ReverseAD::trace_on<double>();
   xad <<= x;
   //adouble v1 = xad *xad * xad;

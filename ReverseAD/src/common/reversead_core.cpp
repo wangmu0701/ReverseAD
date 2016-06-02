@@ -12,7 +12,6 @@ namespace ReverseAD {
   std::shared_ptr<RuntimeEnv> runtime_env = nullptr;
   int _disk_tape_id = 0;
   
-  extern Log logger;
 
   locint get_next_loc() {
     if (!runtime_env) {return 0;}
@@ -35,11 +34,6 @@ namespace ReverseAD {
 
   void runtime_env_off() {
     runtime_env.reset();
-  }
-  
-  // turn on some internal loggerging
-  void logging_on() {
-    logger.reset_info(&(std::cout));   
   }
 
 } // namespace ReverseAD

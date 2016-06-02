@@ -16,7 +16,6 @@ int main() {
   adouble yad[M];
   adouble xad[N];
   adouble a1, a2;
-  ReverseAD::logging_on();
   ReverseAD::trace_on<double>();
   for (int i=0; i<N; i++) {
     xad[i] <<= x[i];

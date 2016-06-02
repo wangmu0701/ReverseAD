@@ -5,6 +5,7 @@
 #include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/base_reverse_mode.hpp"
 #include "reversead/forwardtype/single_forward.hpp"
+#include "reversead/util/error_info.hpp"
 
 #define COMBINE_D_1 info.dx += info.dy; info.dy = 0;
 
@@ -22,14 +23,7 @@ namespace ReverseAD {
 
 template <typename Base>
 BaseReverseMode<Base>& BaseReverseMode<Base>::compute(int ind_num, int dep_num) {
-  double time = get_timing();
   reverse_local_computation(ind_num, dep_num);
-  time = get_timing();
-  logger.info << "reverse local compute timing : " << time << std::endl;
-  //for (auto& kv : dep_deriv) {
-    //logger.info << "Dep : " << kv.first << std::endl;
-    //kv.second.debug(logger.info);
-  //}
   return *this;
 }
 
@@ -81,14 +75,10 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
     DerivativeInfo<locint, Base> info;
     
     if (ind_num != trace->get_num_ind()) {
-        logger.warning << "The given number of independent variables (" << ind_num << ")"
-        << " does not match the record on the trace (" << trace->get_num_ind()
-        << "). Will proceed with the trace. " << std::endl;
+      warning_NumberInconsistent("independent", ind_num, trace->get_num_ind());
     }
     if (dep_num != trace->get_num_dep()) {
-        logger.warning << "The given number of dependent variables (" << ind_num << ")"
-        << " does not match the record on the trace (" << trace->get_num_dep()
-        << "). Will proceed with the trace. " << std::endl;
+      warning_NumberInconsistent("dependent", dep_num, trace->get_num_dep());
     }
     int ind_count = trace->get_num_ind();
     int dep_count = trace->get_num_dep();
@@ -347,7 +337,7 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
             case rmpi_recv:
                 break;
             default:
-                logger.warning << "Unrecongized opcode : " << (int)op << std::endl;
+                warning_UnrecognizedOpcode((int)op);
         }
         // call to inherited virtual functions
         process_sac(info);

@@ -8,6 +8,7 @@
 #include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/base_reverse_generic.hpp"
 #include "reversead/forwardtype/single_forward.hpp"
+#include "reversead/util/error_info.hpp"
 
 namespace ReverseAD {
 
@@ -595,8 +596,8 @@ void BaseReverseGeneric<Base>::fill_in_local_deriv(
     case pow_a_a:
       break;
     default:
-      logger.warning << "Unrecongized opcode : " << (int)info.opcode
-      << std::endl;
+      // We should not see this as it passed tha check in BaseReverseMode
+      warning_UnrecognizedOpcode((int)info.opcode);
   }
 }
 

@@ -3,7 +3,6 @@
 
 
 #include "reversead/common/reversead_type.hpp"
-#include "reversead/util/logger.hpp"
 
 namespace ReverseAD {
 

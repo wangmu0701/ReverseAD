@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "reversead/reversead.hpp"
+#include "reversead/util/error_info.hpp"
 
 using ReverseAD::adouble;
 using ReverseAD::locint;
@@ -17,7 +18,6 @@ int main() {
   for (int i = 0; i < N; i++) {
     x[i] = i;
   }
-  ReverseAD::logging_on();
   ReverseAD::get_timing();
   ReverseAD::trace_on<double>();
   yad = 0;

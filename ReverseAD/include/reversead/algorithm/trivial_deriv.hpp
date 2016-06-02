@@ -6,7 +6,6 @@
 #include "reversead/algorithm/trivial_adjoint.hpp"
 #include "reversead/algorithm/trivial_hessian.hpp"
 #include "reversead/algorithm/trivial_third.hpp"
-#include "reversead/util/logger.hpp"
 
 namespace ReverseAD {
 

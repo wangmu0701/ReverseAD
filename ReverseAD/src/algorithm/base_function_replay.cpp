@@ -6,6 +6,7 @@
 #include "reversead/common/opcodes.hpp"
 #include "reversead/algorithm/base_function_replay.hpp"
 #include "reversead/forwardtype/single_forward.hpp"
+#include "reversead/util/error_info.hpp"
 
 using std::map;
 using ReverseAD::TrivialTrace;
@@ -132,19 +133,13 @@ template <typename OldBase, typename NewBase>
   int dep_count = 0;
   int param_count = 0;
   if (reset_param && param_num != trace->get_num_param()) {
-    logger.fatal << "Number of parameter (" << param_num << ") does NOT"
-    << " match the record on the trace (" << trace->get_num_param()
-    << ")." << std::endl;
+    warning_NumberInconsistent("parameter", param_num, trace->get_num_param());
   }
   if (reset_ind && ind_num != trace->get_num_ind()) {
-    logger.fatal << "Number of independents (" << ind_num << ") does NOT"
-    << " match the record on the trace (" << trace->get_num_ind()
-    << ")." << std::endl;
+    warning_NumberInconsistent("independent", ind_num, trace->get_num_ind());
   }
   if (reset_dep && dep_num != trace->get_num_dep()) {
-    logger.fatal << "Number of dependents (" << dep_num << ") does NOT"
-    << " match the record on the trace (" << trace->get_num_dep()
-    << ")." << std::endl;
+    warning_NumberInconsistent("dependent", dep_num, trace->get_num_dep());
   }
   std::shared_ptr<VirtualTape<NewBase>> val_tape =
   std::make_shared<VirtualTape<NewBase>>();
@@ -164,10 +159,6 @@ template <typename OldBase, typename NewBase>
       case start_of_tape:
         break;
       case assign_ind:
-        if (ind_count >= ind_num) {
-          logger.warning << "more independents found on tape than : " << ind_num << std::endl;
-          return nullptr;
-        }
         res = trace->get_next_loc_f();
         tval = trace->get_next_val_f();
         if (reset_ind) {
@@ -180,10 +171,6 @@ template <typename OldBase, typename NewBase>
         val_tape->put(val_map[res]);
         break;
       case assign_dep:
-        if (dep_count >= dep_num) {
-          logger.warning << "more dependents found on tape than : " << ind_num << std::endl;
-          return nullptr;
-        }
         res = trace->get_next_loc_f();
         trace->get_next_val_f();
         val = val_map[res];
@@ -220,7 +207,7 @@ template <typename OldBase, typename NewBase>
       {
         bool flag = (val_map[arg1] == val_map[arg2]);
         if ((!flag && coval == 1.0) || (flag && coval != 1.0)) {
-          logger.BranchInconsistent<NewBase>(val_map[arg1], "==", val_map[arg2]);
+          warning_BranchInconsistent<NewBase>(val_map[arg1], "==", val_map[arg2]);
         }
       }
         break;
@@ -231,7 +218,7 @@ template <typename OldBase, typename NewBase>
       {
         bool flag = (val_map[arg1] < val_map[arg2]);
         if ((!flag && coval == 1.0) || (flag && coval != 1.0)) {
-          logger.BranchInconsistent<NewBase>(val_map[arg1], "<", val_map[arg2]);
+          warning_BranchInconsistent<NewBase>(val_map[arg1], "<", val_map[arg2]);
         }
       }
         break;
@@ -327,7 +314,7 @@ template <typename OldBase, typename NewBase>
         trace->get_next_val_f();
         val1 = val_map[arg1];
         if (val1 < -1 || val1 > 1) {
-          logger.ParameterOutOfBound<NewBase>(val, "asin");
+          warning_ParameterOutOfBound<NewBase>(val1, "asin");
         }
         val_map[res] = asin(val1);
         val_tape->put(val1);
@@ -338,7 +325,7 @@ template <typename OldBase, typename NewBase>
         trace->get_next_val_f();
         val1 = val_map[arg1];
         if (val1 < -1 || val1 > 1) {
-          logger.ParameterOutOfBound<NewBase>(val, "acos");
+          warning_ParameterOutOfBound<NewBase>(val1, "acos");
         }
         val_map[res] = acos(val1);
         val_tape->put(val1);
@@ -373,7 +360,7 @@ template <typename OldBase, typename NewBase>
         trace->get_next_val_f();
         val1 = val_map[arg1];
         if (val1 <= 0) {
-          logger.ParameterOutOfBound<NewBase>(val, "logger");
+          warning_ParameterOutOfBound<NewBase>(val1, "log");
         }
         val_map[res] = log(val1);
         val_tape->put(val1);
@@ -420,7 +407,7 @@ template <typename OldBase, typename NewBase>
       case rmpi_recv:
         break;
       default:
-        logger.warning << "Unrecongized opcode : " << (int)op << std::endl; 
+        warning_UnrecognizedOpcode((int)op);
     }
     op = trace->get_next_op_f();
   }

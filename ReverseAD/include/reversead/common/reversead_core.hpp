@@ -10,11 +10,9 @@
 #include "reversead/common/runtime_env.hpp"
 #include "reversead/common/opcodes.hpp"
 #include "reversead/trace/trivial_trace.hpp"
-#include "reversead/util/logger.hpp"
 
 namespace ReverseAD {
 
-  extern Log logger; 
   extern void* global_trace;
   //extern RuntimeEnv* runtime_env;
   extern std::shared_ptr<RuntimeEnv> runtime_env;

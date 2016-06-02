@@ -1,3 +1,3 @@
 libutilincludedir = $(pkgincludedir)/util
 
-libutilinclude_HEADERS = logger.hpp temp_memory_allocator.hpp
+libutilinclude_HEADERS = error_info.hpp temp_memory_allocator.hpp

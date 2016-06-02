@@ -3,7 +3,6 @@
 
 #include <map>
 
-#include "reversead/util/logger.hpp"
 #include "reversead/algorithm/algorithm_common.hpp"
 
 namespace ReverseAD {
