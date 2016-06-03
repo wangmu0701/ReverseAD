@@ -53,7 +53,6 @@ class BaseReverseMode {
 
  private:
   // This class will only be invoked by InterativeFunc
-  void compute_iterative();
   void reset_trace(std::shared_ptr<TrivialTrace<Base>> _trace);
   friend class IterativeFunc;
 };

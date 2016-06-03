@@ -44,11 +44,11 @@ void set_up(T* x, int x_num, T* t, int t_num) {
 template <typename T>
 void run(T* t, int t_num) {
   t[0] = t[1]+t[0];
-  t[1] = t[0] - 2 * t[1];
+  t[1] = t[0]*t[1];
 }
 template <typename T>
 bool while_condition(const T* const t, int t_num) {
-  return t[0] * t[1] < 100;
+  return t[0] * t[1] < 1000;
 }
 template <typename T>
 void tear_down(T* t, int t_num, T* y, int y_num) {
@@ -86,6 +86,6 @@ int main() {
                           &(run<adouble>), &(while_condition));
   iter_func.run(x, 2, &y, 1);
   std::cout << "y = " << y << std::endl;
-  tensor = iter_func.compute(x, 2, &y, 1);
+  tensor = iter_func.compute(x, 2, &y, 1, 3);
   check_answer(tensor);
 } 

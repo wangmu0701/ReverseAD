@@ -19,7 +19,7 @@ class IterativeFunc {
                 bool (*while_condition)(const adouble* const, int));
   void run(double*, int, double*, int);
   std::shared_ptr<DerivativeTensor<int, double>> compute(
-      double*, int, double*, int);
+      double*, int, double*, int, int);
  
  private:
   int _x_num;

@@ -1,7 +1,9 @@
 #include <iostream>
 
 #include "reversead/activetype/base_active.hpp"
+#include "reversead/algorithm/base_reverse_adjoint.hpp"
 #include "reversead/algorithm/base_reverse_hessian.hpp"
+#include "reversead/algorithm/base_reverse_third.hpp"
 #include "reversead/common/reversead_core.hpp"
 #include "reversead/common/runtime_env.hpp"
 #include "reversead/checkpointing/iterative_func.hpp"
@@ -46,10 +48,10 @@ void IterativeFunc::run(double* x_values, int x_num,
 
 std::shared_ptr<DerivativeTensor<int, double>> IterativeFunc::compute(
     double* x_values, int x_num,
-    double* y_values, int y_num) {
+    double* y_values, int y_num,
+    int t_order) {
   CheckpointTrace cp_trace;
 
-  //TODO(muwang)
   // first recompute the function, no tracing
   // but record the initial values for each step, and also runtime env.
   adouble* x_adouble = new adouble[_x_num];
@@ -115,8 +117,17 @@ std::shared_ptr<DerivativeTensor<int, double>> IterativeFunc::compute(
     y_adouble[i] >>= y_values[i];
   }
   std::shared_ptr<TrivialTrace<double>> trace = trace_off<double>();
-  BaseReverseHessian<double> hessian(trace);
-  hessian.compute_iterative();
+  BaseReverseMode<double>* reverse_mode = nullptr;
+  if (t_order == 1) {
+    reverse_mode = new BaseReverseAdjoint<double>(trace);
+  } else if (t_order == 2) {
+    reverse_mode = new BaseReverseHessian<double>(trace);
+  } else if (t_order == 3) {
+    reverse_mode = new BaseReverseThird<double>(trace);
+  } else {
+    std::cerr << "Only (1-3) orders for IterativeFunc." << std::endl;
+  }
+  reverse_mode->compute(trace->get_num_ind(), trace->get_num_dep());
   
   // Step 2 : get initial values and runtime for iterative_step
   while (cp_num > 1) {
@@ -128,8 +139,8 @@ std::shared_ptr<DerivativeTensor<int, double>> IterativeFunc::compute(
       --iter_num;
     }
     trace = trace_off<double>();
-    hessian.reset_trace(trace);
-    hessian.compute_iterative();
+    reverse_mode->reset_trace(trace);
+    reverse_mode->compute(trace->get_num_ind(), trace->get_num_dep());
   }
   // Step 3 : get initial values and runtime for set_up
   cp_num = cp_trace.get_checkpoint(t_adouble, _t_num, runtime_env);
@@ -140,9 +151,11 @@ std::shared_ptr<DerivativeTensor<int, double>> IterativeFunc::compute(
   }
   (*_set_up)(x_adouble, _x_num, t_adouble, _t_num);
   trace = trace_off<double>();
-  hessian.reset_trace(trace);
+  reverse_mode->reset_trace(trace);
+  reverse_mode->compute(_x_num, 0);
   std::shared_ptr<DerivativeTensor<int, double>> tensor =
-      hessian.compute(_x_num, 0).get_tensor();
+      reverse_mode->get_tensor();
+  delete reverse_mode;
   return tensor;
 }
 

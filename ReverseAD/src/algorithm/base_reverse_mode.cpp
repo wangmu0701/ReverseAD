@@ -37,18 +37,6 @@ void BaseReverseMode<Base>::transcript_dep_value(
 }
 
 template <typename Base>
-void BaseReverseMode<Base>::compute_iterative() {
-  reverse_local_computation(trace->get_num_ind(), trace->get_num_dep());
-/*
-  std::cout << "one step : " << std::endl;
-  for (auto& kv : dep_deriv) {
-    logger.info << "Dep : " << kv.first << std::endl;
-    kv.second.debug();
-  }
-*/
-}
-
-template <typename Base>
 void BaseReverseMode<Base>::reset_trace(
     std::shared_ptr<TrivialTrace<Base>> _trace) {
   this->trace = std::move(_trace);
@@ -56,11 +44,11 @@ void BaseReverseMode<Base>::reset_trace(
 
 template <typename Base>
 void BaseReverseMode<Base>::clear() {
-  reverse_live.clear();
-  dep_deriv.clear();
-  indep_index_map.clear();
-  dep_index_map.clear();
-  dep_value.clear();
+  this->reverse_live.clear();
+  this->dep_deriv.clear();
+  this->indep_index_map.clear();
+  this->dep_index_map.clear();
+  this->dep_value.clear();
 }
 
 template <typename Base>
