@@ -7,12 +7,12 @@
 namespace ReverseAD {
 
 template <typename Base>
-void BaseReverseHessian<Base>::accumulate_deriv(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) {
+void BaseReverseHessian<Base>::accumulate_sac(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) {
   Base w = deriv.adjoint_vals->get_and_erase(info.r);
   type_adjoint r = deriv.hessian_vals->get_and_erase(info.r);
   
-  compute_adjoint_sac(info, *(deriv.adjoint_vals), w);
-  compute_hessian_sac(info, *(deriv.hessian_vals), w, r);
+  accumulate_adjoint_sac(info, *(deriv.adjoint_vals), w);
+  accumulate_hessian_sac(info, *(deriv.hessian_vals), w, r);
 }
 
 template <typename Base>
@@ -53,26 +53,26 @@ void BaseReverseHessian<Base>::transcript_hessian(
 }
 
 template <typename Base>
-void BaseReverseHessian<Base>::process_single_deriv(locint local_dep,
-                                                    SingleDeriv& local_deriv,
-                                                    SingleDeriv& deriv) {
+void BaseReverseHessian<Base>::accumulate_deriv(locint local_dep,
+                                                SingleDeriv& local_deriv,
+                                                SingleDeriv& deriv) {
   Base w = deriv.adjoint_vals->get_and_erase(local_dep);
   type_adjoint r = deriv.hessian_vals->get_and_erase(local_dep);
   // compute adjoint;
-  compute_adjoint_deriv(*(local_deriv.adjoint_vals),
-                        *(deriv.adjoint_vals),
-                        w);
+  accumulate_adjoint_deriv(*(local_deriv.adjoint_vals),
+                           *(deriv.adjoint_vals),
+                           w);
   // compute hessian;
-  compute_hessian_deriv(local_dep,
-                        *(local_deriv.adjoint_vals),
-                        *(local_deriv.hessian_vals),
-                        *(deriv.hessian_vals),
-                        w,
-                        r);
+  accumulate_hessian_deriv(local_dep,
+                           *(local_deriv.adjoint_vals),
+                           *(local_deriv.hessian_vals),
+                           *(deriv.hessian_vals),
+                           w,
+                           r);
 }
 
 template <typename Base>
-void BaseReverseHessian<Base>::compute_hessian_sac(
+void BaseReverseHessian<Base>::accumulate_hessian_sac(
     const DerivativeInfo<locint, Base>& info,
     type_hessian& hessian_vals,
     const Base& w,
@@ -134,7 +134,7 @@ void BaseReverseHessian<Base>::compute_hessian_sac(
 
 
 template <typename Base>
-void BaseReverseHessian<Base>::compute_hessian_deriv(
+void BaseReverseHessian<Base>::accumulate_hessian_deriv(
     locint local_dep,
     const type_adjoint& local_adjoint,
     const type_hessian& local_hessian,

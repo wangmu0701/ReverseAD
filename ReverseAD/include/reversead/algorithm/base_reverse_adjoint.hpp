@@ -39,23 +39,22 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
   // From BaseReverseMode 
   void init_dep_deriv(locint dep, int dep_count) override final;
 
-  // here we can do something to enable preaccumulation
   void process_sac(const DerivativeInfo<locint, Base>& info) override final;
 
   // Originate BaseReverseAdjoint
-  virtual void accumulate_deriv(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv);
+  virtual void accumulate_sac(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv);
 
-  virtual void process_single_deriv(locint local_dep,
-                                    SingleDeriv& local_deriv,
-                                    SingleDeriv& deriv);
+  virtual void accumulate_deriv(locint local_dep,
+                                SingleDeriv& local_deriv,
+                                SingleDeriv& deriv);
 
   void transcript_adjoint(std::shared_ptr<DerivativeTensor<int, Base>> tensor) const;
 
-  void compute_adjoint_sac(const DerivativeInfo<locint, Base>& info,
+  void accumulate_adjoint_sac(const DerivativeInfo<locint, Base>& info,
                            type_adjoint& adjoint_vals,
                            const Base& w);
 
-  void compute_adjoint_deriv(const type_adjoint& local_adjoint,
+  void accumulate_adjoint_deriv(const type_adjoint& local_adjoint,
                              type_adjoint& global_adjoint,
                              const Base& w);
 
@@ -65,7 +64,7 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
   locint temp_local_dep;
   SingleDeriv temp_local_deriv;
   std::set<locint> temp_local_live;
-  void compute_preacc(const DerivativeInfo<locint, Base>& info);
+  void process_preacc(const DerivativeInfo<locint, Base>& info);
 };
 
 } // namespace ReverseAD

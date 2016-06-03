@@ -8,15 +8,15 @@ namespace ReverseAD {
 
 template <typename Base>
 
-void BaseReverseThird<Base>::accumulate_deriv(
+void BaseReverseThird<Base>::accumulate_sac(
     const DerivativeInfo<locint, Base>& info,
     SingleDeriv& deriv) {
   Base w = deriv.adjoint_vals->get_and_erase(info.r);
   type_adjoint r = deriv.hessian_vals->get_and_erase(info.r);
   type_hessian e = deriv.third_vals->get_and_erase(info.r);
-  compute_adjoint_sac(info, *(deriv.adjoint_vals), w);
-  compute_hessian_sac(info, *(deriv.hessian_vals), w, r);
-  compute_third_sac(info, *(deriv.third_vals), w, r, e);
+  accumulate_adjoint_sac(info, *(deriv.adjoint_vals), w);
+  accumulate_hessian_sac(info, *(deriv.hessian_vals), w, r);
+  accumulate_third_sac(info, *(deriv.third_vals), w, r, e);
 }
 
 template <typename Base>
@@ -59,147 +59,148 @@ void BaseReverseThird<Base>::transcript_third(
 }
 
 template <typename Base>
-void BaseReverseThird<Base>::process_single_deriv(locint local_dep,
+void BaseReverseThird<Base>::accumulate_deriv(locint local_dep,
                                                   SingleDeriv& local_deriv,
                                                   SingleDeriv& deriv) {
   Base w = deriv.adjoint_vals->get_and_erase(local_dep);
   type_adjoint r = deriv.hessian_vals->get_and_erase(local_dep);
   type_hessian e = deriv.third_vals->get_and_erase(local_dep);
   // compute adjoint;
-  compute_adjoint_deriv(*(local_deriv.adjoint_vals),
-                        *(deriv.adjoint_vals),
-                        w);
+  accumulate_adjoint_deriv(*(local_deriv.adjoint_vals),
+                           *(deriv.adjoint_vals),
+                           w);
   // compute hessian;
-  compute_hessian_deriv(local_dep,
-                        *(local_deriv.adjoint_vals),
-                        *(local_deriv.hessian_vals),
-                        *(deriv.hessian_vals),
-                        w,
-                        r);
+  accumulate_hessian_deriv(local_dep,
+                           *(local_deriv.adjoint_vals),
+                           *(local_deriv.hessian_vals),
+                           *(deriv.hessian_vals),
+                           w,
+                           r);
   // compute third
-  compute_third_deriv(local_dep,
-                      *(local_deriv.adjoint_vals),
-                      *(local_deriv.hessian_vals),
-                      *(local_deriv.third_vals),
-                      *(deriv.third_vals),
-                      w,
-                      r,
-                      e);
+  accumulate_third_deriv(local_dep,
+                         *(local_deriv.adjoint_vals),
+                         *(local_deriv.hessian_vals),
+                         *(local_deriv.third_vals),
+                         *(deriv.third_vals),
+                         w,
+                         r,
+                         e);
 }
 
 
 template<typename Base>
-void BaseReverseThird<Base>::compute_third_sac(
-                                              const DerivativeInfo<locint, Base>& info,
-                                              type_third& third_vals,
-                                              const Base& w,
-                                              const type_adjoint& r,
-                                              const type_hessian& e) {
-    locint p,q;
-    Base pw;
-    double coeff, xcoeff, ycoeff;
+void BaseReverseThird<Base>::accumulate_third_sac(
+    const DerivativeInfo<locint, Base>& info,
+    type_third& third_vals,
+    const Base& w,
+    const type_adjoint& r,
+    const type_hessian& e) {
+
+  locint p,q;
+  Base pw;
+  double coeff, xcoeff, ycoeff;
     
-    typename type_hessian::enumerator e_enum = e.get_enumerator();
-    while(e_enum.has_next()) {
-        e_enum.get_next(p, q, pw);
-        if (p != info.r && q != info.r) { // p!=r && q!=r
-            if (info.x != NULL_LOC && !IsZero(info.dx)) {
-                xcoeff = 1.0;
-                if (info.x == p) {xcoeff += 1.0;}
-                if (info.x == q) {xcoeff += 1.0;}
-                third_vals.increase(info.x, p, q, xcoeff * pw * info.dx);
-            }
-            if (info.y != NULL_LOC && !IsZero(info.dy)) {
-                ycoeff = 1.0;
-                if (info.y == p) {ycoeff += 1.0;}
-                if (info.y == q) {ycoeff += 1.0;}
-                third_vals.increase(info.y, p, q, ycoeff * pw * info.dy);
-            }
-        } else if (p !=q) { // p==r || q ==r, p!=q
-            if (q == info.r) {std::swap(p, q);}
-            if (info.x != NULL_LOC && info.y != NULL_LOC) {
-                coeff = 1.0; xcoeff = 1.0; ycoeff = 1.0;
-                if (info.x == q) {coeff+=1.0; xcoeff+=2.0;}
-                if (info.y == q) {coeff+=1.0; ycoeff+=2.0;}
-                third_vals.increase(q, info.x, info.x, xcoeff*pw*info.dx*info.dx);
-                third_vals.increase(q, info.x, info.y, coeff*pw*info.dx*info.dy);
-                third_vals.increase(q, info.y, info.y, ycoeff*pw*info.dy*info.dy);
-            } else if (info.x != NULL_LOC) {
-                xcoeff = 1.0;
-                if (info.x == q) {xcoeff+=2.0;}
-                third_vals.increase(q, info.x, info.x, xcoeff*pw*info.dx*info.dx);
-            }
-        } else { // p==q==r
-            if (info.x != NULL_LOC) {
-                third_vals.increase(info.x, info.x, info.x,
-                                    pw * info.dx * info.dx * info.dx);
-                if (info.y != NULL_LOC && !IsZero(info.dy)) {
-                    third_vals.increase(info.x, info.x, info.y,
-                                        pw * info.dx * info.dx * info.dy);
-                    third_vals.increase(info.x, info.y, info.y,
-                                        pw * info.dx * info.dy * info.dy);
-                    third_vals.increase(info.y, info.y, info.y,
-                                        pw * info.dy * info.dy * info.dy);
-                }
-            }
-        } // if
-    } // while
-    
-    typename type_adjoint::enumerator r_enum = r.get_enumerator();
-    while (r_enum.has_next()) {
-        r_enum.get_next(p, pw);
-        if (p != info.r) {
-            if (info.x != NULL_LOC && info.y != NULL_LOC) {
-                coeff = xcoeff = ycoeff = 1.0;
-                if (info.x == p) {coeff+=1.0;xcoeff+=2.0;}
-                if (info.y == p) {coeff+=1.0;ycoeff+=2.0;}
-                third_vals.increase(p, info.x, info.x, xcoeff*pw*info.pxx);
-                third_vals.increase(p, info.x, info.y, coeff*pw*info.pxy);
-                third_vals.increase(p, info.y, info.y, ycoeff*pw*info.pyy);
-            } else if (info.x != NULL_LOC) {
-                xcoeff = 1.0;
-                if (info.x == p) {xcoeff +=2.0;}
-                third_vals.increase(p, info.x, info.x, xcoeff*pw*info.pxx);
-            }
-        } else { // p == info.r
-            if (info.x != NULL_LOC) {
-                third_vals.increase(info.x, info.x, info.x,
-                                    3.0*pw*info.dx*info.pxx);
-                if (info.y != NULL_LOC) {
-                    third_vals.increase(info.x, info.x, info.y,
-                                        2.0*pw*info.dx*info.pxy+pw*info.dy*info.pxx);
-                    third_vals.increase(info.x, info.y, info.y,
-                                        2.0*pw*info.dy*info.pxy+pw*info.dx*info.pyy);
-                    third_vals.increase(info.y, info.y, info.y,
-                                        3.0*pw*info.dy*info.pyy);
-                }
-            }
+  typename type_hessian::enumerator e_enum = e.get_enumerator();
+  while(e_enum.has_next()) {
+    e_enum.get_next(p, q, pw);
+    if (p != info.r && q != info.r) { // p!=r && q!=r
+      if (info.x != NULL_LOC && !IsZero(info.dx)) {
+        xcoeff = 1.0;
+        if (info.x == p) {xcoeff += 1.0;}
+        if (info.x == q) {xcoeff += 1.0;}
+        third_vals.increase(info.x, p, q, xcoeff * pw * info.dx);
+      }
+      if (info.y != NULL_LOC && !IsZero(info.dy)) {
+        ycoeff = 1.0;
+        if (info.y == p) {ycoeff += 1.0;}
+        if (info.y == q) {ycoeff += 1.0;}
+        third_vals.increase(info.y, p, q, ycoeff * pw * info.dy);
+      }
+    } else if (p !=q) { // p==r || q ==r, p!=q
+      if (q == info.r) {std::swap(p, q);}
+      if (info.x != NULL_LOC && info.y != NULL_LOC) {
+        coeff = 1.0; xcoeff = 1.0; ycoeff = 1.0;
+        if (info.x == q) {coeff+=1.0; xcoeff+=2.0;}
+        if (info.y == q) {coeff+=1.0; ycoeff+=2.0;}
+        third_vals.increase(q, info.x, info.x, xcoeff*pw*info.dx*info.dx);
+        third_vals.increase(q, info.x, info.y, coeff*pw*info.dx*info.dy);
+        third_vals.increase(q, info.y, info.y, ycoeff*pw*info.dy*info.dy);
+      } else if (info.x != NULL_LOC) {
+        xcoeff = 1.0;
+        if (info.x == q) {xcoeff+=2.0;}
+        third_vals.increase(q, info.x, info.x, xcoeff*pw*info.dx*info.dx);
+      }
+    } else { // p==q==r
+      if (info.x != NULL_LOC) {
+        third_vals.increase(info.x, info.x, info.x,
+                            pw * info.dx * info.dx * info.dx);
+        if (info.y != NULL_LOC && !IsZero(info.dy)) {
+          third_vals.increase(info.x, info.x, info.y,
+                              pw * info.dx * info.dx * info.dy);
+          third_vals.increase(info.x, info.y, info.y,
+                              pw * info.dx * info.dy * info.dy);
+          third_vals.increase(info.y, info.y, info.y,
+                              pw * info.dy * info.dy * info.dy);
         }
-    } // while
+      }
+    } // if
+  } // while
     
-    if (!IsZero(w)) {
-        if (info.x != NULL_LOC) {
-            third_vals.increase(info.x, info.x, info.x, w*info.pxxx);
-            if (info.y != NULL_LOC) {
-                third_vals.increase(info.x, info.x, info.y, w*info.pxxy);
-                third_vals.increase(info.x, info.y, info.y, w*info.pxyy);
-                third_vals.increase(info.y, info.y, info.y, w*info.pyyy);
-            }
+  typename type_adjoint::enumerator r_enum = r.get_enumerator();
+  while (r_enum.has_next()) {
+    r_enum.get_next(p, pw);
+    if (p != info.r) {
+      if (info.x != NULL_LOC && info.y != NULL_LOC) {
+        coeff = xcoeff = ycoeff = 1.0;
+        if (info.x == p) {coeff+=1.0;xcoeff+=2.0;}
+        if (info.y == p) {coeff+=1.0;ycoeff+=2.0;}
+        third_vals.increase(p, info.x, info.x, xcoeff*pw*info.pxx);
+        third_vals.increase(p, info.x, info.y, coeff*pw*info.pxy);
+        third_vals.increase(p, info.y, info.y, ycoeff*pw*info.pyy);
+      } else if (info.x != NULL_LOC) {
+        xcoeff = 1.0;
+        if (info.x == p) {xcoeff +=2.0;}
+          third_vals.increase(p, info.x, info.x, xcoeff*pw*info.pxx);
+      }
+    } else { // p == info.r
+      if (info.x != NULL_LOC) {
+        third_vals.increase(info.x, info.x, info.x,
+                            3.0*pw*info.dx*info.pxx);
+        if (info.y != NULL_LOC) {
+          third_vals.increase(info.x, info.x, info.y,
+                              2.0*pw*info.dx*info.pxy+pw*info.dy*info.pxx);
+          third_vals.increase(info.x, info.y, info.y,
+                              2.0*pw*info.dy*info.pxy+pw*info.dx*info.pyy);
+          third_vals.increase(info.y, info.y, info.y,
+                              3.0*pw*info.dy*info.pyy);
         }
+      }
     }
+  } // while
+    
+  if (!IsZero(w)) {
+    if (info.x != NULL_LOC) {
+      third_vals.increase(info.x, info.x, info.x, w*info.pxxx);
+      if (info.y != NULL_LOC) {
+        third_vals.increase(info.x, info.x, info.y, w*info.pxxy);
+        third_vals.increase(info.x, info.y, info.y, w*info.pxyy);
+        third_vals.increase(info.y, info.y, info.y, w*info.pyyy);
+      }
+    }
+  }
 }
 
 
 template<typename Base>
-void BaseReverseThird<Base>::compute_third_deriv(
-                                                locint local_dep,
-                                                const type_adjoint& local_adjoint,
-                                                const type_hessian& local_hessian,
-                                                const type_third& local_third,
-                                                type_third& global_third,
-                                                const Base& w,
-                                                const type_adjoint& r,
-                                                const type_hessian& e) {
+void BaseReverseThird<Base>::accumulate_third_deriv(
+    locint local_dep,
+    const type_adjoint& local_adjoint,
+    const type_hessian& local_hessian,
+    const type_third& local_third,
+    type_third& global_third,
+    const Base& w,
+    const type_adjoint& r,
+    const type_hessian& e) {
     
     locint p, q, x, y, z;
     Base ww, wx, wy, wz;
@@ -290,8 +291,6 @@ void BaseReverseThird<Base>::compute_third_deriv(
         }
     }
 }
-
-
 
 } //namespace ReverseAD
 

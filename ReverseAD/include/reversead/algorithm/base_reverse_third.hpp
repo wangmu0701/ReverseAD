@@ -27,10 +27,10 @@ class BaseReverseThird : public virtual BaseReverseHessian<Base> {
   using BaseReverseMode<Base>::indep_index_map;
 
   // in template, name resolve will not look in base class
-  using BaseReverseAdjoint<Base>::compute_adjoint_sac;
-  using BaseReverseAdjoint<Base>::compute_adjoint_deriv;
-  using BaseReverseHessian<Base>::compute_hessian_sac;
-  using BaseReverseHessian<Base>::compute_hessian_deriv;
+  using BaseReverseAdjoint<Base>::accumulate_adjoint_sac;
+  using BaseReverseAdjoint<Base>::accumulate_adjoint_deriv;
+  using BaseReverseHessian<Base>::accumulate_hessian_sac;
+  using BaseReverseHessian<Base>::accumulate_hessian_deriv;
 
   BaseReverseThird(const std::shared_ptr<TrivialTrace<Base>>& trace)
       : BaseReverseAdjoint<Base>(trace) {}
@@ -42,21 +42,21 @@ class BaseReverseThird : public virtual BaseReverseHessian<Base> {
  protected:
   BaseReverseThird() = default;
 
-  void accumulate_deriv(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) override;
+  void accumulate_sac(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) override;
 
-  void process_single_deriv(locint local_dep,
-                            SingleDeriv& local_deriv,
-                            SingleDeriv& deriv) override;
+  void accumulate_deriv(locint local_dep,
+                        SingleDeriv& local_deriv,
+                        SingleDeriv& deriv) override;
     
   void transcript_third(std::shared_ptr<DerivativeTensor<int, Base>> tensor) const;
 
-  void compute_third_sac(const DerivativeInfo<locint, Base>& info,
+  void accumulate_third_sac(const DerivativeInfo<locint, Base>& info,
                          type_third& third_vals,
                          const Base& w,
                          const type_adjoint& r,
                          const type_hessian& e);
 
-  void compute_third_deriv(locint local_dep,
+  void accumulate_third_deriv(locint local_dep,
                            const type_adjoint& local_adjoint,
                            const type_hessian& local_hessian,
                            const type_third& local_third,

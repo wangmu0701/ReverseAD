@@ -56,13 +56,14 @@ void BaseReverseAdjoint<Base>::init_dep_deriv(locint dep, int dep_count) {
 }
 
 template <typename Base>
-void BaseReverseAdjoint<Base>::accumulate_deriv(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) {
+void BaseReverseAdjoint<Base>::accumulate_sac(
+    const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) {
   Base w = deriv.adjoint_vals->get_and_erase(info.r);
-  compute_adjoint_sac(info, *(deriv.adjoint_vals), w);
+  accumulate_adjoint_sac(info, *(deriv.adjoint_vals), w);
 }
 
 template <typename Base>
-void BaseReverseAdjoint<Base>::compute_adjoint_sac(
+void BaseReverseAdjoint<Base>::accumulate_adjoint_sac(
     const DerivativeInfo<locint, Base>& info,
     type_adjoint& adjoint_vals,
     const Base& w) {
@@ -75,18 +76,18 @@ void BaseReverseAdjoint<Base>::compute_adjoint_sac(
 }
 
 template <typename Base>
-void BaseReverseAdjoint<Base>::process_single_deriv(
+void BaseReverseAdjoint<Base>::accumulate_deriv(
     locint local_dep,
     SingleDeriv& local_deriv,
     SingleDeriv& deriv) {
   Base w = deriv.adjoint_vals->get_and_erase(local_dep);
   // compute adjoint;
-  compute_adjoint_deriv(*(local_deriv.adjoint_vals),
-                        *(deriv.adjoint_vals),
-                        w);
+  accumulate_adjoint_deriv(*(local_deriv.adjoint_vals),
+                           *(deriv.adjoint_vals),
+                           w);
 }
 template <typename Base>
-void BaseReverseAdjoint<Base>::compute_adjoint_deriv(
+void BaseReverseAdjoint<Base>::accumulate_adjoint_deriv(
     const type_adjoint& local_adjoint,
     type_adjoint& global_adjoint,
     const Base& w) {
@@ -107,14 +108,14 @@ void BaseReverseAdjoint<Base>::compute_adjoint_deriv(
 template <typename Base>
 void BaseReverseAdjoint<Base>::process_sac(const DerivativeInfo<locint, Base>& info) {
   if (preacc_enabled) {
-    compute_preacc(info);
+    process_preacc(info);
     return;
   }
   if (info.r != NULL_LOC) {
     std::set<locint> dep_set = std::move(reverse_live[info.r]);
     reverse_live.erase(info.r);
     for (const locint& dep : dep_set) {
-      accumulate_deriv(info, dep_deriv[dep]);
+      accumulate_sac(info, dep_deriv[dep]);
       if (info.x != NULL_LOC) {
         reverse_live[info.x].insert(dep);
       }
@@ -126,7 +127,7 @@ void BaseReverseAdjoint<Base>::process_sac(const DerivativeInfo<locint, Base>& i
 }
 
 template <typename Base>
-void BaseReverseAdjoint<Base>::compute_preacc(
+void BaseReverseAdjoint<Base>::process_preacc(
     const DerivativeInfo<locint, Base>& info) {
   switch (info.opcode) {
     case start_of_tape:
@@ -142,7 +143,7 @@ void BaseReverseAdjoint<Base>::compute_preacc(
       std::set<locint> dep_set = std::move(reverse_live[temp_local_dep]);
       reverse_live.erase(temp_local_dep);
       for (const locint& dep : dep_set) {
-        process_single_deriv(temp_local_dep, temp_local_deriv, dep_deriv[dep]);
+        accumulate_deriv(temp_local_dep, temp_local_deriv, dep_deriv[dep]);
         for (const locint& p : temp_local_live) {
           reverse_live[p].insert(dep);
         }
@@ -155,7 +156,7 @@ void BaseReverseAdjoint<Base>::compute_preacc(
       break;
   }
   if (info.r != NULL_LOC) {
-    accumulate_deriv(info, temp_local_deriv);
+    accumulate_sac(info, temp_local_deriv);
     temp_local_live.erase(info.r);
     if (info.x != NULL_LOC) {
       temp_local_live.insert(info.x);

@@ -27,8 +27,8 @@ class BaseReverseHessian : public virtual BaseReverseAdjoint<Base> {
   using BaseReverseMode<Base>::indep_index_map;
 
   // in template, name resolve will not look in base class
-  using BaseReverseAdjoint<Base>::compute_adjoint_sac;
-  using BaseReverseAdjoint<Base>::compute_adjoint_deriv;
+  using BaseReverseAdjoint<Base>::accumulate_adjoint_sac;
+  using BaseReverseAdjoint<Base>::accumulate_adjoint_deriv;
 
   BaseReverseHessian(const std::shared_ptr<TrivialTrace<Base>>& trace)
       : BaseReverseAdjoint<Base>(trace) {}
@@ -40,22 +40,22 @@ class BaseReverseHessian : public virtual BaseReverseAdjoint<Base> {
  protected:
   BaseReverseHessian() = default;
 
-  void accumulate_deriv(
+  void accumulate_sac(
       const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) override;
 
-  void process_single_deriv(locint local_dep,
-                            SingleDeriv& local_deriv,
-                            SingleDeriv& deriv) override;
+  void accumulate_deriv(locint local_dep,
+                        SingleDeriv& local_deriv,
+                        SingleDeriv& deriv) override;
 
   void transcript_hessian(
       std::shared_ptr<DerivativeTensor<int, Base>> tensor) const;
 
-  void compute_hessian_sac(const DerivativeInfo<locint, Base>& info,
+  void accumulate_hessian_sac(const DerivativeInfo<locint, Base>& info,
                            type_hessian& hessian_vals,
                            const Base& w,
                            const type_adjoint& r);
 
-  void compute_hessian_deriv(locint local_dep,
+  void accumulate_hessian_deriv(locint local_dep,
                              const type_adjoint& local_adjoint,
                              const type_hessian& local_hessian,
                              type_hessian& global_hessian,
