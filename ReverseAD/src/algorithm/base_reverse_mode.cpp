@@ -5,6 +5,7 @@
 #include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/base_reverse_mode.hpp"
 #include "reversead/forwardtype/single_forward.hpp"
+#include "reversead/forwardtype/multi_forward.hpp"
 #include "reversead/util/error_info.hpp"
 
 #define COMBINE_D_1 info.dx += info.dy; info.dy = 0;
@@ -344,3 +345,5 @@ void BaseReverseMode<Base>::reverse_local_computation(int ind_num, int dep_num) 
 
 template class ReverseAD::BaseReverseMode<double>;
 template class ReverseAD::BaseReverseMode<ReverseAD::SingleForward>;
+template class ReverseAD::BaseReverseMode<ReverseAD::MultiForward<5>>;
+

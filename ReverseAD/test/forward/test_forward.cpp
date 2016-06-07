@@ -53,9 +53,9 @@ void check_forward_over_second(
   BaseReverseThird<double> third(trace);
   std::shared_ptr<DerivativeTensor<int, double>> tensor =
       third.compute(ind_num, dep_num).get_tensor();
-  int t_size;
-  int** t_tind;
-  double* t_value;
+  int t_size = 0;
+  int** t_tind = nullptr;
+  double* t_value = nullptr;
   tensor->get_internal_coordinate_list(0, 3, &t_size, &t_tind, &t_value);
 //  std::cout << "t_size = " << t_size << std::endl;
 //  for (int i=0; i<t_size; i++) {
@@ -111,9 +111,9 @@ void check_forward_over_reverse(
   BaseReverseHessian<double> hessian(trace);
   std::shared_ptr<DerivativeTensor<int, double>> tensor =
       hessian.compute(ind_num, dep_num).get_tensor();
-  int h_size;
-  int** h_tind;
-  double* h_value;
+  int h_size = 0;
+  int** h_tind = nullptr;
+  double* h_value = nullptr;
   tensor->get_internal_coordinate_list(0, 2, &h_size, &h_tind, &h_value);
 //  std::cout << "h_size = " << h_size << std::endl;
 //  for (int i=0; i<h_size; i++) {

@@ -163,6 +163,12 @@ SingleForward fabs(const SingleForward& rhs) {
   } else if (rhs._val < 0) {
     return SingleForward(-rhs._val, -1.0);
   }
+  if (rhs._der > 0) {
+    return SingleForward(0, 1.0);
+  } else if (rhs._der < 0) {
+    return SingleForward(0, -1.0);
+  }
   return SingleForward(0, 0);
 }
+
 } // namespace ReverseAD

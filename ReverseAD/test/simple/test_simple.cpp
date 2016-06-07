@@ -7,11 +7,11 @@ using ReverseAD::TrivialTrace;
 using ReverseAD::DerivativeTensor;
 using ReverseAD::BaseReverseTensor;
 
-#define N 1
+#define N 3
 #define M 1
 
 int main() {
-  double x[4] = {2, 3, 4, 5};
+  double x[4] = {1, 2, 3, 4};
   double y[M];
   adouble yad[M];
   adouble xad[N];
@@ -23,7 +23,11 @@ int main() {
   //double vp = 3.0;
   //adouble p = adouble::markParam(vp);
   //yad[0] = (xad[0] * (xad[0]+xad[0]-xad[0]) * (2*xad[0])/2 * sqrt(xad[0] * xad[0]) * xad[0] * xad[0] * log(exp(xad[0]))) / (xad[0] * 2);
-  yad[0] = (xad[0] * xad[0]) / xad[0];
+  //yad[0] = (xad[0] * xad[0]) / xad[0];
+  yad[0] = xad[0] * xad[1];
+  yad[0] += sin(xad[2]);
+  yad[0] *= cos(xad[0]);
+  yad[0] /= log(xad[1]);
   //yad[0] = x*(x+x-x)*(2*x)/2*sqrt(x*x)
   //yad[0] = xad[0];
   yad[0] >>= y[0];

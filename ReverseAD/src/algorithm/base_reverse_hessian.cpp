@@ -3,6 +3,7 @@
 #include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/base_reverse_hessian.hpp"
 #include "reversead/forwardtype/single_forward.hpp"
+#include "reversead/forwardtype/multi_forward.hpp"
 
 namespace ReverseAD {
 
@@ -189,3 +190,4 @@ void BaseReverseHessian<Base>::accumulate_hessian_deriv(
 
 template class ReverseAD::BaseReverseHessian<double>;
 template class ReverseAD::BaseReverseHessian<ReverseAD::SingleForward>;
+template class ReverseAD::BaseReverseHessian<ReverseAD::MultiForward<5>>;

@@ -6,6 +6,7 @@
 #include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/base_reverse_adjoint.hpp"
 #include "reversead/forwardtype/single_forward.hpp"
+#include "reversead/forwardtype/multi_forward.hpp"
 
 namespace ReverseAD {
 
@@ -171,3 +172,4 @@ void BaseReverseAdjoint<Base>::process_preacc(
 
 template class ReverseAD::BaseReverseAdjoint<double>;
 template class ReverseAD::BaseReverseAdjoint<ReverseAD::SingleForward>;
+template class ReverseAD::BaseReverseAdjoint<ReverseAD::MultiForward<5>>;

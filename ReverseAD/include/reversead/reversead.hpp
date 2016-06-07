@@ -7,6 +7,7 @@
 #include "reversead/activetype/base_active.hpp"
 #include "reversead/trace/trivial_trace.hpp"
 #include "reversead/forwardtype/single_forward.hpp"
+#include "reversead/forwardtype/multi_forward.hpp"
 #include "reversead/driver/forward_over_reverse.hpp"
 #include "reversead/checkpointing/iterative_func.hpp"
 #include "reversead/algorithm/base_function_replay.hpp"

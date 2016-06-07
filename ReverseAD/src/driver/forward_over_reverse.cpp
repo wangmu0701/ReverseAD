@@ -87,9 +87,6 @@ void forward_over_second(std::shared_ptr<TrivialTrace<double>> trace,
   for (int i=0; i<dep_size; i++) {
     tensor->get_internal_coordinate_list(i, 2, &size, &tind, &values);
     //std::cout << "size = " << size << std::endl;
-    if (size != ind_size) {
-      // some error here.
-    }
     for (int j = 0; j < ind_size; j++) {
       for(int k = 0; k < ind_size; k++) {
         third_vector[i][j][k] = 0.0;

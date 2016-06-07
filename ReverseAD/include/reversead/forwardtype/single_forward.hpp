@@ -84,6 +84,7 @@ SingleForward operator*(SingleForward lhs,
 SingleForward operator/(SingleForward lhs,
                                const SingleForward& rhs);
 
+// unary arithmetic
 SingleForward sqrt(const SingleForward& rhs);
 SingleForward log(const SingleForward& rhs);
 SingleForward exp(const SingleForward& rhs);

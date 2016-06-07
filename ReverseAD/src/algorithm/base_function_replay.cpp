@@ -6,11 +6,13 @@
 #include "reversead/common/opcodes.hpp"
 #include "reversead/algorithm/base_function_replay.hpp"
 #include "reversead/forwardtype/single_forward.hpp"
+#include "reversead/forwardtype/multi_forward.hpp"
 #include "reversead/util/error_info.hpp"
 
 using std::map;
 using ReverseAD::TrivialTrace;
 using ReverseAD::SingleForward;
+using ReverseAD::MultiForward;
 
 namespace ReverseAD {
 
@@ -481,3 +483,15 @@ template std::shared_ptr<TrivialTrace<SingleForward>>
       const SingleForward* const param_val, int param_num,
       bool reset_dep, bool reset_ind, bool reset_param);
 
+template std::shared_ptr<TrivialTrace<MultiForward<5>>>
+    ReverseAD::BaseFunctionReplay::replay_forward<double, MultiForward<5>>(
+      const std::shared_ptr<TrivialTrace<double>>& trace,
+      const MultiForward<5>* const ind_val, int ind_num);
+
+template std::shared_ptr<TrivialTrace<MultiForward<5>>>
+    ReverseAD::BaseFunctionReplay::replay<double, MultiForward<5>>(
+      const std::shared_ptr<TrivialTrace<double>>& trace,
+      MultiForward<5>* dep_val, int dep_num,
+      const MultiForward<5>* const ind_val, int ind_num,
+      const MultiForward<5>* const param_val, int param_num,
+      bool reset_dep, bool reset_ind, bool reset_param);
