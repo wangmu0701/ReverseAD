@@ -8,7 +8,7 @@ using ReverseAD::DerivativeTensor;
 
 extern double myEps;
 
-void check_value(int, std::shared_ptr<DerivativeTensor<int, double>>, double, bool&);
+void check_value(size_t, std::shared_ptr<DerivativeTensor<size_t, double>>, double, bool&);
 
 void check_answer(std::shared_ptr<TrivialTrace<double>> trace,
                   double vx,
@@ -24,7 +24,7 @@ void check_answer(std::shared_ptr<TrivialTrace<double>> trace,
 
   ReverseAD::BaseReverseThird<double> third_derivative(new_trace);
   third_derivative.enable_preacc();
-  std::shared_ptr<DerivativeTensor<int, double>> tensor =
+  std::shared_ptr<DerivativeTensor<size_t, double>> tensor =
       third_derivative.compute(1, 1).get_tensor();
   check_value(1, tensor, 2*vx*vp, done);
   check_value(2, tensor, 2*vp, done);

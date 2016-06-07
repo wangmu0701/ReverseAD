@@ -37,8 +37,8 @@ class TrivialHessian {
 
   // serializable
   TrivialHessian(char* buf);
-  int get_size() const;
-  int byte_size() const;
+  size_t get_size() const;
+  size_t byte_size() const;
   void write_to_byte(char*) const;
   void debug() const;
 
@@ -122,8 +122,8 @@ TrivialAdjoint<LocType, Base>& TrivialHessian<LocType, Base>::operator [] (LocTy
 }
 
 template <typename LocType, typename Base>
-int TrivialHessian<LocType, Base>::get_size() const {
-  int size_count = 0;
+size_t TrivialHessian<LocType, Base>::get_size() const {
+  size_t size_count = 0;
   typename std::map<LocType, TrivialAdjoint<LocType, Base> >::const_iterator t_iter;
   t_iter = _data.begin();
   while (t_iter != _data.end()) {
@@ -154,15 +154,15 @@ void TrivialHessian<LocType, Base>::debug() const {
 }
 
 template <typename LocType, typename Base>
-int TrivialHessian<LocType, Base>::byte_size() const {
-  return get_size() * (sizeof(double) + sizeof(LocType) * 2) + sizeof(int);
+size_t TrivialHessian<LocType, Base>::byte_size() const {
+  return get_size() * (sizeof(double) + sizeof(LocType) * 2) + sizeof(size_t);
 }
 
 template <typename LocType, typename Base>
 void TrivialHessian<LocType, Base>::write_to_byte(char* buf) const {
   char* p = buf;
-  *((int*)p) = get_size();
-  p += sizeof(int);
+  *((size_t*)p) = get_size();
+  p += sizeof(size_t);
   typename std::map<LocType, TrivialAdjoint<LocType, Base> >::const_iterator t_iter;
   t_iter = _data.begin();
   while (t_iter != _data.end()) {
@@ -188,12 +188,12 @@ template <typename LocType, typename Base>
 TrivialHessian<LocType, Base>::TrivialHessian(char* buf) {
   _data.clear();
   char* p = buf;
-  int size = 0;
+  size_t size = 0;
   LocType x;
   LocType y;
   Base w;
-  size = *((int*)p);
-  p += sizeof(int);
+  size = *((size_t*)p);
+  p += sizeof(size_t);
   for(int i = 0; i < size; i++) {
     x = *((LocType*)p);
     p += sizeof(LocType);

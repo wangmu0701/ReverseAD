@@ -17,14 +17,14 @@ using ReverseAD::BaseReverseThird;
 using ReverseAD::DerivativeTensor;
 
 double myEps = 1.E-10;
-void symmetric_third_vector(int n, int t_size, int** t_ind, double* t_value,
+void symmetric_third_vector(size_t n, size_t t_size, size_t** t_ind, double* t_value,
     double* v, double** tv) {
-  for(int i=0;i<n;i++) {
-    for(int j=0;j<n;j++) {
+  for(size_t i=0;i<n;i++) {
+    for(size_t j=0;j<n;j++) {
       tv[i][j] = 0;
     }
   }
-  for (int i=0;i<t_size;i++) {
+  for (size_t i=0;i<t_size;i++) {
     // we have orders t_ind[i][0] >=t_ind[i][1] >=t_ind[i][2];
     if (t_ind[i][0] != t_ind[i][1]) {
       if (t_ind[i][1] != t_ind[i][2]) { // [0]!=[1]!=[2]
@@ -47,14 +47,14 @@ void symmetric_third_vector(int n, int t_size, int** t_ind, double* t_value,
 }
 void check_forward_over_second(
     std::shared_ptr<TrivialTrace<double>> trace,
-    int ind_num, int dep_num,
+    size_t ind_num, size_t dep_num,
     double* ind_init_values,
     double* adjoint_init_values) {
   BaseReverseThird<double> third(trace);
-  std::shared_ptr<DerivativeTensor<int, double>> tensor =
+  std::shared_ptr<DerivativeTensor<size_t, double>> tensor =
       third.compute(ind_num, dep_num).get_tensor();
-  int t_size = 0;
-  int** t_tind = nullptr;
+  size_t t_size = 0;
+  size_t** t_tind = nullptr;
   double* t_value = nullptr;
   tensor->get_internal_coordinate_list(0, 3, &t_size, &t_tind, &t_value);
 //  std::cout << "t_size = " << t_size << std::endl;
@@ -64,15 +64,15 @@ void check_forward_over_second(
 //  }
   double** tv = new double*[ind_num];
   double** ctv = new double*[ind_num];
-  for (int i=0; i<ind_num; i++) {
+  for (size_t i=0; i<ind_num; i++) {
     tv[i] = new double[ind_num];
     ctv[i] = new double[ind_num];
   }
   forward_over_second(trace, ind_num, dep_num,
       ind_init_values, adjoint_init_values, &tv);
   symmetric_third_vector(ind_num, t_size, t_tind, t_value, adjoint_init_values, ctv);
-  for (int i=0; i<ind_num; i++) {
-    for(int j=0;j<ind_num; j++) {
+  for (size_t i=0; i<ind_num; i++) {
+    for(size_t j=0;j<ind_num; j++) {
       //std::cout << "tv["<<i<<", "<<j<<"] = "<<tv[i][j]<<std::endl;
       //std::cout << "ctv["<<i<<", "<<j<<"] = "<<ctv[i][j]<<std::endl;
       if (fabs(tv[i][j] - ctv[i][j]) > myEps) {
@@ -82,19 +82,19 @@ void check_forward_over_second(
     }
   }
   std::cout << "forward over second OK!" << std::endl;
-  for (int i=0; i<ind_num; i++) {
+  for (size_t i=0; i<ind_num; i++) {
     delete[] tv[i];
     delete[] ctv[i];
   }
   delete[] tv;
   delete[] ctv; 
 }
-void symmetric_matrix_vector(int n, int h_size, int** h_tind,
+void symmetric_matrix_vector(size_t n, size_t h_size, size_t** h_tind,
     double* h_value, double* v, double* hv) {
-  for (int i=0; i<n; i++) {
+  for (size_t i=0; i<n; i++) {
     hv[i] = 0.0;
   }
-  for (int i=0; i<h_size; i++) {
+  for (size_t i=0; i<h_size; i++) {
     if (h_tind[i][0] != h_tind[i][1]) {
       hv[h_tind[i][0]] += h_value[i] * v[h_tind[i][1]];
       hv[h_tind[i][1]] += h_value[i] * v[h_tind[i][0]];
@@ -105,14 +105,14 @@ void symmetric_matrix_vector(int n, int h_size, int** h_tind,
 }
 void check_forward_over_reverse(
     std::shared_ptr<TrivialTrace<double>> trace,
-    int ind_num, int dep_num,
+    size_t ind_num, size_t dep_num,
     double* ind_init_values,
     double* adjoint_init_values) {
   BaseReverseHessian<double> hessian(trace);
-  std::shared_ptr<DerivativeTensor<int, double>> tensor =
+  std::shared_ptr<DerivativeTensor<size_t, double>> tensor =
       hessian.compute(ind_num, dep_num).get_tensor();
-  int h_size = 0;
-  int** h_tind = nullptr;
+  size_t h_size = 0;
+  size_t** h_tind = nullptr;
   double* h_value = nullptr;
   tensor->get_internal_coordinate_list(0, 2, &h_size, &h_tind, &h_value);
 //  std::cout << "h_size = " << h_size << std::endl;
@@ -124,7 +124,7 @@ void check_forward_over_reverse(
   forward_over_reverse(trace, ind_num, dep_num,
       ind_init_values, adjoint_init_values, &hv);
   symmetric_matrix_vector(ind_num, h_size, h_tind, h_value, adjoint_init_values, chv);
-  for (int i=0; i<ind_num; i++) {
+  for (size_t i=0; i<ind_num; i++) {
     //std::cout << "hv["<<i<<"] = "<<hv[i]<<std::endl;
     //std::cout << "chv["<<i<<"] = "<<chv[i]<<std::endl;
     if (fabs(hv[i] - chv[i]) > myEps) {

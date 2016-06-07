@@ -18,14 +18,14 @@ class BaseReverseTensor : public BaseReverseMode<Base> {
   using BaseReverseMode<Base>::indep_index_map;
   using BaseReverseMode<Base>::dep_index_map;
 
-  BaseReverseTensor(const std::shared_ptr<TrivialTrace<Base>>& trace, int order);
+  BaseReverseTensor(const std::shared_ptr<TrivialTrace<Base>>& trace, size_t order);
 
-  std::shared_ptr<DerivativeTensor<int, Base>> get_tensor() const override;
+  std::shared_ptr<DerivativeTensor<size_t, Base>> get_tensor() const override;
 
   void clear() override final;
 
  protected:
-  void init_dep_deriv(locint dep, int dep_count) override final;
+  void init_dep_deriv(locint dep) override final;
   void process_sac(const DerivativeInfo<locint, Base>& info) override final;
 
   void accumulate_deriv(TensorDeriv<locint, Base>& global_deriv);
@@ -33,7 +33,7 @@ class BaseReverseTensor : public BaseReverseMode<Base> {
  private:
   void fill_in_ginfo(const DerivativeInfo<locint, Base>& dinfo);
   
-  int order;
+  size_t order;
   TensorDerivativeInfo<locint, Base> ginfo;
   std::map<locint, TensorDeriv<locint, Base>> dep_deriv;
 
@@ -46,18 +46,18 @@ class BaseReverseTensor : public BaseReverseMode<Base> {
 
   // make these private for some efficiency
   mutable TempMemoryAllocator temp_memory;
-  int r_count;
-  int x_count;
-  int y_count;
+  size_t r_count;
+  size_t x_count;
+  size_t y_count;
   double w;
-  mutable int size;
+  mutable size_t size;
   mutable locint** tind; 
   mutable double* values;
   mutable char* temp;
-  int case_code;
-  void assign_pointers(int s_order) const;
-  void binary_generator(int s_order, TensorDeriv<locint, Base>&);
-  void unary_generator(int s_order, TensorDeriv<locint, Base>&);
+  size_t case_code;
+  void assign_pointers(size_t s_order) const;
+  void binary_generator(size_t s_order, TensorDeriv<locint, Base>&);
+  void unary_generator(size_t s_order, TensorDeriv<locint, Base>&);
 };
 
 } // namespace ReverseAD

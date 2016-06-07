@@ -48,11 +48,11 @@ int main() {
   int order = 6;
   ReverseAD::BaseReverseTensor<double> third(trace, order);
   third.compute(N, M);
-  std::shared_ptr<DerivativeTensor<int, double>> tensor = third.get_tensor();
+  std::shared_ptr<DerivativeTensor<size_t, double>> tensor = third.get_tensor();
   third.clear();
   std::cout << "done" << std::endl;
-  int size;
-  int** tind = nullptr;
+  size_t size;
+  size_t** tind = nullptr;
   double* values = nullptr; 
 /*
   tensor->get_internal_coordinate_list(0, 1, &size, &tind, &values);
@@ -75,12 +75,12 @@ int main() {
               << ", " << tind[i][2] << " ] =" << values[i] << std::endl;
   }
 */
-  for (int i = 1; i <= order; i++) {
+  for (size_t i = 1; i <= order; i++) {
     tensor->get_internal_coordinate_list(0, i, &size, &tind, &values);
     std::cout << "Order : " << i << " size = " << size << std::endl;
-    for (int j = 0; j < size; j++) {
+    for (size_t j = 0; j < size; j++) {
       std::cout << "T[" << tind[j][0];
-      for (int k = 1; k < i; k++) {
+      for (size_t k = 1; k < i; k++) {
         std::cout << ", " << tind[j][k];
       }
       std::cout << "] = " << values[j] << std::endl;

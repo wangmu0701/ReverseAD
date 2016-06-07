@@ -20,14 +20,14 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
   using BaseReverseMode<Base>::indep_index_map;
   using BaseReverseMode<Base>::dep_index_map;
 
-  BaseReverseGeneric(const std::shared_ptr<TrivialTrace<Base>>& trace, int order);
+  BaseReverseGeneric(const std::shared_ptr<TrivialTrace<Base>>& trace, size_t order);
 
-  std::shared_ptr<DerivativeTensor<int, Base>> get_tensor() const override;
+  std::shared_ptr<DerivativeTensor<size_t, Base>> get_tensor() const override;
 
   void clear() override final;
 
  protected:
-  void init_dep_deriv(locint dep, int dep_count) override final;
+  void init_dep_deriv(locint dep) override final;
 
   void process_sac(const DerivativeInfo<locint, Base>& info) override;
 
@@ -35,20 +35,20 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
                         const GenericDeriv<locint, Base>& local_deriv,
                         GenericDeriv<locint, Base>& global_deriv);
 
-  int order;
+  size_t order;
 
   // this will shadow the same name in BaseReverseMode because it's a template
   mutable std::map<locint, GenericDeriv<locint, Base> > dep_deriv;
 
  private:
   // some private temps used when accumulating, avoid pointers on stack
-  int dx[REVERSEAD_MAX_GENERIC_ORDER + 1];
-  int dy[REVERSEAD_MAX_GENERIC_ORDER + 1];
+  size_t dx[REVERSEAD_MAX_GENERIC_ORDER + 1];
+  size_t dy[REVERSEAD_MAX_GENERIC_ORDER + 1];
   Base ssw[(REVERSEAD_MAX_GENERIC_ORDER + 1) * (REVERSEAD_MAX_GENERIC_ORDER + 1)];
-  int max_level;
-  int max_order;
-  int cx;
-  int cy;
+  size_t max_level;
+  size_t max_order;
+  size_t cx;
+  size_t cy;
   locint temp_x;
   locint temp_y;
   
@@ -62,10 +62,10 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
 
   void clear_private_temps();
 
-  void generate_binary_tuples(int curr_level, int curr_order, Base pw,
+  void generate_binary_tuples(size_t curr_level, size_t curr_order, Base pw,
     typename GenericDeriv<locint, Base>::enumerator curr_enum);
 
-  void generate_unary_tuples(int curr_level, int curr_order, Base pw,
+  void generate_unary_tuples(size_t curr_level, size_t curr_order, Base pw,
     typename GenericDeriv<locint, Base>::enumerator curr_enum);
 
   double binary_sym_coeff();

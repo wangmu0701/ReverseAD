@@ -51,14 +51,14 @@ std::shared_ptr<TrivialTrace<T>> bar(T a, T b, T c) {
 
 void check_forward_over_second(
     std::shared_ptr<TrivialTrace<double>> trace,
-    int ind_num, int dep_num,
+    size_t ind_num, size_t dep_num,
     double ind_init_values[],
     double adjoint_init_values[][5]) {
   BaseReverseThird<double> third(trace);
-  std::shared_ptr<DerivativeTensor<int, double>> tensor =
+  std::shared_ptr<DerivativeTensor<size_t, double>> tensor =
       third.compute(ind_num, dep_num).get_tensor();
-  int t_size;
-  int** t_tind;
+  size_t t_size;
+  size_t** t_tind;
   double* t_value;
   tensor->get_internal_coordinate_list(0, 3, &t_size, &t_tind, &t_value);
 //  std::cout << "t_size = " << t_size << std::endl;
@@ -68,7 +68,7 @@ void check_forward_over_second(
 //  }
   double** tv = new double*[ind_num];
   double** ctv = new double*[ind_num];
-  for (int i=0; i<ind_num; i++) {
+  for (size_t i=0; i<ind_num; i++) {
     tv[i] = new double[ind_num];
     ctv[i] = new double[ind_num];
   }
@@ -78,7 +78,7 @@ void check_forward_over_second(
 */
   void* raw_memory = ::operator new[] (ind_num * sizeof(MultiForward<5>));
   MultiForward<5>* x = static_cast<MultiForward<5>*>(raw_memory);
-  for (int i = 0; i < ind_num; i++) {
+  for (size_t i = 0; i < ind_num; i++) {
     new(&x[i]) MultiForward<5>(ind_init_values[i], adjoint_init_values[i]);
   }
   std::shared_ptr<TrivialTrace<MultiForward<5>>> new_trace = 
@@ -87,13 +87,13 @@ void check_forward_over_second(
 
   BaseReverseHessian<MultiForward<5>> hessian(new_trace);
   hessian.compute(ind_num, dep_num);
-  std::shared_ptr<DerivativeTensor<int, MultiForward<5>>> m_tensor =
+  std::shared_ptr<DerivativeTensor<size_t, MultiForward<5>>> m_tensor =
       hessian.get_tensor();
-  int size;
-  int** tind;
+  size_t size;
+  size_t** tind;
   MultiForward<5>* values;
   m_tensor->get_internal_coordinate_list(0, 2, &size, &tind, &values);
-  for (int i = 0; i < size; i++) {
+  for (size_t i = 0; i < size; i++) {
     std::cout << "H["<< tind[i][0]<<", "<<tind[i][1] << "] = "
               << values[i] << std::endl;
   }

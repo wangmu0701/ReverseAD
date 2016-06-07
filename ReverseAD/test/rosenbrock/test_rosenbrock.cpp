@@ -41,19 +41,19 @@ int main() {
     ReverseAD::BaseFunctionReplay::replay_ind(trace, ry,1 ,x, N); 
   std::cout << " ry = " << ry[0] << std::endl;
   ReverseAD::BaseReverseHessian<double> hessian(new_trace);
-  std::shared_ptr<DerivativeTensor<int, double>> tensor =
+  std::shared_ptr<DerivativeTensor<size_t, double>> tensor =
       hessian.compute(N, 1).get_tensor();
-  int size;
-  int** tind;
+  size_t size;
+  size_t** tind;
   double* values;
   tensor->get_internal_coordinate_list(0, 1, &size, &tind, &values);
   std::cout << "adjoint size = " << size << std::endl;
-  for (int i=0; i<size; i++) {
+  for (size_t i=0; i<size; i++) {
     std::cout << "A["<<tind[i][0] << "] = " << values[i] << std::endl;
   }
   tensor->get_internal_coordinate_list(0, 2, &size, &tind, &values);
   std::cout << "hessian size = "<<size << std::endl;
-  for(int i = 0; i < size; i++) {
+  for(size_t i = 0; i < size; i++) {
     std::cout << "H["<<tind[i][0]<<","<<tind[i][1]<<"] = "<<values[i] << std::endl;
   }
 }

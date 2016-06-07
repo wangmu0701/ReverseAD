@@ -17,17 +17,17 @@ class CheckpointTrace {
   void init_reverse();
   void end_reverse();
   // the return value is the current number of checkpoints
-  int make_checkpoint(adouble* x, int x_num,
+  size_t make_checkpoint(adouble* x, size_t x_num,
                        std::shared_ptr<RuntimeEnv>& _runtime_env);
-  void set_iteration_num(int);
-  int get_checkpoint(adouble* x, int x_num,
+  void set_iteration_num(size_t);
+  size_t get_checkpoint(adouble* x, size_t x_num,
                       std::shared_ptr<RuntimeEnv>& _runtime_env);
-  int get_iteration_num();
+  size_t get_iteration_num();
   void dump_trace() const;
  private:
-  int _checkpoint_num;
-  std::shared_ptr<TrivialTape<int>> _tape_x_num;
-  std::shared_ptr<TrivialTape<int>> _tape_iter_num;
+  size_t _checkpoint_num;
+  std::shared_ptr<TrivialTape<size_t>> _tape_x_num;
+  std::shared_ptr<TrivialTape<size_t>> _tape_iter_num;
   std::shared_ptr<VirtualTape<double>> _tape_x_values;
   std::shared_ptr<VirtualTape<locint>> _tape_x_locint;
   std::shared_ptr<TrivialTape<RuntimeEnv>> _tape_runtime_env;

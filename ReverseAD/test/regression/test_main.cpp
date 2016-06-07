@@ -8,12 +8,12 @@ double myEps = 1.E-10;
 
 int run_function();
 
-void check_value(int t_order,
-                 std::shared_ptr<DerivativeTensor<int, double>> tensor,
+void check_value(size_t t_order,
+                 std::shared_ptr<DerivativeTensor<size_t, double>> tensor,
                  double true_answer,
                  bool& done) {
-  int size;
-  int** tind;
+  size_t size;
+  size_t** tind;
   double* values;
   tensor->get_internal_coordinate_list(0, t_order, &size, &tind, &values);
   if (size > 1) {

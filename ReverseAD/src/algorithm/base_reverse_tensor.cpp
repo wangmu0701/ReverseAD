@@ -5,20 +5,20 @@ namespace ReverseAD {
 #include "generator/tensor.ipp"
 
 //#include "generator/generator.ipp"
-int kOrderShift = 1000000;
-int kRCountShift =  10000;
-int kXCountShift =    100;
-int kYCountShift =      1;
+size_t kOrderShift = 1000000;
+size_t kRCountShift =  10000;
+size_t kXCountShift =    100;
+size_t kYCountShift =      1;
 
 template <typename Base>
 BaseReverseTensor<Base>::BaseReverseTensor(
     const std::shared_ptr<TrivialTrace<Base>>& trace,
-    int order) : BaseReverseMode<Base>(trace) {
+    size_t order) : BaseReverseMode<Base>(trace) {
   if (order > REVERSEAD_MAX_TENSOR_ORDER) {
     std::cout << "Sorry, max order for tensor should be less than "
               << REVERSEAD_MAX_TENSOR_ORDER << "." << std::endl;
   }
-  if (order <= 0) {
+  if (order == 0) {
     std::cout << "Order(" << order << ") should be positive." << std::endl;
   }
   this->order = order;
@@ -28,21 +28,21 @@ BaseReverseTensor<Base>::BaseReverseTensor(
 
 template <typename Base>
 void BaseReverseTensor<Base>::special_derivative_coeff() {
-  for (int i=0;i<=REVERSEAD_MAX_TENSOR_ORDER; i++) {
-    for (int j=0;j<=REVERSEAD_MAX_TENSOR_ORDER; j++) {
-      for (int k=0;k<=REVERSEAD_MAX_TENSOR_ORDER; k++) {
+  for (size_t i=0;i<=REVERSEAD_MAX_TENSOR_ORDER; i++) {
+    for (size_t j=0;j<=REVERSEAD_MAX_TENSOR_ORDER; j++) {
+      for (size_t k=0;k<=REVERSEAD_MAX_TENSOR_ORDER; k++) {
         c_atan[i][j][k] = c_asin[i][j][k] =  0.0;
       }
     }
   }
   c_atan[1][1][0] = c_asin[1][1][0] = 1.0;
-  for (int i=2; i <= REVERSEAD_MAX_TENSOR_ORDER; i++) {
-    for (int j = REVERSEAD_MAX_TENSOR_ORDER; j >= 2; j--) {
-      for (int k=0; k < REVERSEAD_MAX_TENSOR_ORDER; k++) {
+  for (size_t i=2; i <= REVERSEAD_MAX_TENSOR_ORDER; i++) {
+    for (size_t j = REVERSEAD_MAX_TENSOR_ORDER; j >= 2; j--) {
+      for (size_t k=0; k < REVERSEAD_MAX_TENSOR_ORDER; k++) {
         c_atan[i][j][k] = c_atan[i-1][j][k+1] * (k+1);
         c_asin[i][j][k] = c_asin[i-1][j][k+1] * (k+1);
       }
-      for (int k=1; k <= REVERSEAD_MAX_TENSOR_ORDER; k++) {
+      for (size_t k=1; k <= REVERSEAD_MAX_TENSOR_ORDER; k++) {
         c_atan[i][j][k] += c_atan[i-1][j-1][k-1] * 2 * (1-j);
         c_asin[i][j][k] += c_asin[i-1][j-1][k-1] * -2 * (1.5 - j);
       }
@@ -57,7 +57,7 @@ void BaseReverseTensor<Base>::clear() {
 }
 
 template <typename Base>
-void BaseReverseTensor<Base>::init_dep_deriv(locint dep, int dep_count) {
+void BaseReverseTensor<Base>::init_dep_deriv(locint dep) {
   TensorDeriv<locint, Base> d_deriv(order);
   TensorIndex<locint> t_index;
   t_index.insert(dep);
@@ -67,23 +67,25 @@ void BaseReverseTensor<Base>::init_dep_deriv(locint dep, int dep_count) {
 }
 
 template <typename Base>
-std::shared_ptr<DerivativeTensor<int, Base>>
+std::shared_ptr<DerivativeTensor<size_t, Base>>
     BaseReverseTensor<Base>::get_tensor() const {
-  int* ttind = new int[order];
-  int dep_size = dep_deriv.size();
-  int ind_size = indep_index_map.size();
-  std::shared_ptr<DerivativeTensor<int, Base>> ret =
-      std::make_shared<DerivativeTensor<int, Base>>(dep_size, ind_size, order);
+  size_t* ttind = new size_t[order];
+  size_t dep_size = dep_deriv.size();
+  size_t ind_size = indep_index_map.size();
+  std::shared_ptr<DerivativeTensor<size_t, Base>> ret =
+      std::make_shared<DerivativeTensor<size_t, Base>>(dep_size, ind_size, order);
   BaseReverseMode<Base>::transcript_dep_value(ret);
   for (auto& kv : dep_deriv) {
-    locint dep = dep_index_map.find(kv.first)->second - 1;
-    for (int d = 1; d <= order; d++) {
+    locint dep = dep_index_map.find(kv.first)->second;
+    for (size_t d = 1; d <= order; d++) {
       size = kv.second.tensor[d]->size();
       ret->init_single_tensor(dep, d, size);
       assign_pointers(d);
       kv.second.tensor[d]->to_array(tind, values, 0, 0);
-      for (int i = 0; i < size; i++) {
-        for (int j = 0; j < d; j++) {ttind[j] = tind[i][j];}
+      for (size_t i = 0; i < size; i++) {
+        for (size_t j = 0; j < d; j++) {
+          ttind[j] = indep_index_map.find(tind[i][j])->second;
+        }
         ret->put_value(dep, d, i, ttind, values[i]);
       }
       temp_memory.return_memory();
@@ -117,12 +119,12 @@ void BaseReverseTensor<Base>::process_sac(
 }
 
 template <typename Base>
-void BaseReverseTensor<Base>::assign_pointers(int s_order) const {
+void BaseReverseTensor<Base>::assign_pointers(size_t s_order) const {
   temp = (char*)temp_memory.get_memory(
       size * (sizeof(locint*) + sizeof(locint)*s_order + sizeof(double)));
   tind = (locint**)temp;
   temp += sizeof(locint*) * size;
-  for (int i = 0; i < size; i++) {
+  for (size_t i = 0; i < size; i++) {
     tind[i] = (locint*)temp;
     temp += sizeof(locint) * s_order;
   }
@@ -131,14 +133,14 @@ void BaseReverseTensor<Base>::assign_pointers(int s_order) const {
 
 template <typename Base>
 void BaseReverseTensor<Base>::unary_generator(
-    int s_order, TensorDeriv<locint, Base>& global_deriv) {
+    size_t s_order, TensorDeriv<locint, Base>& global_deriv) {
   //std::cout << "s_order = " << s_order << std::endl;
   //std::cout << "size = " << size << std::endl;
   TensorIndex<locint> t_index;
-  for (int i = 0; i < size; i++) {
+  for (size_t i = 0; i < size; i++) {
     t_index.clear();
     r_count = 1; x_count = 0; y_count = 0;
-    for (int j = 0; j < s_order; j++) {
+    for (size_t j = 0; j < s_order; j++) {
       if (tind[i][j] == ginfo.r) {
         r_count++;
       } else {
@@ -158,12 +160,12 @@ void BaseReverseTensor<Base>::unary_generator(
 
 template <typename Base>
 void BaseReverseTensor<Base>::binary_generator(
-    int s_order, TensorDeriv<locint, Base>& global_deriv) {
+    size_t s_order, TensorDeriv<locint, Base>& global_deriv) {
   TensorIndex<locint> t_index;
-  for (int i = 0; i < size; i++) {
+  for (size_t i = 0; i < size; i++) {
     t_index.clear();
     r_count = 1; x_count = 0; y_count = 0;
-    for (int j = 0; j < s_order; j++) {
+    for (size_t j = 0; j < s_order; j++) {
       if (tind[i][j] == ginfo.r) {
         r_count++;
       } else {
@@ -189,7 +191,7 @@ void BaseReverseTensor<Base>::accumulate_deriv(
   TensorDeriv<locint, Base> slice_deriv(order);
   global_deriv.get_and_erase(ginfo.r, slice_deriv);
   TensorIndex<locint> t_index;
-  for (int d = 0; d < order; d++) {
+  for (size_t d = 0; d < order; d++) {
     size = slice_deriv.tensor[d]->size();
     assign_pointers(d);
     slice_deriv.tensor[d]->to_array(tind, values, 0, 0);
@@ -251,9 +253,9 @@ void BaseReverseTensor<Base>::fill_in_ginfo(
             Base sw = 0;
             Base w = 0;
             Base s = 1.0;
-            for (int i = 0; i <= 6; i++) {
+            for (size_t i = 0; i <= 6; i++) {
               w = 1.0;
-              for (int j = 0; j <=i; j++) {
+              for (size_t j = 0; j <=i; j++) {
                 sw += c_atan[6][i][j] * w * s;
                 w = w * dinfo.vx;
               }
@@ -299,9 +301,9 @@ void BaseReverseTensor<Base>::fill_in_ginfo(
             Base sw = 0;
             Base w = 0;
             Base s = sqrt(1.0 - dinfo.vx * dinfo.vx);
-            for (int i = 0; i <= 5; i++) {
+            for (size_t i = 0; i <= 5; i++) {
               w = 1.0;
-              for (int j = 0; j <=i; j++) {
+              for (size_t j = 0; j <=i; j++) {
                 sw += c_asin[5][i][j] * w * s;
                 w = w * dinfo.vx;
               }
@@ -320,9 +322,9 @@ void BaseReverseTensor<Base>::fill_in_ginfo(
             Base sw = 0;
             Base w = 0;
             Base s = 1.0;
-            for (int i = 0; i <= 5; i++) {
+            for (size_t i = 0; i <= 5; i++) {
               w = 1.0;
-              for (int j = 0; j <=i; j++) {
+              for (size_t j = 0; j <=i; j++) {
                 sw += c_atan[5][i][j] * w * s;
                 w = w * dinfo.vx;
               }
@@ -368,9 +370,9 @@ void BaseReverseTensor<Base>::fill_in_ginfo(
             Base sw = 0;
             Base w = 0;
             Base s = sqrt(1.0 - dinfo.vx * dinfo.vx);
-            for (int i = 0; i <= 4; i++) {
+            for (size_t i = 0; i <= 4; i++) {
               w = 1.0;
-              for (int j = 0; j <=i; j++) {
+              for (size_t j = 0; j <=i; j++) {
                 sw += c_asin[4][i][j] * w * s;
                 w = w * dinfo.vx;
               }
@@ -389,9 +391,9 @@ void BaseReverseTensor<Base>::fill_in_ginfo(
             Base sw = 0;
             Base w = 0;
             Base s = 1.0;
-            for (int i = 0; i <= 4; i++) {
+            for (size_t i = 0; i <= 4; i++) {
               w = 1.0;
-              for (int j = 0; j <=i; j++) {
+              for (size_t j = 0; j <=i; j++) {
                 sw += c_atan[4][i][j] * w * s;
                 w = w * dinfo.vx;
               }

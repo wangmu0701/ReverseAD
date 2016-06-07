@@ -13,7 +13,7 @@ template <typename LocType, typename Base>
 class GenericDeriv {
  public:
   GenericDeriv(): _order(0) {};
-  GenericDeriv(int order): _order(order) {_data.resize(_order);};
+  GenericDeriv(size_t order): _order(order) {_data.resize(_order);};
   void clear() {
     _data.clear();
     _data.resize(_order);
@@ -29,12 +29,12 @@ class GenericDeriv {
     _data[order-1][set] += v;
   }
 
-  int get_size(int order) const {
+  size_t get_size(size_t order) const {
     return _data[order].size();
   }
 
   Base get(const GenericMultiset<LocType>& set) {
-    int order = set.size();
+    size_t order = set.size();
     if (check_size_fail(order)) {
       return;
     }
@@ -139,10 +139,10 @@ class GenericDeriv {
  }
 
  private:
-  int _order; // LocTypehe highest order
+  size_t _order; // LocTypehe highest order
   std::vector<std::map<GenericMultiset<LocType>, Base> > _data;
   
-  bool check_size_fail(int order) {
+  bool check_size_fail(size_t order) {
     if (order < 1 || order > _order) {
       std::cout << "Max order = " << _order
                 << ", Input size = " << order << std::endl;

@@ -35,8 +35,8 @@ class TrivialAdjoint {
   // serializable
   TrivialAdjoint(char* buf);
   void debug() const;
-  int get_size() const;
-  int byte_size() const;
+  size_t get_size() const;
+  size_t byte_size() const;
   void write_to_byte(char* buf) const;
 
   class enumerator {
@@ -103,7 +103,7 @@ Base& TrivialAdjoint<LocType, Base>::operator [] (LocType x) {
 }
 
 template <typename LocType, typename Base>
-int TrivialAdjoint<LocType, Base>::get_size() const {
+size_t TrivialAdjoint<LocType, Base>::get_size() const {
   return _data.size();
 }
 
@@ -118,15 +118,15 @@ void TrivialAdjoint<LocType, Base>::debug() const {
 }
 
 template <typename LocType, typename Base>
-int TrivialAdjoint<LocType, Base>::byte_size() const {
-  return _data.size() * (sizeof(LocType) + sizeof(Base)) + sizeof(int);
+size_t TrivialAdjoint<LocType, Base>::byte_size() const {
+  return _data.size() * (sizeof(LocType) + sizeof(Base)) + sizeof(size_t);
 }
 
 template <typename LocType, typename Base>
 void TrivialAdjoint<LocType, Base>::write_to_byte(char* buf) const {
   char* p = buf;
-  *((int*)p) = _data.size();
-  p += sizeof(int);
+  *((size_t*)p) = _data.size();
+  p += sizeof(size_t);
   typename std::map<LocType, Base>::const_iterator t_iter;
   t_iter = _data.begin();
   while(t_iter != _data.end()) {
@@ -144,9 +144,9 @@ TrivialAdjoint<LocType, Base>::TrivialAdjoint(char* buf) {
   char* p = buf;
   LocType loc;
   Base w;
-  int size = *((int*)p);
-  p += sizeof(int);
-  for(int i = 0; i < size; i++) {
+  size_t size = *((size_t*)p);
+  p += sizeof(size_t);
+  for(size_t i = 0; i < size; i++) {
     loc = *((LocType*)p);
     p += sizeof(LocType);
     w = *((Base*)p);

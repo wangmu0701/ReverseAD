@@ -14,10 +14,10 @@ template <typename LocType, typename Base>
 class TensorDeriv {
  public:
   TensorDeriv(): _order(0) {initial_template_tensor();};
-  TensorDeriv(int order) : _order(order) {initial_template_tensor();};
+  TensorDeriv(size_t order) : _order(order) {initial_template_tensor();};
   void initial_template_tensor() {
     tensor.clear();
-    for (int i = 0; i <= _order; i++) {
+    for (size_t i = 0; i <= _order; i++) {
       switch (i) {
         case 0:
           //tensor.push_back(new SymmetryTensor<LocType, Base, 0>());
@@ -107,7 +107,7 @@ class TensorDeriv {
   }
   void debug() {
     std::cout << "=====" << std::endl;
-    for (int i = 0; i <= _order; i++) {
+    for (size_t i = 0; i <= _order; i++) {
       tensor[i]->debug();
     }
     //tensor0.debug();
@@ -116,7 +116,7 @@ class TensorDeriv {
     //tensor3.debug();
     //tensor4.debug();
   }
-  int _order;
+  size_t _order;
   std::vector<std::shared_ptr<SymmetryTensorBase<LocType, Base>>> tensor;
 /*
   SymmetryTensor<LocType, Base, 0> tensor0;

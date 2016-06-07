@@ -12,25 +12,25 @@ namespace ReverseAD {
 // pointers. So for now, this class only consider overloaded type.
 class IterativeFunc {
  public:
-  IterativeFunc(int x_num, int t_num, int y_num,
-                void (*set_up)(adouble*, int, adouble*, int),
-                void (*tear_down)(adouble*, int, adouble*, int),
-                void (*run)(adouble*, int),
-                bool (*while_condition)(const adouble* const, int));
-  void run(double*, int, double*, int);
-  std::shared_ptr<DerivativeTensor<int, double>> compute(
-      double*, int, double*, int, int);
+  IterativeFunc(size_t x_num, size_t t_num, size_t y_num,
+                void (*set_up)(adouble*, size_t, adouble*, size_t),
+                void (*tear_down)(adouble*, size_t, adouble*, size_t),
+                void (*run)(adouble*, size_t),
+                bool (*while_condition)(const adouble* const, size_t));
+  void run(double*, size_t, double*, size_t);
+  std::shared_ptr<DerivativeTensor<size_t, double>> compute(
+      double*, size_t, double*, size_t, size_t);
  
  private:
-  int _x_num;
-  int _t_num;
-  int _y_num;
+  size_t _x_num;
+  size_t _t_num;
+  size_t _y_num;
 
-  void (*_set_up)(adouble* x_values, int x_num, adouble* t, int t_num);
-  void (*_tear_down)(adouble* t, int t_num, adouble* y_values, int y_num);
-  void (*_run)(adouble* t, int t_num);
+  void (*_set_up)(adouble* x_values, size_t x_num, adouble* t, size_t t_num);
+  void (*_tear_down)(adouble* t, size_t t_num, adouble* y_values, size_t y_num);
+  void (*_run)(adouble* t, size_t t_num);
   // const adouble* const make t only readable, implies no changes in loc?
-  bool (*_while_condition)(const adouble* const t, int t_num);
+  bool (*_while_condition)(const adouble* const t, size_t t_num);
 };
 
 } // namespace ReverseAD

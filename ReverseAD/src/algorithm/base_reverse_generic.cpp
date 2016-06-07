@@ -18,7 +18,7 @@ static const double kFactorial[REVERSEAD_MAX_GENERIC_ORDER + 1] =
 
 template <typename Base>
 BaseReverseGeneric<Base>::BaseReverseGeneric(
-    const std::shared_ptr<TrivialTrace<Base>>& trace, int order)
+    const std::shared_ptr<TrivialTrace<Base>>& trace, size_t order)
         : BaseReverseMode<Base>(trace) {
   if (order > REVERSEAD_MAX_GENERIC_ORDER) {
     std::cout << "Sorry, max order should be less than "
@@ -47,8 +47,8 @@ void BaseReverseGeneric<Base>::accumulate_deriv(
   while (s_enum.has_next()) {
     s_enum.get_curr_pair(s_set, sw);
     s_enum.move_to_next();
-    int t_size = s_set.count(info.r);
-    for(int i=0;i<t_size;i++) {s_set.remove(info.r);}
+    size_t t_size = s_set.count(info.r);
+    for(size_t i = 0;i < t_size; i++) {s_set.remove(info.r);}
     clear_private_temps();
     max_level = t_size;
     max_order = order - s_set.size();
@@ -61,9 +61,9 @@ void BaseReverseGeneric<Base>::accumulate_deriv(
                              0, // curr_order
                              sw,
                              local_deriv.get_enumerator()); // initial enum)
-      for (int i=0; i<= order; i++) {
+      for (size_t i = 0; i <= order; i++) {
         GenericMultiset<locint> ss_set(s_set);
-        for(int j=0; j<=order; j++) {
+        for(size_t j=0; j<=order; j++) {
           if (!IsZero(ssw[i*(order+1)+j])) {
             global_deriv.increase(ss_set, ssw[i*(order+1)+j]);
           }
@@ -77,7 +77,7 @@ void BaseReverseGeneric<Base>::accumulate_deriv(
                             0, // curr_order
                             sw,
                             local_deriv.get_enumerator()); // initial enum
-      for (int i=1; i<=order; i++) {
+      for (size_t i = 1; i <= order; i++) {
         s_set.insert(info.x);
         if (!IsZero(ssw[i])) {
           global_deriv.increase(s_set, ssw[i]);
@@ -88,20 +88,20 @@ void BaseReverseGeneric<Base>::accumulate_deriv(
 }
 
 template <typename Base>
-std::shared_ptr<DerivativeTensor<int, Base>>
+std::shared_ptr<DerivativeTensor<size_t, Base>>
     BaseReverseGeneric<Base>::get_tensor() const {
-  int dep_size = dep_deriv.size();
-  int ind_size = indep_index_map.size();
-  std::shared_ptr<DerivativeTensor<int, Base>> ret =
-      std::make_shared<DerivativeTensor<int, Base>>(dep_size, ind_size, order);
+  size_t dep_size = dep_deriv.size();
+  size_t ind_size = indep_index_map.size();
+  std::shared_ptr<DerivativeTensor<size_t, Base>> ret =
+      std::make_shared<DerivativeTensor<size_t, Base>>(dep_size, ind_size, order);
   BaseReverseMode<Base>::transcript_dep_value(ret);
-  int* size = new int[order];
-  int* curr_l = new int[order];
+  size_t* size = new size_t[order];
+  size_t* curr_l = new size_t[order];
   locint* t = new locint[order];
-  int* x = new int[order];
+  size_t* x = new size_t[order];
   for (auto& kv : dep_deriv) {
-    locint dep = dep_index_map.find(kv.first)->second - 1;
-    for (int i = 0; i < order; i++) {
+    size_t dep = dep_index_map.find(kv.first)->second;
+    for (size_t i = 0; i < order; i++) {
       size[i] = kv.second.get_size(i);
       ret->init_single_tensor(dep, i+1, size[i]);
       curr_l[i] = 0;
@@ -113,12 +113,12 @@ std::shared_ptr<DerivativeTensor<int, Base>>
     while (g_enum.has_next()) {
       g_enum.get_curr_pair(s_set, sw);
       g_enum.move_to_next();
-      int t_order = s_set.size();
+      size_t t_order = s_set.size();
       s_set.to_array(t);
       // The iterator of multiset puts small number fist
       // reverse the order so it gives lower half
-      for (int i=0; i<t_order; i++) {
-        x[t_order - 1 - i] = indep_index_map.find(t[i])->second - 1;
+      for (size_t i = 0; i < t_order; i++) {
+        x[t_order - 1 - i] = indep_index_map.find(t[i])->second;
       }
       ret->put_value(dep, t_order, curr_l[t_order-1], x, sw);
       curr_l[t_order - 1]++;
@@ -140,7 +140,7 @@ void BaseReverseGeneric<Base>::clear() {
 }
 
 template <typename Base>
-void BaseReverseGeneric<Base>::init_dep_deriv(locint dep, int dep_count) {
+void BaseReverseGeneric<Base>::init_dep_deriv(locint dep) {
   GenericDeriv<locint, Base> d_deriv(order);
   GenericMultiset<locint> d_set;
   d_set.insert(dep);
@@ -180,22 +180,22 @@ void BaseReverseGeneric<Base>::process_sac(
 
 template <typename Base>
 void BaseReverseGeneric<Base>::special_derivative_coeff() {
-  for (int i=0;i<=REVERSEAD_MAX_GENERIC_ORDER; i++) {
-    for (int j=0;j<=REVERSEAD_MAX_GENERIC_ORDER; j++) {
-      for (int k=0;k<=REVERSEAD_MAX_GENERIC_ORDER; k++) {
+  for (size_t i = 0;i <= REVERSEAD_MAX_GENERIC_ORDER; i++) {
+    for (size_t j = 0;j <= REVERSEAD_MAX_GENERIC_ORDER; j++) {
+      for (size_t k = 0;k <= REVERSEAD_MAX_GENERIC_ORDER; k++) {
         c_atan[i][j][k] = c_asin[i][j][k] =  0.0;
       }
     }
   }
   c_atan[1][1][0] = c_asin[1][1][0] = 1.0;
-  for (int i=2; i <= REVERSEAD_MAX_GENERIC_ORDER; i++) {
-    for (int j = REVERSEAD_MAX_GENERIC_ORDER; j >= 2; j--) {
-      for (int k=0; k < REVERSEAD_MAX_GENERIC_ORDER; k++) {
-        c_atan[i][j][k] = c_atan[i-1][j][k+1] * (k+1);
-        c_asin[i][j][k] = c_asin[i-1][j][k+1] * (k+1);
+  for (size_t i = 2; i <= REVERSEAD_MAX_GENERIC_ORDER; i++) {
+    for (size_t j = REVERSEAD_MAX_GENERIC_ORDER; j >= 2; j--) {
+      for (size_t k = 0; k < REVERSEAD_MAX_GENERIC_ORDER; k++) {
+        c_atan[i][j][k] = c_atan[i-1][j][k+1] * (k+1.0);
+        c_asin[i][j][k] = c_asin[i-1][j][k+1] * (k+1.0);
       }
-      for (int k=1; k <= REVERSEAD_MAX_GENERIC_ORDER; k++) {
-        c_atan[i][j][k] += c_atan[i-1][j-1][k-1] * 2 * (1-j);
+      for (size_t k = 1; k <= REVERSEAD_MAX_GENERIC_ORDER; k++) {
+        c_atan[i][j][k] += c_atan[i-1][j-1][k-1] * 2 * (1.0 - j);
         c_asin[i][j][k] += c_asin[i-1][j-1][k-1] * -2 * (1.5 - j);
       }
     }
@@ -208,9 +208,9 @@ void BaseReverseGeneric<Base>::clear_private_temps() {
   temp_y = NULL_LOC;
   max_level = 0;
   max_order = 0;
-  for (int i=0; i<order+1; i++) {
+  for (size_t i = 0; i < order + 1; i++) {
     dx[i] = 0;dy[i] = 0;
-    for(int j=0; j<order+1; j++) {
+    for(size_t j = 0; j < order+1; j++) {
       ssw[i*(order+1)+j] = 0;
     }
   }
@@ -218,7 +218,7 @@ void BaseReverseGeneric<Base>::clear_private_temps() {
 
 template <typename Base>
 void BaseReverseGeneric<Base>::generate_binary_tuples(
-    int curr_level, int curr_order, Base pw,
+    size_t curr_level, size_t curr_order, Base pw,
     typename GenericDeriv<locint, Base>::enumerator curr_enum) {
   if (curr_level > max_level) {
     double coeff = binary_sym_coeff();
@@ -234,7 +234,7 @@ void BaseReverseGeneric<Base>::generate_binary_tuples(
     //dc.debug();
     //std::cout << " w = " << w << std::endl;
     if (!IsZero(w)) {
-      int size = dc.size();
+      size_t size = dc.size();
       if (size * (max_level - curr_level + 1) + curr_order <= max_order) {
         dx[curr_level] = dc.count(temp_x);
         dy[curr_level] = size - dx[curr_level];
@@ -250,7 +250,7 @@ void BaseReverseGeneric<Base>::generate_binary_tuples(
 
 template <typename Base>
 void BaseReverseGeneric<Base>::generate_unary_tuples(
-    int curr_level, int curr_order, Base pw,
+    size_t curr_level, size_t curr_order, Base pw,
     typename GenericDeriv<locint, Base>::enumerator curr_enum) {
   if (curr_level > max_level) {
     double coeff = unary_sym_coeff();
@@ -263,7 +263,7 @@ void BaseReverseGeneric<Base>::generate_unary_tuples(
   while (s_enum.has_next()) {
     s_enum.get_curr_pair(dc, w);
     if (!IsZero(w)) {
-      int size = dc.size();
+      size_t size = dc.size();
       if (size * (max_level - curr_level + 1) + curr_order <= max_order) {
         dx[curr_level] = size;
         generate_unary_tuples(curr_level + 1,
@@ -278,21 +278,21 @@ void BaseReverseGeneric<Base>::generate_unary_tuples(
 
 template <typename Base>
 double BaseReverseGeneric<Base>::binary_sym_coeff() {
-  int n = 0;
-  int m = 0;
-  for(int i=0; i<=max_level; i++) {n+=dx[i]; m+=dy[i];}
+  size_t n = 0;
+  size_t m = 0;
+  for(size_t i=0; i<=max_level; i++) {n+=dx[i]; m+=dy[i];}
   cx = n - dx[0];
   cy = m - dy[0];
   double ret = kFactorial[n];
-  for(int i=0; i<=max_level; i++) {
+  for(size_t i=0; i<=max_level; i++) {
     ret = ret / kFactorial[dx[i]];
   }
   ret = ret * kFactorial[m];
-  for(int i=0; i<=max_level; i++) {
+  for(size_t i=0; i<=max_level; i++) {
     ret = ret / kFactorial[dy[i]];
   }
-  int count = 1;
-  int l = 2;
+  size_t count = 1;
+  size_t l = 2;
   while (l <= max_level) {
     if (dx[l] == dx[l-1] && dy[l] == dy[l-1]) {
       count++;
@@ -308,14 +308,14 @@ double BaseReverseGeneric<Base>::binary_sym_coeff() {
 
 template <typename Base>
 double BaseReverseGeneric<Base>::unary_sym_coeff() {
-  int n = 0;
-  for (int i=0; i<=max_level; i++){n+=dx[i];}
+  size_t n = 0;
+  for (size_t i=0; i<=max_level; i++){n+=dx[i];}
   double ret = kFactorial[n];
-  for (int i=0; i<=max_level; i++) {
+  for (size_t i=0; i<=max_level; i++) {
     ret = ret / kFactorial[dx[i]];
   }
-  int count = 1;
-  int l = 2;
+  size_t count = 1;
+  size_t l = 2;
   while (l<=max_level) {
     if (dx[l] == dx[l-1]) {
       count++;
@@ -447,15 +447,15 @@ void BaseReverseGeneric<Base>::fill_in_local_deriv(
       if (info.y != NULL_LOC) {
         Base t = 1.0 / info.vy;
         term.insert(info.x);
-        for(int i=2;i<=order; i++) {
-          t = t * (1-i) / info.vy;
+        for(size_t i = 2;i <= order; i++) {
+          t = t * (1.0 - i) / info.vy;
           term.insert(info.y);
           check_and_increase(term, t, local_deriv);
         }
         term.clear();
         t = info.vx / info.vy;
-        for(int i=1;i<=order; i++) {
-          t = t * (-i) / info.vy;
+        for(size_t i = 1;i <= order; i++) {
+          t = t * (0.0 - i) / info.vy;
           term.insert(info.y);
           check_and_increase(term, t, local_deriv);
         }
@@ -467,8 +467,8 @@ void BaseReverseGeneric<Base>::fill_in_local_deriv(
       check_and_increase(term, info.dx, local_deriv);
     {
       Base t = info.dx;
-      for (int i=2; i<=order; i++) {
-        t *= (-i) / info.vx;
+      for (size_t i = 2; i <= order; i++) {
+        t *= (0.0 - i) / info.vx;
         term.insert(info.x);
         check_and_increase(term, t, local_deriv);
       }
@@ -478,7 +478,7 @@ void BaseReverseGeneric<Base>::fill_in_local_deriv(
     {
       Base dsin[4] = {sin(info.vx), cos(info.vx),
         -sin(info.vx), -cos(info.vx)};
-      for(int i=1; i<=order; i++) {
+      for(size_t i=1; i<=order; i++) {
         term.insert(info.x);
         check_and_increase(term, dsin[i % 4], local_deriv);
       }
@@ -488,7 +488,7 @@ void BaseReverseGeneric<Base>::fill_in_local_deriv(
     {
       Base dcos[4] = {cos(info.vx), -sin(info.vx),
         -cos(info.vx), sin(info.vx)};
-      for(int i=1; i<=order; i++) {
+      for(size_t i = 1; i <= order; i++) {
         term.insert(info.x);
         check_and_increase(term, dcos[i % 4], local_deriv);
       }
@@ -501,13 +501,13 @@ void BaseReverseGeneric<Base>::fill_in_local_deriv(
       Base sw = 0;
       Base w = 0;
       Base s = 0;
-      for (int i=1; i<= order; i++) {
+      for (size_t i = 1; i <= order; i++) {
         term.insert(info.x);
         sw = 0;
         s = sqrt(1.0 - info.vx * info.vx);
-        for (int j=0; j<=i; j++) {
+        for (size_t j = 0; j <= i; j++) {
           w = 1;
-          for (int k=0;k<=j; k++) {
+          for (size_t k = 0; k <= j; k++) {
             sw += c_asin[i][j][k] * w * s;
             w = w * info.vx;
           }
@@ -527,13 +527,13 @@ void BaseReverseGeneric<Base>::fill_in_local_deriv(
       Base sw = 0;
       Base w = 0;
       Base s = 0;
-      for (int i = 1; i <= order; i++) {
+      for (size_t i = 1; i <= order; i++) {
         term.insert(info.x);
         sw = 0;
         s = 1;
-        for (int j = 0; j <= i; j++) {
+        for (size_t j = 0; j <= i; j++) {
           w = 1;
-          for (int k = 0; k <= j; k++) {
+          for (size_t k = 0; k <= j; k++) {
             sw += c_atan[i][j][k] * w * s;
             w = w * info.vx;
           }
@@ -544,7 +544,7 @@ void BaseReverseGeneric<Base>::fill_in_local_deriv(
     }
       break;
     case exp_a:
-      for (int i=1; i<=order; i++) {
+      for (size_t i=1; i<=order; i++) {
         term.insert(info.x);
         check_and_increase(term, info.dx, local_deriv);
       }
@@ -554,8 +554,8 @@ void BaseReverseGeneric<Base>::fill_in_local_deriv(
       term.insert(info.x);
       check_and_increase(term, info.dx, local_deriv);
       Base t = info.dx;
-      for(int i=2; i<=order; i++) {
-        t = t * (1-i) / info.vx;
+      for(size_t i = 2; i <= order; i++) {
+        t = t * (1.0 - i) / info.vx;
         term.insert(info.x);
         check_and_increase(term, t, local_deriv);
       }
@@ -564,7 +564,7 @@ void BaseReverseGeneric<Base>::fill_in_local_deriv(
     case sqrt_a:
     {
       Base t = sqrt(info.vx);
-      for (int i = 1; i <= order; i++) {
+      for (size_t i = 1; i <= order; i++) {
         t = t * (1.5 - i) / info.vx;
         term.insert(info.x);
         check_and_increase(term, t, local_deriv);
@@ -574,7 +574,7 @@ void BaseReverseGeneric<Base>::fill_in_local_deriv(
     case pow_d_a:
     {
       Base t = info.dx;
-      for (int i = 1; i <= order; i++) {
+      for (size_t i = 1; i <= order; i++) {
         term.insert(info.x);
         check_and_increase(term, t, local_deriv);
         t = t * log(info.coval);
@@ -585,8 +585,8 @@ void BaseReverseGeneric<Base>::fill_in_local_deriv(
     case pow_a_d:
     {
       Base t = pow(info.vx, info.coval);
-      for (int i=1; i <= order; i++) {
-        t = t * (info.coval + 1 - i) / info.vx;
+      for (size_t i = 1; i <= order; i++) {
+        t = t * (info.coval + 1.0 - i) / info.vx;
         term.insert(info.x);
         check_and_increase(term, t, local_deriv);
       }

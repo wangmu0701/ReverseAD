@@ -11,14 +11,14 @@
 
 namespace ReverseAD {
 
-locint kMIN_OP_PER_CP = 100000000;
+size_t kMIN_OP_PER_CP = 100000000;
 
 IterativeFunc::IterativeFunc(
-    int x_num, int y_num, int t_num,
-    void (*set_up)(adouble*, int, adouble*, int),
-    void (*tear_down)(adouble*, int, adouble*, int),
-    void (*run)(adouble*, int),
-    bool (*while_condition)(const adouble* const, int)) {
+    size_t x_num, size_t y_num, size_t t_num,
+    void (*set_up)(adouble*, size_t, adouble*, size_t),
+    void (*tear_down)(adouble*, size_t, adouble*, size_t),
+    void (*run)(adouble*, size_t),
+    bool (*while_condition)(const adouble* const, size_t)) {
   _x_num = x_num;
   _y_num = y_num;
   _t_num = t_num;
@@ -28,12 +28,12 @@ IterativeFunc::IterativeFunc(
   _while_condition = while_condition; 
 }
 
-void IterativeFunc::run(double* x_values, int x_num,
-                        double* y_values, int y_num) {
+void IterativeFunc::run(double* x_values, size_t x_num,
+                        double* y_values, size_t y_num) {
   adouble* x_adouble = new adouble[_x_num];
   adouble* y_adouble = new adouble[_y_num];
   adouble* t_adouble = new adouble[_t_num];
-  for (int i = 0; i < _x_num; i++) {
+  for (size_t i = 0; i < _x_num; i++) {
     x_adouble[i] = x_values[i];
   }
   (*_set_up)(x_adouble, _x_num, t_adouble, _t_num);
@@ -41,15 +41,15 @@ void IterativeFunc::run(double* x_values, int x_num,
     (*_run)(t_adouble, _t_num);
   }
   (*_tear_down)(t_adouble, _t_num, y_adouble, _y_num);
-  for (int i = 0; i < _y_num; i++) {
+  for (size_t i = 0; i < _y_num; i++) {
     y_values[i] = y_adouble[i].getVal();
   }
 }
 
-std::shared_ptr<DerivativeTensor<int, double>> IterativeFunc::compute(
-    double* x_values, int x_num,
-    double* y_values, int y_num,
-    int t_order) {
+std::shared_ptr<DerivativeTensor<size_t, double>> IterativeFunc::compute(
+    double* x_values, size_t x_num,
+    double* y_values, size_t y_num,
+    size_t t_order) {
   CheckpointTrace cp_trace;
 
   // first recompute the function, no tracing
@@ -62,7 +62,7 @@ std::shared_ptr<DerivativeTensor<int, double>> IterativeFunc::compute(
   runtime_env->init();
   cp_trace.make_checkpoint(x_adouble, _x_num, runtime_env);
   runtime_env_on(runtime_env);
-  for (int i = 0; i < _x_num; i++) {
+  for (size_t i = 0; i < _x_num; i++) {
     x_adouble[i] <<= x_values[i];
   }
   (*_set_up)(x_adouble, _x_num, t_adouble, _t_num);
@@ -71,7 +71,7 @@ std::shared_ptr<DerivativeTensor<int, double>> IterativeFunc::compute(
   // set_up trace done, get RuntimeEnv
   locint prev_loc = runtime_env->curr_loc;
   bool is_tracing = false;
-  int iter_num = 0;
+  size_t iter_num = 0;
   while((*_while_condition)(t_adouble, _t_num)) {
     // iterative trace, store initial values and RuntimeEnv
     if (!is_tracing) {
@@ -109,11 +109,11 @@ std::shared_ptr<DerivativeTensor<int, double>> IterativeFunc::compute(
  
   cp_trace.init_reverse(); 
   // Step 1 : get initial values and runtime for tear_down
-  int cp_num = cp_trace.get_checkpoint(t_adouble, _t_num, runtime_env);
+  size_t cp_num = cp_trace.get_checkpoint(t_adouble, _t_num, runtime_env);
   cp_trace.get_iteration_num(); // 0
   trace_on_runtime_env<double>(runtime_env);
   (*_tear_down)(t_adouble, _t_num, y_adouble, _y_num);
-  for(int i = 0; i < _y_num; i++) {
+  for(size_t i = 0; i < _y_num; i++) {
     y_adouble[i] >>= y_values[i];
   }
   std::shared_ptr<TrivialTrace<double>> trace = trace_off<double>();
@@ -132,7 +132,7 @@ std::shared_ptr<DerivativeTensor<int, double>> IterativeFunc::compute(
   // Step 2 : get initial values and runtime for iterative_step
   while (cp_num > 1) {
     cp_num = cp_trace.get_checkpoint(t_adouble, _t_num, runtime_env);
-    int iter_num = cp_trace.get_iteration_num();
+    size_t iter_num = cp_trace.get_iteration_num();
     trace_on_runtime_env<double>(runtime_env);
     while (iter_num > 0) {
       (*_run)(t_adouble, _t_num);
@@ -146,14 +146,14 @@ std::shared_ptr<DerivativeTensor<int, double>> IterativeFunc::compute(
   cp_num = cp_trace.get_checkpoint(t_adouble, _t_num, runtime_env);
   cp_trace.get_iteration_num(); // 0
   trace_on_runtime_env<double>(runtime_env);
-  for (int i = 0; i < _x_num; i++) {
+  for (size_t i = 0; i < _x_num; i++) {
     x_adouble[i] <<= x_values[i];
   }
   (*_set_up)(x_adouble, _x_num, t_adouble, _t_num);
   trace = trace_off<double>();
   reverse_mode->reset_trace(trace);
   reverse_mode->compute(_x_num, 0);
-  std::shared_ptr<DerivativeTensor<int, double>> tensor =
+  std::shared_ptr<DerivativeTensor<size_t, double>> tensor =
       reverse_mode->get_tensor();
   delete reverse_mode;
   return tensor;

@@ -14,11 +14,11 @@ class TensorIndex {
   TensorIndex<LocType>& operator = (const TensorIndex<LocType>& rhs) = default;
 
   void insert(LocType x) {
-    int l = 0;
+    size_t l = 0;
     while ((l < _len) && (_data[l] > x)) {
       l++;
     }
-    for (int i = _len; i >= l+1; i--) {
+    for (size_t i = _len; i >= l+1; i--) {
       _data[i] = _data[i-1];
     }
     _data[l] = x;
@@ -26,23 +26,23 @@ class TensorIndex {
   }
   void insert(LocType x, int count) {
     if (count == 0) {return;}
-    int l = 0;
+    size_t l = 0;
     while ((l < _len) && (_data[l] > x)) {
       l++;
     }
-    for (int i = _len+count-1; i >= l+count; i--) {
+    for (size_t i = _len+count-1; i >= l+count; i--) {
       _data[i] = _data[i-count];
     }
-    for (int i = 0; i < count; i++) {
+    for (size_t i = 0; i < count; i++) {
       _data[l+i] = x;
     }
     _len += count;
   }
   void clear() {_len = 0;}
-  int size() const {return _len;}
+  size_t size() const {return _len;}
   LocType* get_array() {return &(_data[0]);}
   LocType _data[REVERSEAD_MAX_TENSOR_ORDER];
-  int _len;
+  size_t _len;
 };
 
 template <typename LocType, typename Base>
@@ -50,12 +50,12 @@ class SymmetryTensorBase {
  public:
   virtual ~SymmetryTensorBase() = default;
   virtual bool increase(const LocType*&& x, const Base& w) = 0;
-  virtual void to_array(LocType** tind, Base* values, int, int) const = 0;
+  virtual void to_array(LocType** tind, Base* values, size_t, size_t) const = 0;
   virtual void debug() const = 0;
-  virtual int size() const = 0;
+  virtual size_t size() const = 0;
 };
 
-template <typename LocType, typename Base, int DIM>
+template <typename LocType, typename Base, size_t DIM>
 class SymmetryTensor : public SymmetryTensorBase<LocType, Base>{
  public:
   SymmetryTensor() : _size(0), _data(){};
@@ -77,10 +77,10 @@ class SymmetryTensor : public SymmetryTensorBase<LocType, Base>{
     return SymmetryTensor<LocType, Base, DIM-1>();
   }
   void to_array(LocType** tind, Base* values,
-                int mybegin, int mydim) const override final {
-    int nextbegin = mybegin;
+                size_t mybegin, size_t mydim) const override final {
+    size_t nextbegin = mybegin;
     for (const auto& kv : _data) {
-      for (int i = 0; i < kv.second.size(); i++) {
+      for (size_t i = 0; i < kv.second.size(); i++) {
         tind[nextbegin+i][mydim] = kv.first;
       }
       kv.second.to_array(tind, values, nextbegin, mydim+1);
@@ -94,12 +94,12 @@ class SymmetryTensor : public SymmetryTensorBase<LocType, Base>{
       kv.second.debug();
     }
   }
-  int size() const override final {
+  size_t size() const override final {
     return _size;
   }
  private:
   // maintain the total number of distinct elements in the tensor
-  int _size;
+  size_t _size;
   std::map<LocType, SymmetryTensor<LocType, Base, DIM-1>> _data;
 };
 
@@ -128,8 +128,8 @@ class SymmetryTensor<LocType, Base, 1> : public SymmetryTensorBase<LocType, Base
     return 0.0;
   }
   void to_array(LocType** tind, Base* values,
-                int mybegin, int mydim) const override final {
-    int l = 0;
+                size_t mybegin, size_t mydim) const override final {
+    size_t l = 0;
     for (const auto& kv : _data) {
       tind[mybegin+l][mydim] = kv.first;
       values[mybegin+l] = kv.second;
@@ -141,11 +141,11 @@ class SymmetryTensor<LocType, Base, 1> : public SymmetryTensorBase<LocType, Base
       std::cout << "A["<<kv.first<<"] = " << kv.second << std::endl;
     }
   }
-  int size() const override final {
+  size_t size() const override final {
     return _size;
   }
  private:
-  int _size;  // for array _size = _data._size;
+  size_t _size;  // for array _size = _data._size;
   std::map<LocType, Base> _data;
 };
 
@@ -165,17 +165,17 @@ class SymmetryTensor<LocType, Base, 0> : public SymmetryTensorBase<LocType, Base
     return false;
   }
   void to_array(LocType** tind, Base* values,
-                int mybegin, int mydim) const override final {
+                size_t mybegin, size_t mydim) const override final {
     values[0] = _data;
   }
   void debug() const override final {
     std::cout << "Tensor0 = " << _data << std::endl;
   }
-  int size() const override final {
+  size_t size() const override final {
     return _size;
   }
  private:
-  int _size;
+  size_t _size;
   Base _data;
 };
 

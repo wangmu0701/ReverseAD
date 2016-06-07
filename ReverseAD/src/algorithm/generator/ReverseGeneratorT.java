@@ -117,7 +117,7 @@ public class ReverseGeneratorT {
 
   public void generateUnary() {
     String funcDecl = "inline void generator_unary " +
-        "(int case_code, " + 
+        "(size_t case_code, " + 
         "const TensorIndex<locint>& Z, const double& sw, " +
         "const TensorDerivativeInfo<locint, double>& ginfo, " +
         "TensorDeriv<locint, double>& global_deriv) {";
@@ -223,7 +223,7 @@ public class ReverseGeneratorT {
 
   public void generateBinary() {
     String funcDecl = "inline void generator_binary " +
-        "(int case_code, " + 
+        "(size_t case_code, " + 
         "const TensorIndex<locint>& Z, const double& sw, " +
         "const TensorDerivativeInfo<locint, double>& ginfo, " +
         "TensorDeriv<locint, double>& global_deriv) {";

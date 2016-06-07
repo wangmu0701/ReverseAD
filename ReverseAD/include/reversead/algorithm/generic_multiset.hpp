@@ -12,20 +12,19 @@ class GenericMultiset {
   GenericMultiset();
   GenericMultiset(const GenericMultiset& rsh);
   GenericMultiset(const GenericMultiset&& rhs);
-  GenericMultiset(char* const buf, const int t_size);
   GenericMultiset& operator = (const GenericMultiset& rhs);
   GenericMultiset& operator = (const GenericMultiset&& rhs);
   inline bool operator == (const GenericMultiset<T>& rhs) const;
   inline bool operator != (const GenericMultiset<T>& rhs) const;
   inline bool operator < (const GenericMultiset<T>& rhs) const;
 
-  int insert(T element);
-  int insert(T element, int count);
-  int remove(T element);
-  int size() const;
+  size_t insert(T element);
+  size_t insert(T element, size_t count);
+  size_t remove(T element);
+  size_t size() const;
   void debug() const;
   bool find(T target) const;
-  int count(T target) const;
+  size_t count(T target) const;
   void write_to_byte(char* buf) const;
   void to_array(T*) const;
   void clear();
@@ -68,21 +67,21 @@ GenericMultiset<T>& GenericMultiset<T>::operator = (
 }
 
 template <typename T>
-int GenericMultiset<T>::insert(T element) {
+size_t GenericMultiset<T>::insert(T element) {
   _data.insert(element);
   return _data.count(element);
 }
 
 template <typename T>
-int GenericMultiset<T>::insert(T element, int count) {
-  for(int i = 0; i < count; i++) {
+size_t GenericMultiset<T>::insert(T element, size_t count) {
+  for(size_t i = 0; i < count; i++) {
     _data.insert(element);
   }
   return _data.count(element);
 }
 
 template <typename T>
-int GenericMultiset<T>::remove(T element) {
+size_t GenericMultiset<T>::remove(T element) {
   typename std::multiset<T>::iterator hit(_data.find(element));
   if (hit != _data.end()) {
     _data.erase(hit);
@@ -93,7 +92,7 @@ int GenericMultiset<T>::remove(T element) {
 template <typename T>
 void GenericMultiset<T>::to_array(T* array) const {
   typename std::multiset<T>::const_iterator iter = _data.begin();
-  int l = 0;
+  size_t l = 0;
   while (iter != _data.end()) {
     array[l++] = *iter;
     iter++;
@@ -101,7 +100,7 @@ void GenericMultiset<T>::to_array(T* array) const {
 }
 
 template <typename T>
-int GenericMultiset<T>::size() const {
+size_t GenericMultiset<T>::size() const {
   return _data.size();
 }
 
@@ -114,7 +113,7 @@ bool GenericMultiset<T>::find(T target) const {
 }
 
 template <typename T>
-int GenericMultiset<T>::count(T target) const {
+size_t GenericMultiset<T>::count(T target) const {
   return _data.count(target);
 }
 
