@@ -69,8 +69,8 @@ size_t CheckpointTrace::get_checkpoint(
   }
 
   // In place construction
-  for (size_t i = x_num - 1; i >= 0; i--) {
-    new(&x[i]) adouble(_tape_x_values->get_next_r(),
+  for (size_t i = x_num; i > 0; i--) {
+    new(&x[i-1]) adouble(_tape_x_values->get_next_r(),
                        _tape_x_locint->get_next_r());
   }
   // build shared_ptr form a copy constructor

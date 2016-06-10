@@ -1,8 +1,6 @@
 #include <memory>
 #include <iostream>
 #include "reversead/reversead.hpp"
-#include "reversead/forwardtype/single_forward.hpp"
-#include "reversead/driver/forward_over_reverse.hpp"
 
 using ReverseAD::adouble;
 using ReverseAD::BaseActive;
@@ -17,34 +15,15 @@ using ReverseAD::BaseReverseThird;
 using ReverseAD::DerivativeTensor;
 
 double myEps = 1.E-10;
-void symmetric_third_vector(size_t n, size_t t_size, size_t** t_ind, double* t_value,
-    double* v, double** tv) {
-  for(size_t i=0;i<n;i++) {
-    for(size_t j=0;j<n;j++) {
-      tv[i][j] = 0;
-    }
-  }
-  for (size_t i=0;i<t_size;i++) {
-    // we have orders t_ind[i][0] >=t_ind[i][1] >=t_ind[i][2];
-    if (t_ind[i][0] != t_ind[i][1]) {
-      if (t_ind[i][1] != t_ind[i][2]) { // [0]!=[1]!=[2]
-        tv[t_ind[i][0]][t_ind[i][1]] += t_value[i] * v[t_ind[i][2]];
-        tv[t_ind[i][0]][t_ind[i][2]] += t_value[i] * v[t_ind[i][1]];
-        tv[t_ind[i][1]][t_ind[i][2]] += t_value[i] * v[t_ind[i][0]];
-      } else { // [0]!=[1]=[2]
-        tv[t_ind[i][0]][t_ind[i][1]] += t_value[i] * v[t_ind[i][2]];
-        tv[t_ind[i][1]][t_ind[i][2]] += t_value[i] * v[t_ind[i][0]];
-      }
-    } else {
-      if (t_ind[i][1] != t_ind[i][2]) { // [0]=[1]!=[2]
-        tv[t_ind[i][0]][t_ind[i][1]] += t_value[i] * v[t_ind[i][2]];
-        tv[t_ind[i][0]][t_ind[i][2]] += t_value[i] * v[t_ind[i][1]];
-      } else { // [0]=[1]=[2]
-        tv[t_ind[i][0]][t_ind[i][1]] += t_value[i] * v[t_ind[i][2]];
-      }
-    }
-  }
-}
+
+void symmetric_matrix_vector(
+    size_t n, size_t h_size, size_t** h_tind,
+    double* h_value, double* v, double* hv);
+
+void symmetric_third_vector(
+    size_t n, size_t t_size, size_t** t_ind, double* t_value,
+    double* v, double** tv);
+
 void check_forward_over_second(
     std::shared_ptr<TrivialTrace<double>> trace,
     size_t ind_num, size_t dep_num,
@@ -76,12 +55,12 @@ void check_forward_over_second(
       //std::cout << "tv["<<i<<", "<<j<<"] = "<<tv[i][j]<<std::endl;
       //std::cout << "ctv["<<i<<", "<<j<<"] = "<<ctv[i][j]<<std::endl;
       if (fabs(tv[i][j] - ctv[i][j]) > myEps) {
-        std::cout << "forward over second error!" << std::endl;
+        std::cout << "Single Forward over second error!" << std::endl;
         exit(-1);
       }
     }
   }
-  std::cout << "forward over second OK!" << std::endl;
+  std::cout << "Single Forward over second OK!" << std::endl;
   for (size_t i=0; i<ind_num; i++) {
     delete[] tv[i];
     delete[] ctv[i];
@@ -89,20 +68,7 @@ void check_forward_over_second(
   delete[] tv;
   delete[] ctv; 
 }
-void symmetric_matrix_vector(size_t n, size_t h_size, size_t** h_tind,
-    double* h_value, double* v, double* hv) {
-  for (size_t i=0; i<n; i++) {
-    hv[i] = 0.0;
-  }
-  for (size_t i=0; i<h_size; i++) {
-    if (h_tind[i][0] != h_tind[i][1]) {
-      hv[h_tind[i][0]] += h_value[i] * v[h_tind[i][1]];
-      hv[h_tind[i][1]] += h_value[i] * v[h_tind[i][0]];
-    } else { // h_tind[i][0] == h_tind[i][1]
-      hv[h_tind[i][0]] += h_value[i] * v[h_tind[i][1]];
-    }
-  }
-}
+
 void check_forward_over_reverse(
     std::shared_ptr<TrivialTrace<double>> trace,
     size_t ind_num, size_t dep_num,
@@ -128,11 +94,11 @@ void check_forward_over_reverse(
     //std::cout << "hv["<<i<<"] = "<<hv[i]<<std::endl;
     //std::cout << "chv["<<i<<"] = "<<chv[i]<<std::endl;
     if (fabs(hv[i] - chv[i]) > myEps) {
-      std::cout << "forward over reverse error!" << std::endl;
+      std::cout << "Single Forward over reverse error!" << std::endl;
       exit(-1);
     }
   }
-  std::cout << "forward over reverse OK!" << std::endl;
+  std::cout << "Single Forward over reverse OK!" << std::endl;
   delete[] hv;
   delete[] chv; 
 }

@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = include src . test
+SUBDIRS = include src . test example
 
 lib_LTLIBRARIES = libreversead.la
 
@@ -10,7 +10,6 @@ libreversead_la_LIBADD += src/util/libutil.la
 libreversead_la_LIBADD += src/algorithm/libalgorithm.la
 libreversead_la_LIBADD += src/activetype/libactivetype.la
 libreversead_la_LIBADD += src/forwardtype/libforwardtype.la
-libreversead_la_LIBADD += src/driver/libdriver.la
 libreversead_la_LIBADD += src/checkpointing/libcheckpointing.la
 
 test:

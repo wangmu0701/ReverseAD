@@ -32,7 +32,7 @@ void check_answer(std::shared_ptr<TrivialTrace<double>> trace,
   check_value(2, tensor, 12*vx*vx, done);
   check_value(3, tensor, 24*vx, done);
 
-  ReverseAD::BaseReverseGeneric<double> generic_derivative(new_trace, 6);
+  ReverseAD::BaseReverseGeneric<double> generic_derivative(new_trace, 5);
   tensor = generic_derivative.compute(1, 1).get_tensor();
   check_value(1, tensor, 4*vx*vx*vx, done);
   check_value(2, tensor, 12*vx*vx, done);

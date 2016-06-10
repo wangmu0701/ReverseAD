@@ -20,7 +20,13 @@ class MultiForward {
       _der[i] = der[i];
     }
   }
-  
+  double getVal() const {
+    return _val;
+  }
+  double getDer(size_t index) const {
+    return _der[index];
+  }
+
   // unary arithmetic
   MultiForward<DIM>& operator++() {
     this->_val += 1.0;

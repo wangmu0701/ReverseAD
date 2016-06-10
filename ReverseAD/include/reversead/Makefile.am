@@ -1,4 +1,4 @@
 pkginclude_HEADERS = reversead.hpp
 
-SUBDIRS = activetype algorithm common tape trace util forwardtype driver\
+SUBDIRS = activetype algorithm common tape trace util forwardtype\
           checkpointing

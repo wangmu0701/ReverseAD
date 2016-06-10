@@ -11,7 +11,7 @@
 
 namespace ReverseAD {
 
-size_t kMIN_OP_PER_CP = 100000000;
+size_t kMIN_OP_PER_CP = 1000000; // 1M
 
 IterativeFunc::IterativeFunc(
     size_t x_num, size_t y_num, size_t t_num,
@@ -26,6 +26,12 @@ IterativeFunc::IterativeFunc(
   _tear_down = tear_down;
   _run = run;
   _while_condition = while_condition; 
+  // Use default value
+  _min_op_per_cp = kMIN_OP_PER_CP;
+}
+
+void IterativeFunc::set_min_op_per_cp(size_t min_op_per_cp) {
+  this->_min_op_per_cp = min_op_per_cp;
 }
 
 void IterativeFunc::run(double* x_values, size_t x_num,
@@ -84,7 +90,8 @@ std::shared_ptr<DerivativeTensor<size_t, double>> IterativeFunc::compute(
     (*_run)(t_adouble, _t_num);
     iter_num++;
     runtime_env_off();
-    if (runtime_env->curr_loc - prev_loc >= kMIN_OP_PER_CP) {
+    if (runtime_env->curr_loc - prev_loc >= _min_op_per_cp) {
+      // accumulated enough ops, create an checkpoint
       cp_trace.set_iteration_num(iter_num);
       is_tracing = false;
     }
@@ -128,7 +135,6 @@ std::shared_ptr<DerivativeTensor<size_t, double>> IterativeFunc::compute(
     std::cerr << "Only (1-3) orders for IterativeFunc." << std::endl;
   }
   reverse_mode->compute(trace->get_num_ind(), trace->get_num_dep());
-  
   // Step 2 : get initial values and runtime for iterative_step
   while (cp_num > 1) {
     cp_num = cp_trace.get_checkpoint(t_adouble, _t_num, runtime_env);

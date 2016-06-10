@@ -1,4 +1,4 @@
-SUBDIRS = regression rosenbrock simple forward algorithm
+SUBDIRS = regression simple
 
 test:
-	./rosenbrock/test_rosenbrock
+	./regression/run_test.sh

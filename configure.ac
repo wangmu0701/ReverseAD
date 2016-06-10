@@ -53,7 +53,6 @@ AC_CONFIG_FILES(Makefile
                 ReverseAD/src/common/Makefile
                 ReverseAD/src/algorithm/Makefile
                 ReverseAD/src/forwardtype/Makefile
-                ReverseAD/src/driver/Makefile
                 ReverseAD/src/checkpointing/Makefile
                 ReverseAD/src/util/Makefile
                 ReverseAD/include/Makefile
@@ -61,7 +60,6 @@ AC_CONFIG_FILES(Makefile
                 ReverseAD/include/reversead/activetype/Makefile
                 ReverseAD/include/reversead/algorithm/Makefile
                 ReverseAD/include/reversead/forwardtype/Makefile
-                ReverseAD/include/reversead/driver/Makefile
                 ReverseAD/include/reversead/checkpointing/Makefile
                 ReverseAD/include/reversead/common/Makefile
                 ReverseAD/include/reversead/tape/Makefile
@@ -70,12 +68,10 @@ AC_CONFIG_FILES(Makefile
                 ReverseAD/include/reversead/common/reversead_config.h
                 ReverseAD/test/Makefile
                 ReverseAD/test/regression/Makefile
-                ReverseAD/test/forward/Makefile
-                ReverseAD/test/algorithm/Makefile
-                ReverseAD/test/tape/Makefile
-                ReverseAD/test/trace/Makefile
                 ReverseAD/test/rosenbrock/Makefile
                 ReverseAD/test/simple/Makefile
+                ReverseAD/example/Makefile
+                ReverseAD/example/oneminute/Makefile
 )
 
 AC_OUTPUT

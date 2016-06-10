@@ -45,7 +45,7 @@ int main() {
   std::shared_ptr<TrivialTrace<double>> new_trace = 
       ReverseAD::BaseFunctionReplay::replay(trace, y, 1, x, 1, &vp, 1);
 */
-  int order = 6;
+  size_t order = 6;
   ReverseAD::BaseReverseTensor<double> third(trace, order);
   third.compute(N, M);
   std::shared_ptr<DerivativeTensor<size_t, double>> tensor = third.get_tensor();

@@ -10,10 +10,12 @@ using ReverseAD::TrivialTrace;
 using ReverseAD::DerivativeTensor;
 using ReverseAD::IterativeFunc;
 
-void check_answer(std::shared_ptr<DerivativeTensor<size_t, double>> tensor) {
-  size_t size;
-  size_t** tind;
-  double* values;
+double myEps = 1.0e-10;
+
+void dump_tensor(std::shared_ptr<DerivativeTensor<size_t, double>> tensor) {
+  size_t size = 0;
+  size_t** tind = nullptr;
+  double* values = nullptr;
 
   tensor->get_internal_coordinate_list(0, 1, &size, &tind, &values);
 
@@ -36,6 +38,37 @@ void check_answer(std::shared_ptr<DerivativeTensor<size_t, double>> tensor) {
   }
 }
 
+void check_fail() {
+  std::cout << "IterativeFunc test fail!" << std::endl;
+  exit(-1);
+}
+void check_answer(std::shared_ptr<DerivativeTensor<size_t, double>> tensor1,
+                  std::shared_ptr<DerivativeTensor<size_t, double>> tensor2) {
+  size_t size1 = 0;
+  size_t **tind1 = nullptr;
+  double *values1 = nullptr;
+  size_t size2 = 0;
+  size_t **tind2 = nullptr;
+  double *values2 = nullptr;
+  for (size_t k = 1; k <=3; k++) {
+    tensor1->get_internal_coordinate_list(0, k, &size1, &tind1, &values1);
+    tensor2->get_internal_coordinate_list(0, k, &size2, &tind2, &values2);
+    if (size1 != size2) {
+      check_fail();
+    }
+    for (size_t i = 0; i < size1; i++) {
+      for (size_t j = 0; j < k; j++) {
+        if (tind1[i][j] != tind2[i][j]) {
+          check_fail();
+        }
+      }
+      if (fabs(values1[i] - values2[i]) > myEps) {
+        check_fail();
+      }
+    }
+  }
+}
+
 template <typename T>
 void set_up(T* x, size_t x_num, T* t, size_t t_num) {
   t[0] = x[0];
@@ -48,7 +81,7 @@ void run(T* t, size_t t_num) {
 }
 template <typename T>
 bool while_condition(const T* const t, size_t t_num) {
-  return t[0] * t[1] < 1000;
+  return t[0] * t[1] < 10000;
 }
 template <typename T>
 void tear_down(T* t, size_t t_num, T* y, size_t y_num) {
@@ -71,21 +104,26 @@ int main() {
   tear_down<adouble>(tad, 2, &yad, 1);
   yad >>= y;
   std::shared_ptr<TrivialTrace<double>> trace = ReverseAD::trace_off<double>();
-  std::cout << "t[0] = " << tad[0].getVal() << std::endl;
-  std::cout << "t[1] = " << tad[1].getVal() << std::endl;
-  std::cout << "y = " << yad.getVal() << std::endl;
-  std::shared_ptr<DerivativeTensor<size_t, double>> tensor;
+  //std::cout << "t[0] = " << tad[0].getVal() << std::endl;
+  //std::cout << "t[1] = " << tad[1].getVal() << std::endl;
+  //std::cout << "y = " << yad.getVal() << std::endl;
   BaseReverseThird<double> third(trace);
-  tensor = third.compute(2, 1).get_tensor();
-  check_answer(tensor);
+  std::shared_ptr<DerivativeTensor<size_t, double>> r_tensor =
+      third.compute(2, 1).get_tensor();
+  //dump_tensor(r_tensor);
   BaseReverseGeneric<double> generic(trace, 3);
-  tensor = generic.compute(2, 1).get_tensor();
-  check_answer(tensor);
+  std::shared_ptr<DerivativeTensor<size_t, double>> g_tensor =
+      generic.compute(2, 1).get_tensor();
+  //dump_tensor(g_tensor);
 
   IterativeFunc iter_func(2, 1, 2, &(set_up<adouble>), &(tear_down<adouble>),
                           &(run<adouble>), &(while_condition));
+  // Force iter_func to create multiple checkpoints
+  iter_func.set_min_op_per_cp(5);
   iter_func.run(x, 2, &y, 1);
-  std::cout << "y = " << y << std::endl;
-  tensor = iter_func.compute(x, 2, &y, 1, 3);
-  check_answer(tensor);
+  std::shared_ptr<DerivativeTensor<size_t, double>> i_tensor =
+      iter_func.compute(x, 2, &y, 1, 3);
+  //dump_tensor(i_tensor);
+  std::cout << "IterativeFunc test OK!" << std::endl;
+  return 0;
 } 
