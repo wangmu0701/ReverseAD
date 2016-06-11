@@ -31,7 +31,7 @@ void check_forward_over_second(
     double* adjoint_init_values) {
   BaseReverseThird<double> third(trace);
   std::shared_ptr<DerivativeTensor<size_t, double>> tensor =
-      third.compute(ind_num, dep_num).get_tensor();
+      third.compute(ind_num, dep_num);
   size_t t_size = 0;
   size_t** t_tind = nullptr;
   double* t_value = nullptr;
@@ -76,7 +76,7 @@ void check_forward_over_reverse(
     double* adjoint_init_values) {
   BaseReverseHessian<double> hessian(trace);
   std::shared_ptr<DerivativeTensor<size_t, double>> tensor =
-      hessian.compute(ind_num, dep_num).get_tensor();
+      hessian.compute(ind_num, dep_num);
   size_t h_size = 0;
   size_t** h_tind = nullptr;
   double* h_value = nullptr;

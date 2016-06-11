@@ -1,1 +1,1 @@
-SUBDIRS = oneminute
+SUBDIRS = oneminute timestepfunc highorder

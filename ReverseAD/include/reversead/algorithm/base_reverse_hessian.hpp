@@ -31,15 +31,14 @@ class BaseReverseHessian : public virtual BaseReverseAdjoint<Base> {
   using BaseReverseAdjoint<Base>::accumulate_adjoint_sac;
   using BaseReverseAdjoint<Base>::accumulate_adjoint_deriv;
 
+  BaseReverseHessian() = default;
   BaseReverseHessian(const std::shared_ptr<TrivialTrace<Base>>& trace)
       : BaseReverseAdjoint<Base>(trace) {}
 
   ~BaseReverseHessian() = default;
-
-  std::shared_ptr<DerivativeTensor<size_t, Base>> get_tensor() const override;
   
  protected:
-  BaseReverseHessian() = default;
+  std::shared_ptr<DerivativeTensor<size_t, Base>> get_tensor() const override;
 
   void accumulate_sac(
       const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv) override;

@@ -134,7 +134,7 @@ std::shared_ptr<DerivativeTensor<size_t, double>> IterativeFunc::compute(
   } else {
     std::cerr << "Only (1-3) orders for IterativeFunc." << std::endl;
   }
-  reverse_mode->compute(trace->get_num_ind(), trace->get_num_dep());
+  reverse_mode->compute_iterative();
   // Step 2 : get initial values and runtime for iterative_step
   while (cp_num > 1) {
     cp_num = cp_trace.get_checkpoint(t_adouble, _t_num, runtime_env);
@@ -145,8 +145,8 @@ std::shared_ptr<DerivativeTensor<size_t, double>> IterativeFunc::compute(
       --iter_num;
     }
     trace = trace_off<double>();
-    reverse_mode->reset_trace(trace);
-    reverse_mode->compute(trace->get_num_ind(), trace->get_num_dep());
+    reverse_mode->reset_trace_no_clear(trace);
+    reverse_mode->compute_iterative();
   }
   // Step 3 : get initial values and runtime for set_up
   cp_num = cp_trace.get_checkpoint(t_adouble, _t_num, runtime_env);
@@ -157,10 +157,9 @@ std::shared_ptr<DerivativeTensor<size_t, double>> IterativeFunc::compute(
   }
   (*_set_up)(x_adouble, _x_num, t_adouble, _t_num);
   trace = trace_off<double>();
-  reverse_mode->reset_trace(trace);
-  reverse_mode->compute(_x_num, 0);
+  reverse_mode->reset_trace_no_clear(trace);
   std::shared_ptr<DerivativeTensor<size_t, double>> tensor =
-      reverse_mode->get_tensor();
+      reverse_mode->compute(_x_num, 0);
   delete reverse_mode;
   return tensor;
 }

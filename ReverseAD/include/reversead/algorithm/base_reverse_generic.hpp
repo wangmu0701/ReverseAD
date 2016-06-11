@@ -22,11 +22,11 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
 
   BaseReverseGeneric(const std::shared_ptr<TrivialTrace<Base>>& trace, size_t order);
 
-  std::shared_ptr<DerivativeTensor<size_t, Base>> get_tensor() const override;
-
   void clear() override final;
 
  protected:
+  std::shared_ptr<DerivativeTensor<size_t, Base>> get_tensor() const override;
+
   void init_dep_deriv(locint dep) override final;
 
   void process_sac(const DerivativeInfo<locint, Base>& info) override;
@@ -35,12 +35,12 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
                         const GenericDeriv<locint, Base>& local_deriv,
                         GenericDeriv<locint, Base>& global_deriv);
 
-  size_t order;
 
+ private:
+  size_t order;
   // this will shadow the same name in BaseReverseMode because it's a template
   mutable std::map<locint, GenericDeriv<locint, Base> > dep_deriv;
 
- private:
   // some private temps used when accumulating, avoid pointers on stack
   size_t dx[REVERSEAD_MAX_GENERIC_ORDER + 1];
   size_t dy[REVERSEAD_MAX_GENERIC_ORDER + 1];

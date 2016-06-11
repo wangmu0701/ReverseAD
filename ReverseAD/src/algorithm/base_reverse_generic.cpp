@@ -208,6 +208,8 @@ void BaseReverseGeneric<Base>::clear_private_temps() {
   temp_y = NULL_LOC;
   max_level = 0;
   max_order = 0;
+  cx = 0;
+  cy = 0;
   for (size_t i = 0; i < order + 1; i++) {
     dx[i] = 0;dy[i] = 0;
     for(size_t j = 0; j < order+1; j++) {

@@ -50,8 +50,7 @@ int main() {
   std::cout << "y = " << y << std::endl;
 
   ReverseAD::BaseReverseGeneric<double> generic(trace, 4);
-  generic.compute(1,1);
-  std::shared_ptr<DerivativeTensor<size_t, double>> tensor = generic.get_tensor();
+  std::shared_ptr<DerivativeTensor<size_t, double>> tensor = generic.compute(1,1);
   generic.clear();
   retrieve_value(1, tensor);
   retrieve_value(2, tensor);

@@ -15,6 +15,9 @@ void warning_UnrecognizedOpcode(int opcode) {
             << std::endl;
 }
 
+void warning_NoTraceSet() {
+  std::cerr << "No trace was assigned. Forgot to pass the trace?" << std::endl;
+}
 
 double get_timing() {
   static struct timeval tv1, tv2;

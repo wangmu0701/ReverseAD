@@ -28,9 +28,10 @@ int main() {
       trace_off<double>(); // end tracing
   std::cout << "y = " << vy << std::endl;
 
-  BaseReverseHessian<double> hessian(trace);
-  hessian.compute(2,1);
-  std::shared_ptr<DerivativeTensor<size_t, double>> tensor = hessian.get_tensor();
+  std::unique_ptr<BaseReverseHessian<double>> hessian(
+      new BaseReverseHessian<double>(trace));
+  std::shared_ptr<DerivativeTensor<size_t, double>> tensor = hessian->compute(2,1);
+  hessian.release();
 
   // retrieve results
   size_t size;

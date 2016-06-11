@@ -25,7 +25,7 @@ void check_answer(std::shared_ptr<TrivialTrace<double>> trace,
   ReverseAD::BaseReverseThird<double> third_derivative(new_trace);
   third_derivative.enable_preacc();
   std::shared_ptr<DerivativeTensor<size_t, double>> tensor =
-      third_derivative.compute(1, 1).get_tensor();
+      third_derivative.compute(1, 1);
   check_value(1, tensor, 2*vx*vp, done);
   check_value(2, tensor, 2*vp, done);
   check_value(3, tensor, 0, done);

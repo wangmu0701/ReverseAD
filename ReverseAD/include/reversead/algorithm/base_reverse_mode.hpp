@@ -36,20 +36,17 @@ class BaseReverseMode {
   typedef typename TrivialDeriv<Base>::type_third type_third;
   typedef TrivialDeriv<Base> SingleDeriv;
 
+  BaseReverseMode() = default;
   BaseReverseMode(const std::shared_ptr<TrivialTrace<Base>>& _trace)
       : trace(_trace) {}
 
   virtual ~BaseReverseMode() = default;
 
-  BaseReverseMode<Base>& compute(size_t ind_num, size_t dep_num);
+  std::shared_ptr<DerivativeTensor<size_t, Base>> compute(size_t ind_num, size_t dep_num);
 
-  virtual std::shared_ptr<DerivativeTensor<size_t, Base>> get_tensor() const = 0;
-
-  virtual void clear();
+  void reset_trace(std::shared_ptr<TrivialTrace<Base>> _trace);
 
  protected:
-  BaseReverseMode() = default;
-
   virtual void init_dep_deriv(locint dep) = 0;
 
   virtual void process_sac(const DerivativeInfo<locint, Base>& info) = 0;
@@ -57,6 +54,10 @@ class BaseReverseMode {
   void reverse_local_computation(size_t, size_t);
 
   void transcript_dep_value(std::shared_ptr<DerivativeTensor<size_t, Base>> tensor) const;
+
+  virtual std::shared_ptr<DerivativeTensor<size_t, Base>> get_tensor() const = 0;
+
+  virtual void clear();
 
   std::shared_ptr<TrivialTrace<Base>> trace;
   std::map<locint, std::set<locint> > reverse_live;
@@ -66,15 +67,17 @@ class BaseReverseMode {
   std::map<locint, Base> dep_value;
 
  private:
-  // This class will only be invoked by InterativeFunc
-  void reset_trace(std::shared_ptr<TrivialTrace<Base>> _trace);
+  void reset_trace_no_clear(std::shared_ptr<TrivialTrace<Base>> _trace);
+  void compute_iterative();
   friend class IterativeFunc;
 };
 
 template <typename Base>
-BaseReverseMode<Base>& BaseReverseMode<Base>::compute(size_t ind_num, size_t dep_num) {
+std::shared_ptr<DerivativeTensor<size_t, Base>> BaseReverseMode<Base>::compute(size_t ind_num, size_t dep_num) {
   reverse_local_computation(ind_num, dep_num);
-  return *this;
+  std::shared_ptr<DerivativeTensor<size_t, Base>> tensor = get_tensor();
+  this->clear();
+  return tensor;
 }
 
 template <typename Base>
@@ -87,9 +90,21 @@ void BaseReverseMode<Base>::transcript_dep_value(
 }
 
 template <typename Base>
+void BaseReverseMode<Base>::compute_iterative() {
+  reverse_local_computation(trace->get_num_ind(), trace->get_num_dep());
+}
+
+template <typename Base>
 void BaseReverseMode<Base>::reset_trace(
     std::shared_ptr<TrivialTrace<Base>> _trace) {
-  this->trace = std::move(_trace);
+  this->clear();
+  this->trace = _trace;
+}
+
+template <typename Base>
+void BaseReverseMode<Base>::reset_trace_no_clear(
+    std::shared_ptr<TrivialTrace<Base>> _trace) {
+  this->trace = _trace;
 }
 
 template <typename Base>
@@ -111,7 +126,9 @@ void BaseReverseMode<Base>::reverse_local_computation(size_t ind_num, size_t dep
   using std::exp;
 
     DerivativeInfo<locint, Base> info;
-    
+    if (!trace) {
+      warning_NoTraceSet();
+    }
     if (ind_num != trace->get_num_ind()) {
       warning_NumberInconsistent("independent", ind_num, trace->get_num_ind());
     }

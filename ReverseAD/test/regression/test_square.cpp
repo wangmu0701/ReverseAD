@@ -26,19 +26,19 @@ void check_answer(std::shared_ptr<TrivialTrace<double>> trace,
 
   ReverseAD::BaseReverseThird<double> third_derivative(new_trace);
   std::shared_ptr<DerivativeTensor<size_t, double>> tensor =
-      third_derivative.compute(1, 1).get_tensor();
+      third_derivative.compute(1, 1);
   check_value(1, tensor, 2 * vx, done);
   check_value(2, tensor, 2, done);
   check_value(3, tensor, 0, done);
 
   ReverseAD::BaseReverseGeneric<double> generic_derivative(new_trace, 3);
-  tensor = generic_derivative.compute(1, 1).get_tensor();
+  tensor = generic_derivative.compute(1, 1);
   check_value(1, tensor, 2 * vx, done);
   check_value(2, tensor, 2, done);
   check_value(3, tensor, 0, done);
 
   ReverseAD::BaseReverseTensor<double> tensor_derivative(new_trace, 3);
-  tensor = tensor_derivative.compute(1, 1).get_tensor();
+  tensor = tensor_derivative.compute(1, 1);
   check_value(1, tensor, 2 * vx, done);
   check_value(2, tensor, 2, done);
   check_value(3, tensor, 0, done);

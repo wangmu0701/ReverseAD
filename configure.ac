@@ -9,7 +9,7 @@ LT_INIT
 AC_PROG_CC
 AC_PROG_CXX
 
-ac_reversead_cxxflags="-O3 -std=c++11 -Wall -m64"
+ac_reversead_cxxflags="-O3 -std=c++11 -Wall -m64 -g"
 AC_SUBST(ac_reversead_cxxflags)
 AC_MSG_RESULT($ac_reversead_cxxflags)
 #AX_CXX_COMPILE_STDCXX_11(noext,mandatory)
@@ -72,6 +72,8 @@ AC_CONFIG_FILES(Makefile
                 ReverseAD/test/simple/Makefile
                 ReverseAD/example/Makefile
                 ReverseAD/example/oneminute/Makefile
+                ReverseAD/example/timestepfunc/Makefile
+                ReverseAD/example/highorder/Makefile
 )
 
 AC_OUTPUT

@@ -20,11 +20,11 @@ class BaseReverseTensor : public BaseReverseMode<Base> {
 
   BaseReverseTensor(const std::shared_ptr<TrivialTrace<Base>>& trace, size_t order);
 
-  std::shared_ptr<DerivativeTensor<size_t, Base>> get_tensor() const override;
-
   void clear() override final;
 
  protected:
+  std::shared_ptr<DerivativeTensor<size_t, Base>> get_tensor() const override;
+
   void init_dep_deriv(locint dep) override final;
   void process_sac(const DerivativeInfo<locint, Base>& info) override final;
 

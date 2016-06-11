@@ -47,8 +47,7 @@ int main() {
 */
   size_t order = 6;
   ReverseAD::BaseReverseTensor<double> third(trace, order);
-  third.compute(N, M);
-  std::shared_ptr<DerivativeTensor<size_t, double>> tensor = third.get_tensor();
+  std::shared_ptr<DerivativeTensor<size_t, double>> tensor = third.compute(N, M);
   third.clear();
   std::cout << "done" << std::endl;
   size_t size;

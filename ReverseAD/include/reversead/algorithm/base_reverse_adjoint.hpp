@@ -27,22 +27,21 @@ class BaseReverseAdjoint : public BaseReverseMode<Base> {
   using BaseReverseMode<Base>::dep_index_map;
   using BaseReverseMode<Base>::indep_index_map;
 
+  BaseReverseAdjoint() = default;
   BaseReverseAdjoint(const std::shared_ptr<TrivialTrace<Base>>& trace)
       : BaseReverseMode<Base>(trace), preacc_enabled(false) {}
 
   ~BaseReverseAdjoint() = default;
 
-  std::shared_ptr<DerivativeTensor<size_t, Base>> get_tensor() const override;
-
   void enable_preacc();
 
  protected:
-  BaseReverseAdjoint() = default;
- 
   // From BaseReverseMode 
   void init_dep_deriv(locint dep) override final;
 
   void process_sac(const DerivativeInfo<locint, Base>& info) override final;
+
+  std::shared_ptr<DerivativeTensor<size_t, Base>> get_tensor() const override;
 
   // Originate BaseReverseAdjoint
   virtual void accumulate_sac(const DerivativeInfo<locint, Base>& info, SingleDeriv& deriv);

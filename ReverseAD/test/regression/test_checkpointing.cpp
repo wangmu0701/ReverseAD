@@ -88,7 +88,6 @@ void tear_down(T* t, size_t t_num, T* y, size_t y_num) {
   y[0] = t[1] * t[0];
 }
 int main() {
-  ReverseAD::trace_on<double>();
   double x[2] = {2, 1};
   double y;
   adouble xad[2];
@@ -109,21 +108,23 @@ int main() {
   //std::cout << "y = " << yad.getVal() << std::endl;
   BaseReverseThird<double> third(trace);
   std::shared_ptr<DerivativeTensor<size_t, double>> r_tensor =
-      third.compute(2, 1).get_tensor();
+      third.compute(2, 1);
   //dump_tensor(r_tensor);
   BaseReverseGeneric<double> generic(trace, 3);
   std::shared_ptr<DerivativeTensor<size_t, double>> g_tensor =
-      generic.compute(2, 1).get_tensor();
+      generic.compute(2, 1);
   //dump_tensor(g_tensor);
 
   IterativeFunc iter_func(2, 1, 2, &(set_up<adouble>), &(tear_down<adouble>),
-                          &(run<adouble>), &(while_condition));
+                          &(run<adouble>), &(while_condition<adouble>));
   // Force iter_func to create multiple checkpoints
   iter_func.set_min_op_per_cp(5);
   iter_func.run(x, 2, &y, 1);
   std::shared_ptr<DerivativeTensor<size_t, double>> i_tensor =
       iter_func.compute(x, 2, &y, 1, 3);
   //dump_tensor(i_tensor);
+  check_answer(r_tensor, i_tensor);
+  check_answer(g_tensor, i_tensor);
   std::cout << "IterativeFunc test OK!" << std::endl;
   return 0;
 } 

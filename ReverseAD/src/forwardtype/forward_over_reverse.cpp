@@ -38,8 +38,7 @@ void forward_over_reverse(std::shared_ptr<TrivialTrace<double>> trace,
       get_forward_trace(trace, ind_size, ind_init_value, adjoint_init_value);
 
   BaseReverseAdjoint<SingleForward> adjoint(new_trace);
-  adjoint.compute(ind_size, dep_size);
-  std::shared_ptr<DerivativeTensor<size_t, SingleForward>> tensor = adjoint.get_tensor();
+  std::shared_ptr<DerivativeTensor<size_t, SingleForward>> tensor = adjoint.compute(ind_size, dep_size);
 
   if (tensor->get_dep_size() != dep_size) {
     // TODO(muwang) some error here.
@@ -74,9 +73,8 @@ void forward_over_second(std::shared_ptr<TrivialTrace<double>> trace,
       get_forward_trace(trace, ind_size, ind_init_value, adjoint_init_value);
 
   BaseReverseHessian<SingleForward> hessian(new_trace);
-  hessian.compute(ind_size, dep_size);
   std::shared_ptr<DerivativeTensor<size_t, SingleForward>> tensor =
-      hessian.get_tensor();
+      hessian.compute(ind_size, dep_size);
 
   if (tensor->get_dep_size() != dep_size) {
     // TODO(muwang) some error here.
@@ -110,9 +108,8 @@ void forward_over_third(std::shared_ptr<TrivialTrace<double>> trace,
       get_forward_trace(trace, ind_size, ind_init_value, adjoint_init_value);
 
   BaseReverseThird<SingleForward> third(new_trace);
-  third.compute(ind_size, dep_size);
   std::shared_ptr<DerivativeTensor<size_t, SingleForward>> tensor =
-      third.get_tensor();
+      third.compute(ind_size, dep_size);
 
   if (tensor->get_dep_size() != dep_size) {
     // TODO(muwang) some error here.
@@ -178,20 +175,16 @@ std::shared_ptr<DerivativeTensor<size_t, double>> directional_reverse(
   std::shared_ptr<DerivativeTensor<size_t, SingleForward>> tensor;
   if (t_order == 1) {
     BaseReverseAdjoint<SingleForward> adjoint(new_trace);
-    adjoint.compute(ind_size, dep_size);
-    tensor = adjoint.get_tensor();
+    tensor = adjoint.compute(ind_size, dep_size);
   } else if (t_order == 2) {
     BaseReverseHessian<SingleForward> hessian(new_trace);
-    hessian.compute(ind_size, dep_size);
-    tensor = hessian.get_tensor();
+    tensor = hessian.compute(ind_size, dep_size);
   } else if (t_order == 3) {
     BaseReverseAdjoint<SingleForward> third(new_trace);
-    third.compute(ind_size, dep_size);
-    tensor = third.get_tensor();
+    tensor = third.compute(ind_size, dep_size);
   } else {
     BaseReverseGeneric<SingleForward> generic(new_trace, t_order);
-    generic.compute(ind_size, dep_size);
-    tensor = generic.get_tensor();
+    tensor = generic.compute(ind_size, dep_size);
   }
   return strip_derivative(tensor, t_order, ind_size, dep_size);
 }

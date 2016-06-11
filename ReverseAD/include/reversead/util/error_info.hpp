@@ -21,6 +21,7 @@ void warning_BranchInconsistent(const Base& lhs, const char* const opname, const
 void warning_NumberInconsistent(const char* const info, int input_num, int trace_num);
 
 void warning_UnrecognizedOpcode(int opcode);
+void warning_NoTraceSet();
 
 double get_timing();
 
