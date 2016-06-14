@@ -5,11 +5,12 @@ AC_CONFIG_MACRO_DIR([m4])
 
 LT_INIT
 
+CXXFLAGS="--std=c++11 -O0 -g"
 
-AC_PROG_CC
+#AC_PROG_CC
 AC_PROG_CXX
 
-ac_reversead_cxxflags="-O3 -std=c++11 -Wall -m64 -g"
+ac_reversead_cxxflags=""
 AC_SUBST(ac_reversead_cxxflags)
 AC_MSG_RESULT($ac_reversead_cxxflags)
 #AX_CXX_COMPILE_STDCXX_11(noext,mandatory)
