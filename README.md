@@ -10,12 +10,12 @@ autoreconf -fi
 ./configure --prefix=$ReverseADHOME
 make; make install
 ```
-To enable MPI wrapper, add `--enable-mpi` in `./configure`.
+
 
 ****
 ## One (Ten) Minute Example
 ### Source code and sample result
-Let's begin with the following code `reversead_one_minute.cpp`
+Let's begin with the following example [`one_minute.cpp`](https://github.com/wangmu0701/ReverseAD/blob/master/ReverseAD/example/oneminute/one_minute.cpp)
 ```c++
 #include <memory>
 #include <iostream>
@@ -39,45 +39,46 @@ int main() {
   adouble y;
   double vy;
   trace_on<double>(); // begin tracing
-  x1 <<= 2.0; // independent variable
-  x2 <<= 3.0;
+  x1 <<= 2.0; // independent variable #0
+  x2 <<= 3.0; // independent variable #1
   y = foo<adouble>(x1, x2); // function evaluation
   y >>= vy; // dependent variable
   std::shared_ptr<TrivialTrace<double>> trace =
       trace_off<double>(); // end tracing
   std::cout << "y = " << vy << std::endl;
 
-  BaseReverseHessian<double> hessian(trace);
-  std::shared_ptr<DerivativeTensor<int, double>> tensor =
-      hessian.compute(2, 1).get_tensor();
-    
+  std::unique_ptr<BaseReverseHessian<double>> hessian(
+      new BaseReverseHessian<double>(trace));
+  std::shared_ptr<DerivativeTensor<size_t, double>> tensor = hessian->compute(2,1);
+
   // retrieve results
-  int size;
-  int** tind;
+  size_t size;
+  size_t** tind;
   double* values;
   // adjoints : dep[0].order[1]
   tensor->get_internal_coordinate_list(0, 1, &size, &tind, &values);
   std::cout << "size of adjoints = " << size << std::endl;
-  for (int i = 0; i < size; i++) {
+  for (size_t i = 0; i < size; i++) {
     std::cout << "A["<< tind[i][0] << "] = " << values[i] << std::endl;
   }
   // hessian : dep[0].order[2]
   tensor->get_internal_coordinate_list(0, 2, &size, &tind, &values);
   std::cout << "size of hessian = " << size << std::endl;
-  for (int i = 0; i < size; i++) {
+  for (size_t i = 0; i < size; i++) {
     std::cout << "H["<< tind[i][0] << ", " << tind[i][1]
               << "] = " << values[i] << std::endl;
   }
 }
+
 ```
 A simple `Makefile` can be :
 ```
 ReverseadHome = $(HOME)/packages/reversead
 CXX=/usr/local/bin/g++
 
-all : reversead_one_minute
+all : one_minute
 
-reversead_one_minute : reversead_one_minute.cpp
+one_minute : one_minute.cpp
         $(CXX) -std=c++11 -I$(ReverseadHome)/include $^ -o $@ -L$(ReverseadHome)/lib -lreversead
 ```
 The results of running previous code is :
@@ -117,26 +118,26 @@ using ReverseAD::trace_off;
 ### Derivative evaluation
 Once we get a `trace` for an `active region`, we can pass it to a `derivative evaluation class` to evaluate it's derivatives. In the example we uses `BaseReverseHessian` which evaluates the derivatives up to second order.
 ```c++
-  BaseReverseHessian<double> hessian(trace);
+  std::unique_ptr<BaseReverseHessian<double>> hessian(new BaseReverseHessian<double>(trace));
 ```
 This code creates an instance of `BaseReverseHessian` namely `hessian`.
 ```c++
-  std::shared_ptr<DerivativeTensor<int, double>> tensor =
-      hessian.compute(2, 1).get_tensor();
+  std::shared_ptr<DerivativeTensor<size_t, double>> tensor = hessian.compute(2, 1);
 ```
-Then we can call the member function `compute(ind_num, dep_num)` to evaluate the derivatives for the `trace` up to second order and store the results into a `std::shared_ptr<DerivativeTensor<int, double>>` by calling `get_tensor()`. 
+Then we can call the member function `compute(ind_num, dep_num)` to evaluate the derivatives for the `trace` up to second order and the results are returned into a `std::shared_ptr<DerivativeTensor<size_t, double>>`. 
 
 Other `derivative evaluation class` are given in the following table:
 
-|Class|Order|Constructor|
+|Class|Order (d)|Constructor|
 |:---|:---:|:---|
 |BaseReverseAdjoint| 1 | BaseReverseAdjoint<double>(trace) |
 |BaseReverseHessian| 2 | BaseReverseHessian<double>(trace) |
 |BaseReverseThrid| 3 | BaseReverseThird<double>(trace) |
-|BaseReverseGeneric| d | BaseReverseGeneric<double>(trace, d) |
+|BaseReverseGeneric| 1-10 | BaseReverseGeneric<double>(trace, d) |
+|BaseReverseTensor | 1-6 | BaseReverseTensor<double>(trace, d) |
 
 ### Retrieve derivative tensor
-After we call the `compute(ind_num, dep_num)` function of a `derivative evaluation class` the derivatives are stored in to a `DerivativeTensor<int, double>`. The derivative tensor of each order for each dependent variable is organized in a `sparse coordinate list format`. The function `get_internal_coordinate_list` will expose pointers to the internal array. For example:
+After we call the `compute(ind_num, dep_num)` function of a `derivative evaluation class` the derivatives are stored in to a `DerivativeTensor<size_t, double>`. The derivative tensor of each order for each dependent variable is organized in a `sparse coordinate list format`. The function `get_internal_coordinate_list` will expose pointers to the internal array. For example:
 ```c++
   tensor.get_internal_coordinate_list(0, 1, &size, &tind, &values);
 ```
