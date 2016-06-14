@@ -31,7 +31,6 @@ int main() {
   std::unique_ptr<BaseReverseHessian<double>> hessian(
       new BaseReverseHessian<double>(trace));
   std::shared_ptr<DerivativeTensor<size_t, double>> tensor = hessian->compute(2,1);
-  hessian.release();
 
   // retrieve results
   size_t size;
