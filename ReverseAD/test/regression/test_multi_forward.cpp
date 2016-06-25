@@ -5,14 +5,13 @@
 using ReverseAD::adouble;
 using ReverseAD::BaseActive;
 using ReverseAD::TrivialTrace;
-using ReverseAD::SingleForward;
 using ReverseAD::MultiForward;
 using ReverseAD::trace_on;
 using ReverseAD::trace_off;
 using ReverseAD::BaseFunctionReplay;
-using ReverseAD::BaseReverseAdjoint;
 using ReverseAD::BaseReverseHessian;
 using ReverseAD::BaseReverseThird;
+using ReverseAD::BaseReverseGeneric;
 using ReverseAD::DerivativeTensor;
 
 #define N 3
@@ -54,6 +53,59 @@ std::shared_ptr<TrivialTrace<T>> bar(T a, T b, T c) {
   return ReverseAD::trace_off<T>();
 }
 
+void check_result(double adjoint_init_values[][DIRECTION],
+                  size_t t_size,
+                  size_t** t_tind,
+                  double* t_values,
+                  std::shared_ptr<DerivativeTensor<size_t, MultiForward<DIRECTION>>> m_tensor) {
+  double** tv = new double*[N];
+  double** ctv = new double*[N];
+  for (size_t i=0; i<N; i++) {
+    tv[i] = new double[N];
+    ctv[i] = new double[N];
+  }
+
+  size_t size = 0;
+  size_t** tind = nullptr;
+  MultiForward<DIRECTION>* values = nullptr;
+  m_tensor->get_internal_coordinate_list(0, 2, &size, &tind, &values);
+/*
+  for (size_t i = 0; i < size; i++) {
+    std::cout << "H["<< tind[i][0]<<", "<<tind[i][1] << "] = "
+              << values[i] << std::endl;
+  }
+*/
+  double aa[N] = {0, 0, 0};
+  for (size_t k = 0; k < DIRECTION; k++) {
+    for (size_t i = 0; i < N; i++) {
+      aa[i] = adjoint_init_values[i][k];
+    }
+    symmetric_third_vector(N, t_size, t_tind, t_values, aa, ctv);
+    for (size_t i = 0; i < N; i++) {
+      for (size_t j = 0; j < N; j++) {
+        tv[i][j] = 0.0;
+      }
+    }    
+    for (size_t i = 0;i < size; i++) {
+      tv[tind[i][0]][tind[i][1]] = values[i].getDer(k);
+    }
+    for (size_t i = 0; i < N; i++) {
+      for (size_t j = 0; j < N; j++) {
+        if (fabs(tv[i][j] - ctv[i][j]) > myEps) {
+          std::cout << "Multi Forward over reverse error!" << std::endl;
+          exit(-1);
+        }
+      }
+    }
+  }
+  for (size_t i = 0; i < N; i++) {
+    delete[] tv[i];
+    delete[] ctv[i];
+  }
+  delete[] tv;
+  delete[] ctv;
+  std::cout << "Multi Forward over reverse OK!" << std::endl;
+}
 
 void check_forward_over_second(
     std::shared_ptr<TrivialTrace<double>> trace,
@@ -74,12 +126,7 @@ void check_forward_over_second(
              <<", "<<t_tind[i][2] <<"] = "<<t_value[i]<<std::endl;
   }
 */
-  double** tv = new double*[ind_num];
-  double** ctv = new double*[ind_num];
-  for (size_t i=0; i<ind_num; i++) {
-    tv[i] = new double[ind_num];
-    ctv[i] = new double[ind_num];
-  }
+
   void* raw_memory = ::operator new[] (ind_num * sizeof(MultiForward<5>));
   MultiForward<5>* x = static_cast<MultiForward<DIRECTION>*>(raw_memory);
   for (size_t i = 0; i < ind_num; i++) {
@@ -92,46 +139,12 @@ void check_forward_over_second(
   BaseReverseHessian<MultiForward<DIRECTION>> hessian(new_trace);
   std::shared_ptr<DerivativeTensor<size_t, MultiForward<DIRECTION>>> m_tensor =
       hessian.compute(ind_num, dep_num);
-  size_t size = 0;
-  size_t** tind = nullptr;
-  MultiForward<DIRECTION>* values = nullptr;
-  m_tensor->get_internal_coordinate_list(0, 2, &size, &tind, &values);
-/*
-  for (size_t i = 0; i < size; i++) {
-    std::cout << "H["<< tind[i][0]<<", "<<tind[i][1] << "] = "
-              << values[i] << std::endl;
-  }
-*/
-  double aa[N] = {0, 0, 0};
-  for (size_t k = 0; k < DIRECTION; k++) {
-    for (size_t i = 0; i < N; i++) {
-      aa[i] = adjoint_init_values[i][k];
-    }
-    symmetric_third_vector(ind_num, t_size, t_tind, t_value, aa, ctv);
-    for (size_t i = 0; i < N; i++) {
-      for (size_t j = 0; j < N; j++) {
-        tv[i][j] = 0.0;
-      }
-    }    
-    for (size_t i = 0;i < size; i++) {
-      tv[tind[i][0]][tind[i][1]] = values[i].getDer(k);
-    }
-    for (size_t i = 0; i < N; i++) {
-      for (size_t j = 0; j < N; j++) {
-        if (fabs(tv[i][j] - ctv[i][j]) > myEps) {
-          std::cout << "Multi Forward over reverse error!" << std::endl;
-          exit(-1);
-        }
-      }
-    }
-  }
-  for (size_t i = 0; i < ind_num; i++) {
-    delete[] tv[i];
-    delete[] ctv[i];
-  }
-  delete[] tv;
-  delete[] ctv;
-  std::cout << "Multi Forward over reverse OK!" << std::endl;
+  check_result(adjoint_init_values, t_size, t_tind, t_value, m_tensor);
+
+  BaseReverseGeneric<MultiForward<DIRECTION>> generic(new_trace, 2);
+  m_tensor = generic.compute(ind_num, dep_num);
+  check_result(adjoint_init_values, t_size, t_tind, t_value, m_tensor);
+
 }
 int main() {
   std::shared_ptr<TrivialTrace<double>> trace = foo<double>(1,2,3);
