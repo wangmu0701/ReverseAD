@@ -75,6 +75,7 @@ AC_CONFIG_FILES(Makefile
                 ReverseAD/example/oneminute/Makefile
                 ReverseAD/example/timestepfunc/Makefile
                 ReverseAD/example/highorder/Makefile
+                ReverseAD/example/forward/Makefile
 )
 
 AC_OUTPUT

@@ -177,13 +177,13 @@ void BaseReverseHessian<Base>::accumulate_hessian_sac(
   } // while (has_next)
     
   if (!IsZero(w)) {
-    if (info.pxx != 0.0) {
+    if (!IsZero(info.pxx)) {
       hessian_vals.increase(info.x, info.x, info.pxx * w);
     }
-    if (info.pyy != 0.0) {
+    if (!IsZero(info.pyy)) {
       hessian_vals.increase(info.y, info.y, info.pyy * w);
     }
-    if (info.pxy != 0.0) {
+    if (!IsZero(info.pxy)) {
       // already eliminate pseudo binary functions, menas info.x != info.y
       hessian_vals.increase(info.x, info.y, w * info.pxy);
     }

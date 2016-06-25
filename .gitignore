@@ -18,6 +18,7 @@ ipopt_solver
 high_order
 one_minute
 timestep_func
+forward_over_reverse
 test_rosenbrock
 test_simple
 test_simple.cpp

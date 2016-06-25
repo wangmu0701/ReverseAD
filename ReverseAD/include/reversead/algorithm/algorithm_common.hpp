@@ -4,6 +4,7 @@
 #include <iostream>
 #include "reversead/common/reversead_core.hpp"
 #include "reversead/forwardtype/single_forward.hpp"
+#include "reversead/forwardtype/multi_forward.hpp"
 
 #define REVERSEAD_MAX_GENERIC_ORDER 10
 #define REVERSEAD_MAX_TENSOR_ORDER 6
@@ -15,13 +16,17 @@ inline bool IsZero(const T& val) {
   return val == 0.0;
 }
 
-template <>
-inline bool IsZero<double>(const double& val) {
-  return val == 0.0;
+inline bool IsZero(const SingleForward& val) {
+  return val.getVal() == 0.0 && val.getDer() == 0.0;
 }
-template <>
-inline bool IsZero<SingleForward>(const SingleForward& val) {
-  return (val.getVal() == 0.0 && val.getDer() == 0.0);
+
+template <size_t DIM>
+inline bool IsZero(const MultiForward<DIM>& val) {
+  if (val.getVal() != 0.0) {return false;}
+  for (size_t i = 0; i < DIM; i++) {
+    if (val.getDer(i) != 0.0) {return false;}
+  }
+  return true;
 }
 
 } // namespace ReverseAD
