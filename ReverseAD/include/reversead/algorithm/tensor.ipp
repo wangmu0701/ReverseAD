@@ -1,6 +1,7 @@
-inline void generator_unary (size_t case_code, const TensorIndex<locint>& Z, const double& sw, const TensorDerivativeInfo<locint, double>& ginfo, TensorDeriv<locint, double>& global_deriv) {
+template <typename Base>
+void generator_unary (size_t case_code, const TensorIndex<locint>& Z, const Base& sw, const TensorDerivativeInfo<locint, Base>& ginfo, TensorDeriv<locint, Base>& global_deriv) {
   TensorIndex<locint> D;
-  double w;
+  Base w;
   switch (case_code) {
     case 1010000 : 
       {
@@ -660,9 +661,10 @@ inline void generator_unary (size_t case_code, const TensorIndex<locint>& Z, con
   }
 }
 
-inline void generator_binary (size_t case_code, const TensorIndex<locint>& Z, const double& sw, const TensorDerivativeInfo<locint, double>& ginfo, TensorDeriv<locint, double>& global_deriv) {
+template <typename Base>
+void generator_binary (size_t case_code, const TensorIndex<locint>& Z, const Base& sw, const TensorDerivativeInfo<locint, Base>& ginfo, TensorDeriv<locint, Base>& global_deriv) {
   TensorIndex<locint> D;
-  double w;
+  Base w;
   switch (case_code) {
     case 1010000 : 
       {

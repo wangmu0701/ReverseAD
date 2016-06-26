@@ -125,7 +125,7 @@ class SymmetryTensor<LocType, Base, 1> : public SymmetryTensorBase<LocType, Base
       _data.erase(x);
       return ret;
     }
-    return 0.0;
+    return SymmetryTensor<LocType, Base, 0>();
   }
   void to_array(LocType** tind, Base* values,
                 size_t mybegin, size_t mydim) const override final {

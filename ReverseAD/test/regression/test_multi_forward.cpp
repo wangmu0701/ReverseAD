@@ -119,13 +119,6 @@ void check_forward_over_second(
   size_t** t_tind = nullptr;
   double* t_value = nullptr;
   tensor->get_internal_coordinate_list(0, 3, &t_size, &t_tind, &t_value);
-/*
-  std::cout << "t_size = " << t_size << std::endl;
-  for (size_t i = 0; i < t_size; i++) {
-    std::cout<<"T["<<t_tind[i][0]<<", "<<t_tind[i][1]
-             <<", "<<t_tind[i][2] <<"] = "<<t_value[i]<<std::endl;
-  }
-*/
 
   void* raw_memory = ::operator new[] (ind_num * sizeof(MultiForward<5>));
   MultiForward<5>* x = static_cast<MultiForward<DIRECTION>*>(raw_memory);

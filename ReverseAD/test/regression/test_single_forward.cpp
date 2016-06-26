@@ -13,6 +13,7 @@ using ReverseAD::BaseReverseAdjoint;
 using ReverseAD::BaseReverseHessian;
 using ReverseAD::BaseReverseThird;
 using ReverseAD::BaseReverseGeneric;
+using ReverseAD::BaseReverseTensor;
 using ReverseAD::DerivativeTensor;
 
 double myEps = 1.E-10;
@@ -89,10 +90,14 @@ void test_forward_over_second(
   check_forward_over_second(ind_num, ctv, tv, s_tensor);
 
   BaseReverseGeneric<SingleForward> generic(new_trace, 2);
-  s_tensor = generic.compute(ind_num, 1);
+  std::shared_ptr<DerivativeTensor<size_t, SingleForward>> g_tensor = generic.compute(ind_num, 1);
   std::cout << "BaseReverseGeneric : ";
-  check_forward_over_second(ind_num, ctv, tv, s_tensor);
+  check_forward_over_second(ind_num, ctv, tv, g_tensor);
 
+  BaseReverseTensor<SingleForward> generator(new_trace, 2);
+  std::shared_ptr<DerivativeTensor<size_t, SingleForward>> t_tensor = generator.compute(ind_num, 1);
+  std::cout << "BaseReverseTensor : ";
+  check_forward_over_second(ind_num, ctv, tv, t_tensor);
   for (size_t i=0; i<ind_num; i++) {
     delete[] tv[i];
     delete[] ctv[i];
@@ -151,10 +156,16 @@ void test_forward_over_reverse(
     adjoint.compute(ind_num, 1);
   std::cout << "BaseReverseAdjoint : ";
   check_forward_over_reverse(ind_num, chv, s_tensor);
-  BaseReverseAdjoint<SingleForward> generic(new_trace);
-  s_tensor = generic.compute(ind_num, 1);
+
+  BaseReverseGeneric<SingleForward> generic(new_trace, 1);
+  std::shared_ptr<DerivativeTensor<size_t, SingleForward>> g_tensor = generic.compute(ind_num, 1);
   std::cout << "BaseReverseGeneric : ";
-  check_forward_over_reverse(ind_num, chv, s_tensor);
+  check_forward_over_reverse(ind_num, chv, g_tensor);
+
+  BaseReverseTensor<SingleForward> generator(new_trace, 1);
+  std::shared_ptr<DerivativeTensor<size_t, SingleForward>> t_tensor = generator.compute(ind_num, 1);
+  std::cout << "BaseReverseTensor : ";
+  check_forward_over_reverse(ind_num, chv, t_tensor);
   delete[] chv;
   delete[] x;
 }

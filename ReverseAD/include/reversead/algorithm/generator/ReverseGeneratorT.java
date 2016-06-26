@@ -116,15 +116,16 @@ public class ReverseGeneratorT {
   }
 
   public void generateUnary() {
-    String funcDecl = "inline void generator_unary " +
+    dumpToFile("template <typename Base>");
+    String funcDecl = "void generator_unary " +
         "(size_t case_code, " + 
-        "const TensorIndex<locint>& Z, const double& sw, " +
-        "const TensorDerivativeInfo<locint, double>& ginfo, " +
-        "TensorDeriv<locint, double>& global_deriv) {";
+        "const TensorIndex<locint>& Z, const Base& sw, " +
+        "const TensorDerivativeInfo<locint, Base>& ginfo, " +
+        "TensorDeriv<locint, Base>& global_deriv) {";
     dumpToFile(funcDecl);
     indent += 2;
     dumpToFile("TensorIndex<locint> D;");
-    dumpToFile("double w;");
+    dumpToFile("Base w;");
     dumpToFile("switch (case_code) {");
     indent += 2;
     for (int i = 1; i <= ORDER; i++) {
@@ -222,15 +223,16 @@ public class ReverseGeneratorT {
   }
 
   public void generateBinary() {
-    String funcDecl = "inline void generator_binary " +
+    dumpToFile("template <typename Base>");
+    String funcDecl = "void generator_binary " +
         "(size_t case_code, " + 
-        "const TensorIndex<locint>& Z, const double& sw, " +
-        "const TensorDerivativeInfo<locint, double>& ginfo, " +
-        "TensorDeriv<locint, double>& global_deriv) {";
+        "const TensorIndex<locint>& Z, const Base& sw, " +
+        "const TensorDerivativeInfo<locint, Base>& ginfo, " +
+        "TensorDeriv<locint, Base>& global_deriv) {";
     dumpToFile(funcDecl);
     indent += 2;
     dumpToFile("TensorIndex<locint> D;");
-    dumpToFile("double w;");
+    dumpToFile("Base w;");
     dumpToFile("switch (case_code) {");
     indent += 2;
     for (int i = 1; i <= ORDER; i++) {
@@ -253,7 +255,7 @@ public class ReverseGeneratorT {
   public void doWork() {
     try {
       fout = new PrintWriter(
-          new BufferedWriter(new FileWriter("./tensor.ipp")));
+          new BufferedWriter(new FileWriter("./../tensor.ipp")));
       generateUnary();
       generateBinary();
       fout.close();
