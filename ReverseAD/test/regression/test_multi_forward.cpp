@@ -129,14 +129,21 @@ void check_forward_over_second(
       BaseFunctionReplay::replay_forward<double, MultiForward<5>>(
           trace, x, ind_num);
 
+  std::cout << "BaseReverseHessian : ";
   BaseReverseHessian<MultiForward<DIRECTION>> hessian(new_trace);
   std::shared_ptr<DerivativeTensor<size_t, MultiForward<DIRECTION>>> m_tensor =
       hessian.compute(ind_num, dep_num);
   check_result(adjoint_init_values, t_size, t_tind, t_value, m_tensor);
 
+  std::cout << "BaseReverseGeneric : ";
   BaseReverseGeneric<MultiForward<DIRECTION>> generic(new_trace, 2);
-  m_tensor = generic.compute(ind_num, dep_num);
-  check_result(adjoint_init_values, t_size, t_tind, t_value, m_tensor);
+  std::shared_ptr<DerivativeTensor<size_t, MultiForward<DIRECTION>>> g_tensor = generic.compute(ind_num, dep_num);
+  check_result(adjoint_init_values, t_size, t_tind, t_value, g_tensor);
+
+  std::cout << "BaseReverseTensor : ";
+  BaseReverseGeneric<MultiForward<DIRECTION>> generator(new_trace, 2);
+  std::shared_ptr<DerivativeTensor<size_t, MultiForward<DIRECTION>>> t_tensor = generator.compute(ind_num, dep_num);
+  check_result(adjoint_init_values, t_size, t_tind, t_value, t_tensor);
 
 }
 int main() {
