@@ -12,7 +12,7 @@
 
 ### What is Automatic Differentiation
 
-Automatic differentiation or algorithmetic differentiation is a technique that algorithmetically, thus in macheine precision, computes the derivative of an objective function specified by a computer program.
+Automatic differentiation or algorithmetic differentiation is a technique that algorithmetically, thus in macheine precision, computes the derivative of an objective function specified by a computer program. 
 
 
 

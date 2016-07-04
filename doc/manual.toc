@@ -1,0 +1,19 @@
+\changetocdepth {2}
+\select@language {english}
+\contentsline {chapter}{Preliminaries of Automatic Differentiation}{iii}
+\contentsline {chapter}{\chapternumberline {1}Basic Usage of ReverseAD}{1}
+\contentsline {section}{\numberline {1.1}Download And Installation}{1}
+\contentsline {section}{\numberline {1.2}The One Minute Example}{1}
+\contentsline {section}{\numberline {1.3}Additional Options and Examples}{1}
+\contentsline {subsection}{\numberline {1.3.1}Disk Tape}{1}
+\contentsline {subsection}{\numberline {1.3.2}Forward-over-Reverse Mode}{1}
+\contentsline {chapter}{\chapternumberline {2}Internal Implementation}{2}
+\contentsline {section}{\numberline {2.1}Function Trace}{2}
+\contentsline {section}{\numberline {2.2}Active Type}{2}
+\contentsline {section}{\numberline {2.3}Indexing Scheme}{2}
+\contentsline {section}{\numberline {2.4}Derivative Computation Classes}{2}
+\contentsline {subsection}{\numberline {2.4.1}Adjoints, Hessian and Third Order}{2}
+\contentsline {subsection}{\numberline {2.4.2}Generic Reverse Mode}{2}
+\contentsline {subsection}{\numberline {2.4.3}Generating Flat Code}{2}
+\contentsline {section}{\numberline {2.5}Forward-over-Reverse Mode}{2}
+\contentsline {section}{\numberline {2.6}Time-Step Functions}{2}
