@@ -55,6 +55,11 @@ class BaseActive {
   locint loc;
 
   friend class CheckpointTrace;
+
+  friend std::ostream& operator << (std::ostream& os, BaseActive& obj) {
+    os << obj.val;
+    return os;
+  }
 };  
 
 typedef ReverseAD::BaseActive<double> adouble;
