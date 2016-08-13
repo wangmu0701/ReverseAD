@@ -120,6 +120,7 @@ template <typename Base>
 void BaseReverseMode<Base>::reverse_local_computation(size_t ind_num, size_t dep_num) {
   using std::sin;
   using std::cos;
+  using std::acos;
   using std::sqrt;
   using std::pow;
   using std::log;
@@ -381,6 +382,15 @@ void BaseReverseMode<Base>::reverse_local_computation(size_t ind_num, size_t dep
                 info.pxx = log(coval) * info.dx;
                 info.pxxx = log(coval) * info.pxx;
             }
+                break;
+            case erf_a:
+                info.r = trace->get_next_loc_r();
+                info.x = trace->get_next_loc_r();
+                info.vx = trace->get_next_val_r();
+                info.dx=2.0/sqrt(acos(-1.0))*exp(-info.vx*info.vx);
+                info.pxx=-2.0*info.vx*info.dx;
+                // TODO : fill in other forms!
+                std::cerr << "erf is incomplete" << std::endl;
                 break;
             case fabs_a:
                 info.r = trace->get_next_loc_r();

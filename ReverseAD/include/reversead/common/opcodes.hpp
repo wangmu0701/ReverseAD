@@ -36,9 +36,10 @@ enum OPCODES {
   sqrt_a,
   exp_a,
   log_a,
+  fabs_a,
+  erf_a,
   comp_eq,
   comp_lt,
-  fabs_a,
   rmpi_send,
   rmpi_recv
 };

@@ -10,6 +10,7 @@
 *.swp
 *.class
 *~
+.DS_Store
 .libs
 .deps
 run_test.sh
