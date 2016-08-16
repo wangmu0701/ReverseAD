@@ -70,6 +70,7 @@ class BaseReverseMode {
   void reset_trace_no_clear(std::shared_ptr<TrivialTrace<Base>> _trace);
   void compute_iterative();
   friend class IterativeFunc;
+  friend class IterativeFuncFixed;
 };
 
 template <typename Base>

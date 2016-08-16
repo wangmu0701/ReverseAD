@@ -9,6 +9,7 @@ using ReverseAD::BaseReverseGeneric;
 using ReverseAD::TrivialTrace;
 using ReverseAD::DerivativeTensor;
 using ReverseAD::IterativeFunc;
+using ReverseAD::IterativeFuncFixed;
 
 double myEps = 1.0e-10;
 
@@ -125,6 +126,10 @@ int main() {
   //dump_tensor(i_tensor);
   check_answer(r_tensor, i_tensor);
   check_answer(g_tensor, i_tensor);
+  IterativeFuncFixed iter_func_fixed(2, 1, 2, &(set_up<adouble>), &(tear_down<adouble>), &(run<adouble>), 4);
+  std::shared_ptr<DerivativeTensor<size_t, double>> f_tensor = 
+      iter_func_fixed.compute(x, 2, &y, 1, 3);
+  check_answer(i_tensor, f_tensor);
   std::cout << "IterativeFunc test OK!" << std::endl;
   return 0;
 } 
