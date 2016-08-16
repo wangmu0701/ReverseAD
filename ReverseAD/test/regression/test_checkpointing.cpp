@@ -77,8 +77,10 @@ void set_up(T* x, size_t x_num, T* t, size_t t_num) {
 }
 template <typename T>
 void run(T* t, size_t t_num) {
+//  printf("<%.5f, %.5f> -->", (double)t[0], (double)t[1]);
   t[0] = t[1]+t[0];
   t[1] = t[0]*t[1];
+//  printf("<%.5f, %.5f>\n", (double)t[0], (double)t[1]);
 }
 template <typename T>
 bool while_condition(const T* const t, size_t t_num) {
@@ -119,14 +121,15 @@ int main() {
   IterativeFunc iter_func(2, 1, 2, &(set_up<adouble>), &(tear_down<adouble>),
                           &(run<adouble>), &(while_condition<adouble>));
   // Force iter_func to create multiple checkpoints
-  iter_func.set_min_op_per_cp(5);
+  iter_func.set_min_op_per_cp(1);
   iter_func.run(x, 2, &y, 1);
   std::shared_ptr<DerivativeTensor<size_t, double>> i_tensor =
       iter_func.compute(x, 2, &y, 1, 3);
   //dump_tensor(i_tensor);
   check_answer(r_tensor, i_tensor);
   check_answer(g_tensor, i_tensor);
-  IterativeFuncFixed iter_func_fixed(2, 1, 2, &(set_up<adouble>), &(tear_down<adouble>), &(run<adouble>), 4);
+  IterativeFuncFixed iter_func_fixed(2, 1, 2, &(set_up<adouble>), &(tear_down<adouble>), &(run<adouble>), 3);
+  iter_func_fixed.set_min_op_per_cp(1);
   std::shared_ptr<DerivativeTensor<size_t, double>> f_tensor = 
       iter_func_fixed.compute(x, 2, &y, 1, 3);
   check_answer(i_tensor, f_tensor);
