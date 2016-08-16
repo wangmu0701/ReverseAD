@@ -32,6 +32,7 @@ class BaseActive {
 
   inline Base getVal() const {return val;}
   inline locint getLoc() const {return loc;}
+  explicit operator Base() {return val;}
   static BaseActive<Base> markParam(const Base& param) {
     BaseActive res(param, get_next_loc());
 #ifdef REVERSEAD_BASE_ACTIVE_DEBUG
