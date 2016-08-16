@@ -10,6 +10,7 @@
 #include "reversead/forwardtype/multi_forward.hpp"
 #include "reversead/forwardtype/forward_over_reverse.hpp"
 #include "reversead/checkpointing/iterative_func.hpp"
+#include "reversead/checkpointing/iterative_func_fixed.hpp"
 #include "reversead/algorithm/base_function_replay.hpp"
 #include "reversead/algorithm/base_reverse_mode.hpp"
 #include "reversead/algorithm/base_reverse_adjoint.hpp"
