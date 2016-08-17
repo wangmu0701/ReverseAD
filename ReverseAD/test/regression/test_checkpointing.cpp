@@ -8,7 +8,7 @@ using ReverseAD::BaseReverseThird;
 using ReverseAD::BaseReverseGeneric;
 using ReverseAD::TrivialTrace;
 using ReverseAD::DerivativeTensor;
-using ReverseAD::IterativeFunc;
+using ReverseAD::IterativeFuncCond;
 using ReverseAD::IterativeFuncFixed;
 
 double myEps = 1.0e-10;
@@ -70,26 +70,32 @@ void check_answer(std::shared_ptr<DerivativeTensor<size_t, double>> tensor1,
   }
 }
 
+void dummy_func() {
+  // a dummy_func used as empty set_up and tear_down
+}
+
 template <typename T>
-void set_up(T* x, size_t x_num, T* t, size_t t_num) {
+void initial_step(T* x, size_t x_num, T* t, size_t t_num) {
   t[0] = x[0];
   t[1] = x[1];
 }
 template <typename T>
-void run(T* t, size_t t_num) {
+void iteration_step(T* t, size_t t_num) {
 //  printf("<%.5f, %.5f> -->", (double)t[0], (double)t[1]);
   t[0] = t[1]+t[0];
   t[1] = t[0]*t[1];
 //  printf("<%.5f, %.5f>\n", (double)t[0], (double)t[1]);
 }
+
 template <typename T>
 bool while_condition(const T* const t, size_t t_num) {
   return t[0] * t[1] < 10000;
 }
 template <typename T>
-void tear_down(T* t, size_t t_num, T* y, size_t y_num) {
+void final_step(T* t, size_t t_num, T* y, size_t y_num) {
   y[0] = t[1] * t[0];
 }
+
 int main() {
   double x[2] = {2, 1};
   double y;
@@ -99,11 +105,11 @@ int main() {
   ReverseAD::trace_on<double>();
   xad[0] <<= x[0];
   xad[1] <<= x[1];
-  set_up<adouble>(xad, 2, tad, 2);
+  initial_step<adouble>(xad, 2, tad, 2);
   while (while_condition<adouble>(tad, 2)) {
-    run<adouble>(tad, 2);
+    iteration_step<adouble>(tad, 2);
   }
-  tear_down<adouble>(tad, 2, &yad, 1);
+  final_step<adouble>(tad, 2, &yad, 1);
   yad >>= y;
   std::shared_ptr<TrivialTrace<double>> trace = ReverseAD::trace_off<double>();
   //std::cout << "t[0] = " << tad[0].getVal() << std::endl;
@@ -118,20 +124,24 @@ int main() {
       generic.compute(2, 1);
   //dump_tensor(g_tensor);
 
-  IterativeFunc iter_func(2, 1, 2, &(set_up<adouble>), &(tear_down<adouble>),
-                          &(run<adouble>), &(while_condition<adouble>));
+  IterativeFuncCond iter_func_cond(
+      2, 2, 1, &dummy_func, &dummy_func,
+      &(initial_step<adouble>), &(iteration_step<adouble>),
+      &(final_step<adouble>), &(while_condition<adouble>));
   // Force iter_func to create multiple checkpoints
-  iter_func.set_min_op_per_cp(1);
-  iter_func.run(x, 2, &y, 1);
+  iter_func_cond.set_min_op_per_cp(1);
   std::shared_ptr<DerivativeTensor<size_t, double>> i_tensor =
-      iter_func.compute(x, 2, &y, 1, 3);
+      iter_func_cond.compute(x, 2, 3);
   //dump_tensor(i_tensor);
   check_answer(r_tensor, i_tensor);
   check_answer(g_tensor, i_tensor);
-  IterativeFuncFixed iter_func_fixed(2, 1, 2, &(set_up<adouble>), &(tear_down<adouble>), &(run<adouble>), 3);
+  IterativeFuncFixed iter_func_fixed(
+      2, 2, 1, &dummy_func, &dummy_func,
+      &(initial_step<adouble>), &(iteration_step<adouble>),
+      &(final_step<adouble>), 3);
   iter_func_fixed.set_min_op_per_cp(1);
   std::shared_ptr<DerivativeTensor<size_t, double>> f_tensor = 
-      iter_func_fixed.compute(x, 2, &y, 1, 3);
+      iter_func_fixed.compute(x, 2, 3);
   check_answer(i_tensor, f_tensor);
   std::cout << "IterativeFunc test OK!" << std::endl;
   return 0;

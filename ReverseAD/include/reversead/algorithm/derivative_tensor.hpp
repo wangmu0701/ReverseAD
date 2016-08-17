@@ -21,9 +21,9 @@ class DerivativeTensor {
   friend class BaseReverseThird<Base>;
   friend class BaseReverseGeneric<Base>;
   friend class BaseReverseTensor<Base>;
-  friend std::shared_ptr<DerivativeTensor<size_t, double>> strip_derivative(
-      const std::shared_ptr<DerivativeTensor<size_t, SingleForward>> tensor,
-      size_t t_order, size_t ind_size, size_t dep_size);
+//  friend std::shared_ptr<DerivativeTensor<size_t, double>> strip_derivative(
+//      const std::shared_ptr<DerivativeTensor<size_t, SingleForward>> tensor,
+//      size_t t_order, size_t ind_size, size_t dep_size);
 
  public:
   DerivativeTensor(): _dep_size(0), _order(0) {}

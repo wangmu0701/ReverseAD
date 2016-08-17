@@ -2,18 +2,22 @@
    a timestep function.
    A timestep function iteratively does some computation until a certain
    condition is met.
-   x (ind) --> t0 --> t1 --> ... --> tn (condition met) --> y (dep)
-       set_up() run()   run()   run()  while_condition() tear_down()
+     x (ind) --> t0 --> t1 --> ... --> tn (condition met) --> y (dep)
+ set_up()   init()   iter()  iter() while_condition()  final()    tear_down()
 
-   void set_up(adobule* x, size_t x_num, adouble* t, size_t t_num);
-   void run(adouble* t, size_t t_num) {
-   void tear_down(adouble* t, size_t t_num, adouble* y, size_t y_num) {
+
+   void set_up();
+   void tear_down();
+   void initial_step(adobule* x, size_t x_num, adouble* t, size_t t_num);
+   void iteration_step(adouble* t, size_t t_num) {
+   void final_step(adouble* t, size_t t_num, adouble* y, size_t y_num) {
    bool while_condition(const adouble* const t, size_t t_num) {
 
-   IterativeFunc iter_func(
-       ind_num, dep_num, intermediate_num
-       &(set_up<adouble>), &(tear_down<adouble>),
-       &(run<adouble>), &(while_condition<adouble>));
+   IterativeFuncCond iter_func(
+       ind_num, intermediate_num, dep_num,
+       &set_up, &tear_down,
+       &(initial_step<adouble>), &(iteration_step<adouble>),
+       &(final_step<adouble>), &(while_condition<adouble>));
 */
 
 #include <iostream>
@@ -24,7 +28,7 @@
 using ReverseAD::adouble;
 using ReverseAD::TrivialTrace;
 using ReverseAD::DerivativeTensor;
-using ReverseAD::IterativeFunc;
+using ReverseAD::IterativeFuncCond;
 
 void dump_tensor(std::shared_ptr<DerivativeTensor<size_t, double>> tensor) {
   size_t size = 0;
@@ -52,33 +56,42 @@ void dump_tensor(std::shared_ptr<DerivativeTensor<size_t, double>> tensor) {
   }
 }
 
+void dummy_func() {}
+
 template <typename T>
-void set_up(T* x, size_t x_num, T* t, size_t t_num) {
+void initial_step(T* x, size_t x_num, T* t, size_t t_num) {
   t[0] = x[0];
   t[1] = x[1];
 }
+
 template <typename T>
-void run(T* t, size_t t_num) {
+void iteration_step(T* t, size_t t_num) {
   t[0] = t[1]+t[0];
   t[1] = t[0]*t[1];
 }
+
+template <typename T>
+void final_step(T* t, size_t t_num, T* y, size_t y_num) {
+  y[0] = t[1] * t[0];
+}
+
 template <typename T>
 bool while_condition(const T* const t, size_t t_num) {
   return t[0] * t[1] < 10000;
 }
-template <typename T>
-void tear_down(T* t, size_t t_num, T* y, size_t y_num) {
-  y[0] = t[1] * t[0];
-}
+
 int main() {
   double x[2] = {2, 1};
   double y;
-  IterativeFunc iter_func(2, 1, 2, &(set_up<adouble>), &(tear_down<adouble>),
-                          &(run<adouble>), &(while_condition<adouble>));
-  iter_func.run(x, 2, &y, 1);
+  IterativeFuncCond iter_func_cond(
+      2, 2, 1, 
+      &dummy_func, &dummy_func,
+      &(initial_step<adouble>), &(iteration_step<adouble>),
+      &(final_step<adouble>), &(while_condition<adouble>));
+  iter_func_cond.run(x, 2, &y, 1);
   std::cout << "y = " << y << std::endl;
   std::shared_ptr<DerivativeTensor<size_t, double>> i_tensor =
-      iter_func.compute(x, 2, &y, 1, 3);
+      iter_func_cond.compute(x, 2, 3);
   dump_tensor(i_tensor);
   return 0;
 } 
