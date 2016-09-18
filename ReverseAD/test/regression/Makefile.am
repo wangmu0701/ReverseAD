@@ -1,5 +1,4 @@
-AM_CXXFLAGS = @ac_reversead_cxxflags@
-AM_CPPFLAGS = -I$(top_builddir)/ReverseAD/include -lmath
+AM_CPPFLAGS = -I$(top_builddir)/ReverseAD/include -std=c++11
 
 noinst_PROGRAMS = test_identity test_square test_quad\
                   test_param test_preacc\

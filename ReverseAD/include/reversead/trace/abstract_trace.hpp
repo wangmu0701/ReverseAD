@@ -42,16 +42,8 @@ class AbstractTrace {
   virtual Base get_next_param_r() = 0;
   virtual double get_next_coval_r() = 0;
 
-  // communication trace
-  virtual void put_sr_info(const SendRecvInfo&) = 0;
-  virtual void put_comm_loc(const locint&) = 0;
-  virtual void init_comm_forward() = 0;
-  virtual void end_comm_forward() = 0;
-  virtual bool has_next_sr_info_f() = 0;
-  virtual SendRecvInfo get_next_sr_info_f() = 0;
-  virtual locint get_next_comm_loc_f() = 0;
-
   // for debug
+  virtual void dump_trace_info() = 0;
   virtual void dump_trace() = 0;
   
   // independent and dependent counters

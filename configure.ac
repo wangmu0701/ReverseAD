@@ -5,29 +5,29 @@ AC_CONFIG_MACRO_DIR([m4])
 
 LT_INIT
 
-CXXFLAGS="--std=c++11 -O0 -g"
+#CXXFLAGS="--std=c++11 -O0 -g"
 
 #AC_PROG_CC
 AC_PROG_CXX
 
-ac_reversead_cxxflags=""
-AC_SUBST(ac_reversead_cxxflags)
-AC_MSG_RESULT($ac_reversead_cxxflags)
-#AX_CXX_COMPILE_STDCXX_11(noext,mandatory)
+#ac_reversead_cxxflags=""
+#AC_SUBST(ac_reversead_cxxflags)
+#AC_MSG_RESULT($ac_reversead_cxxflags)
+AX_CXX_COMPILE_STDCXX_11(noext,mandatory)
 
-AC_MSG_CHECKING(whether to enable mpi)
-AC_ARG_ENABLE(mpi, [AS_HELP_STRING([--enable-mpi],
-  [enable mpi in ReverseAD [default=no], (DISABLED)])],
-  [enable_mpi=$enableval], [enable_mpi=no])
-AC_MSG_RESULT($enable_mpi)
+#AC_MSG_CHECKING(whether to enable mpi)
+#AC_ARG_ENABLE(mpi, [AS_HELP_STRING([--enable-mpi],
+#  [enable mpi in ReverseAD [default=no], (DISABLED)])],
+#  [enable_mpi=$enableval], [enable_mpi=no])
+#AC_MSG_RESULT($enable_mpi)
 
-AM_CONDITIONAL(ENABLE_REVERSEAD_MPI, [test x$enable_mpi = xyes])
+#AM_CONDITIONAL(ENABLE_REVERSEAD_MPI, [test x$enable_mpi = xyes])
 
-if test x$enable_mpi = xyes ; then
-  ENABLE_MPI="#define ENABLE_REVERSEAD_MPI 1"
-else
+#if test x$enable_mpi = xyes ; then
+#  ENABLE_MPI="#define ENABLE_REVERSEAD_MPI 1"
+#else
   ENABLE_MPI="#undef ENABLE_REVERSEAD_MPI"
-fi
+#fi
 AC_SUBST(ENABLE_MPI)
 
 AC_MSG_CHECKING(whether to enable disk (file backed) tape.)

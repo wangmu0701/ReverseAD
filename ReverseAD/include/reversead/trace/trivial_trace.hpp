@@ -46,10 +46,6 @@ class TrivialTrace : public AbstractTrace<Base> {
     val_tape = std::make_shared<VirtualTape<Base>>();
     param_tape = std::make_shared<VirtualTape<Base>>();
     coval_tape = std::make_shared<VirtualTape<double>>();
-#ifdef ENABLE_REVERSEAD_MPI
-    sr_info_tape = std::make_shared<TrivialTape<SendRecvInfo>>();
-    comm_loc_tape = std::make_shared<TrivialTape<locint>>();
-#endif
   }
   ~TrivialTrace() {
     op_tape.reset();
@@ -57,10 +53,6 @@ class TrivialTrace : public AbstractTrace<Base> {
     val_tape.reset();
     param_tape.reset();
     coval_tape.reset();
-#ifdef ENABLE_REVERSEAD_MPI
-    sr_info_tape.reset();
-    comm_loc_tape.reset();
-#endif
   }
 
   void init_tracing() {
@@ -69,10 +61,6 @@ class TrivialTrace : public AbstractTrace<Base> {
     val_tape->init_taping();
     param_tape->init_taping();
     coval_tape->init_taping();
-#ifdef ENABLE_REVERSEAD_MPI
-    sr_info_tape->init_taping();
-    comm_loc_tape->init_taping();
-#endif
   }
   void end_tracing() {
     op_tape->end_taping();
@@ -80,10 +68,6 @@ class TrivialTrace : public AbstractTrace<Base> {
     val_tape->end_taping();
     param_tape->end_taping();
     coval_tape->end_taping();
-#ifdef ENABLE_REVERSEAD_MPI
-    sr_info_tape->end_taping();
-    comm_loc_tape->end_taping();
-#endif
   }
   // Write
   inline void put_op(const opbyte& opcode) {
@@ -103,31 +87,6 @@ class TrivialTrace : public AbstractTrace<Base> {
     coval_tape->put(coval);
   }
 
-  inline void put_sr_info(const SendRecvInfo& sr_info) {
-    sr_info_tape->put(sr_info);
-  }
-  inline void put_comm_loc(const locint& comm_loc) {
-    std::cout << "trace->put_comm_loc : " << comm_loc << std::endl;
-    comm_loc_tape->put(comm_loc);
-  }
-  inline void init_comm_forward() {
-    sr_info_tape->init_forward();
-    comm_loc_tape->init_forward();
-  }
-  inline void end_comm_forward() {
-    sr_info_tape->end_forward();
-    comm_loc_tape->end_forward();
-  }
-  inline bool has_next_sr_info_f() {
-    return sr_info_tape->has_next_f();
-  }
-  inline SendRecvInfo get_next_sr_info_f() {
-    return sr_info_tape->get_next_f();
-  }
-  inline locint get_next_comm_loc_f() {
-    return comm_loc_tape->get_next_f();
-  }
- 
   // forward sweep
   inline void init_forward() {
     op_tape->init_forward();
@@ -190,7 +149,11 @@ class TrivialTrace : public AbstractTrace<Base> {
     return coval_tape->get_next_r();
   }
 
+
   // for debug
+  inline void dump_trace_info() {
+  }
+
   inline void dump_trace() {
     std::cout << "Op tape:" << std::endl;
     op_tape->dump_tape();
@@ -202,12 +165,6 @@ class TrivialTrace : public AbstractTrace<Base> {
     param_tape->dump_tape();
     std::cout << "Const tape:" << std::endl;
     coval_tape->dump_tape();
-    if (sr_info_tape) {
-      std::cout << "SendRecvInfo tape:" << std::endl;
-      sr_info_tape->dump_tape();
-      std::cout << "Comm Info tape:" << std::endl;
-      comm_loc_tape->dump_tape();
-    }
   }
    
  private:
@@ -216,8 +173,6 @@ class TrivialTrace : public AbstractTrace<Base> {
   std::shared_ptr<VirtualTape<Base>> val_tape;
   std::shared_ptr<VirtualTape<Base>> param_tape;
   std::shared_ptr<VirtualTape<double>> coval_tape;
-  std::shared_ptr<TrivialTape<SendRecvInfo>> sr_info_tape;
-  std::shared_ptr<TrivialTape<locint>> comm_loc_tape;
 };
 
 template <typename OldBase, typename NewBase>
@@ -234,12 +189,6 @@ std::shared_ptr<TrivialTrace<NewBase>> copy_tape(
     ret->coval_tape = other->coval_tape;
     ret->num_ind = other->num_ind;
     ret->num_dep = other->num_dep;
-#ifdef ENABLE_REVERSEAD_MPI
-    ret->sr_info_tape = other->sr_info_tape;
-    ret->comm_loc_tape = other->comm_loc_tape;
-    ret->num_dummy_ind = other->num_dummy_ind;
-    ret->num_dummy_dep = other->num_dummy_dep;
-#endif
     return ret;
   }
 
