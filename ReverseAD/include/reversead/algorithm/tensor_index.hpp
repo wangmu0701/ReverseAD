@@ -24,7 +24,7 @@ class TensorIndex {
     _data[l] = x;
     _len += 1;
   }
-  void insert(LocType x, int count) {
+  void insert(LocType x, size_t count) {
     if (count == 0) {return;}
     size_t l = 0;
     while ((l < _len) && (_data[l] > x)) {
