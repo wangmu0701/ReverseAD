@@ -4,7 +4,7 @@ SUBDIRS = ReverseAD
 
 TESTS= ReverseAD/test/regression/test_identity\
        ReverseAD/test/regression/test_square\
-       ReverseAD/test/regression/test_quad\
+       ReverseAD/test/regression/test_highorder\
        ReverseAD/test/regression/test_param\
        ReverseAD/test/regression/test_preacc\
        ReverseAD/test/regression/test_checkpointing\
