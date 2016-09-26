@@ -156,12 +156,10 @@ int run_function() {
       testLine = "y=acosh(cosh(x))";
       break;
     case 22: // stable issue?
-      myEps = 1.E-4;
-      y = atanh(tanh(x));
+      y = 20*atanh(tanh(x/20));
       testLine = "y=atanh(tanh(x))";
       break;
     case 23:
-      myEps = 1.E-10;
       y = fabs(x);
       testLine = "y=fabs(x)";
       break;

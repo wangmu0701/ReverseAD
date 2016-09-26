@@ -1,4 +1,4 @@
 *
 !.gitignore
-!manual.tex
-!manual.pdf
+#manual.tex
+#manual.pdf

@@ -98,12 +98,12 @@ void BaseReverseTensor<Base>::special_derivative_coeff() {
   for (size_t i=2; i <= REVERSEAD_MAX_TENSOR_ORDER; i++) {
     for (size_t j = REVERSEAD_MAX_TENSOR_ORDER; j >= 2; j--) {
       for (size_t k=0; k < REVERSEAD_MAX_TENSOR_ORDER; k++) {
-        c_atan[i][j][k] = c_atan[i-1][j][k+1] * (k+1);
-        c_asin[i][j][k] = c_asin[i-1][j][k+1] * (k+1);
+        c_atan[i][j][k] = c_atan[i-1][j][k+1] * (k + 1.0);
+        c_asin[i][j][k] = c_asin[i-1][j][k+1] * (k + 1.0);
       }
       for (size_t k=1; k <= REVERSEAD_MAX_TENSOR_ORDER; k++) {
-        c_atan[i][j][k] += c_atan[i-1][j-1][k-1] * 2 * (1-j);
-        c_asin[i][j][k] += c_asin[i-1][j-1][k-1] * -2 * (1.5 - j);
+        c_atan[i][j][k] += c_atan[i-1][j-1][k-1] * 2.0 * (1.0 - j);
+        c_asin[i][j][k] += c_asin[i-1][j-1][k-1] * -2.0 * (1.5 - j);
       }
     }
   }
