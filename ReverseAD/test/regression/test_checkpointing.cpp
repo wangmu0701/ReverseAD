@@ -115,6 +115,7 @@ int main() {
   //std::cout << "t[0] = " << tad[0].getVal() << std::endl;
   //std::cout << "t[1] = " << tad[1].getVal() << std::endl;
   //std::cout << "y = " << yad.getVal() << std::endl;
+  double expected_y = y;
   BaseReverseThird<double> third(trace);
   std::shared_ptr<DerivativeTensor<size_t, double>> r_tensor =
       third.compute(2, 1);
@@ -129,6 +130,10 @@ int main() {
       &(initial_step<adouble>), &(iteration_step<adouble>),
       &(final_step<adouble>), &(while_condition<adouble>));
   // Force iter_func to create multiple checkpoints
+  iter_func_cond.run(x, 2, &y, 1);
+  if (fabs(expected_y - y) > myEps) {
+    check_fail(); 
+  } 
   iter_func_cond.set_min_op_per_cp(1);
   std::shared_ptr<DerivativeTensor<size_t, double>> i_tensor =
       iter_func_cond.compute(x, 2, 3);
@@ -139,6 +144,10 @@ int main() {
       2, 2, 1, &dummy_func, &dummy_func,
       &(initial_step<adouble>), &(iteration_step<adouble>),
       &(final_step<adouble>), 3);
+  iter_func_fixed.run(x, 2, &y, 1);
+  if (fabs(expected_y - y) > myEps) {
+    check_fail(); 
+  } 
   iter_func_fixed.set_min_op_per_cp(1);
   std::shared_ptr<DerivativeTensor<size_t, double>> f_tensor = 
       iter_func_fixed.compute(x, 2, 3);

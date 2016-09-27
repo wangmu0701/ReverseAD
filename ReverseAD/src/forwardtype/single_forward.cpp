@@ -146,15 +146,20 @@ SingleForward tan(const SingleForward& rhs) {
 
 SingleForward asin(const SingleForward& rhs) {
   return SingleForward(std::asin(rhs._val),
-                       rhs._der / (1.0 - rhs._val * rhs._val));
+                       rhs._der / std::sqrt(1.0 - rhs._val * rhs._val));
 }
 SingleForward acos(const SingleForward& rhs) {
   return SingleForward(std::acos(rhs._val),
-                       -rhs._der / (1.0 - rhs._val * rhs._val));
+                       -rhs._der / std::sqrt(1.0 - rhs._val * rhs._val));
 }
 SingleForward atan(const SingleForward& rhs) {
   return SingleForward(std::atan(rhs._val),
                        rhs._der / (1.0 + rhs._val * rhs._val));
+}
+
+SingleForward erf(const SingleForward& rhs) {
+  return SingleForward(std::erf(rhs._val),
+                       rhs._der * (2.0/std::sqrt(PI))*std::exp(-rhs._val * rhs._val));
 }
 
 SingleForward fabs(const SingleForward& rhs) {

@@ -66,6 +66,7 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
       [REVERSEAD_MAX_GENERIC_ORDER + 1][REVERSEAD_MAX_GENERIC_ORDER + 1];
   double c_asin[REVERSEAD_MAX_GENERIC_ORDER + 1]
       [REVERSEAD_MAX_GENERIC_ORDER + 1][REVERSEAD_MAX_GENERIC_ORDER + 1];
+  double c_erf[REVERSEAD_MAX_GENERIC_ORDER+1][REVERSEAD_MAX_GENERIC_ORDER+1];
 
   void special_derivative_coeff();
 
@@ -260,6 +261,7 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
         for (size_t k = 0;k <= REVERSEAD_MAX_GENERIC_ORDER; k++) {
           c_atan[i][j][k] = c_asin[i][j][k] =  0.0;
         }
+        c_erf[i][j] = 0.0;
       }
     }
     c_atan[1][1][0] = c_asin[1][1][0] = 1.0;
@@ -273,6 +275,13 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
           c_atan[i][j][k] += c_atan[i-1][j-1][k-1] * 2 * (1.0 - j);
           c_asin[i][j][k] += c_asin[i-1][j-1][k-1] * -2 * (1.5 - j);
         }
+      }
+    }
+    c_erf[1][0] = 1.0;
+    for (size_t i = 2; i <= REVERSEAD_MAX_GENERIC_ORDER; i++) {
+      for (size_t j = 0; j < i; j++) {
+        c_erf[i][j] += (j+1.0) * c_erf[i-1][j+1];
+        c_erf[i][j+1] += -2.0 * c_erf[i-1][j];
       }
     }
   }
@@ -671,6 +680,23 @@ class BaseReverseGeneric : public BaseReverseMode<Base> {
         info.coval = 0.0;
         break;
       case pow_a_a:
+        break;
+      case erf_a:
+      {
+        Base sw = 0;
+        Base w = 0;
+        for (size_t i = 1; i <= order; i++) {
+          term.insert(info.x);
+          sw = 0.0;
+          w = 1.0;
+          for (size_t j = 0; j <= i; j++) {
+            sw += c_erf[i][j] * w * info.dx;
+            w = w * info.vx;
+          }
+          check_and_increase(term, sw, local_deriv);
+        }
+      }
+        break;
         break;
       default:
         // We should not see this as it passed tha check in BaseReverseMode

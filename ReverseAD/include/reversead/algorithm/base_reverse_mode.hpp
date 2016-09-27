@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "reversead/common/opcodes.hpp"
+#include "reversead/common/reversead_const.hpp"
 #include "reversead/trace/trivial_trace.hpp"
 #include "reversead/algorithm/algorithm_common.hpp"
 #include "reversead/algorithm/derivative_info.hpp"
@@ -46,6 +47,8 @@ class BaseReverseMode {
 
   void reset_trace(std::shared_ptr<TrivialTrace<Base>> _trace);
 
+  virtual void clear();
+
  protected:
   virtual void init_dep_deriv(locint dep) = 0;
 
@@ -56,8 +59,6 @@ class BaseReverseMode {
   void transcript_dep_value(std::shared_ptr<DerivativeTensor<size_t, Base>> tensor) const;
 
   virtual std::shared_ptr<DerivativeTensor<size_t, Base>> get_tensor() const = 0;
-
-  virtual void clear();
 
   std::shared_ptr<TrivialTrace<Base>> trace;
   std::map<locint, std::set<locint> > reverse_live;
@@ -376,23 +377,31 @@ void BaseReverseMode<Base>::reverse_local_computation(size_t ind_num, size_t dep
                 info.vx = trace->get_next_val_r();
                 coval = trace->get_next_coval_r();
                 info.coval = coval;
-            {
-                Base t = pow(coval, info.vx);
-                info.dx = log(coval) * t;
-                info.pxx = log(coval) * info.dx;
-                info.pxxx = log(coval) * info.pxx;
-            }
+                {
+                  Base t = pow(coval, info.vx);
+                  info.dx = log(coval) * t;
+                  info.pxx = log(coval) * info.dx;
+                  info.pxxx = log(coval) * info.pxx;
+                }
+                break;
+            case erf_a:
+                info.r = trace->get_next_loc_r();
+                info.x = trace->get_next_loc_r();
+                info.vx = trace->get_next_val_r();
+                info.dx = 2.0/sqrt(PI)*exp(-info.vx*info.vx);
+                info.pxx = info.dx * (-2.0 * info.vx);
+                info.pxxx = info.dx * (4.0 * info.vx * info.vx - 2);
                 break;
             case fabs_a:
                 info.r = trace->get_next_loc_r();
                 info.x = trace->get_next_loc_r();
                 info.vx = trace->get_next_val_r();
                 if (info.vx > 0) {
-                    info.dx = 1.0;
+                  info.dx = 1.0;
                 } else if (info.vx < 0) {
-                    info.dx = -1.0;
+                  info.dx = -1.0;
                 } else {
-                    // TODO(muwang) : warning message
+                  // TODO(muwang) : warning message
                 }
                 break;
             case rmpi_send:

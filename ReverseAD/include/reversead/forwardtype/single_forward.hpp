@@ -3,6 +3,8 @@
 
 #include <cmath>
 
+#include "reversead/common/reversead_const.hpp"
+
 class ostream;
 
 namespace ReverseAD {
@@ -53,7 +55,9 @@ class SingleForward {
   friend SingleForward asin(const SingleForward& rhs);
   friend SingleForward acos(const SingleForward& rhs);
   friend SingleForward atan(const SingleForward& rhs);
- 
+
+  friend SingleForward erf(const SingleForward& rhs); 
+
   friend SingleForward fabs(const SingleForward& rhs);
 };
 
@@ -101,6 +105,8 @@ SingleForward tan(const SingleForward& rhs);
 SingleForward asin(const SingleForward& rhs);
 SingleForward acos(const SingleForward& rhs);
 SingleForward atan(const SingleForward& rhs);
+
+SingleForward erf(const SingleForward& rhs);
 
 SingleForward fabs(const SingleForward& rhs);
 

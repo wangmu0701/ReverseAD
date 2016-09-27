@@ -179,6 +179,7 @@ std::shared_ptr<DerivativeTensor<size_t, double>> IterativeFuncBase::compute(
       reverse_mode->compute(_x_num, 0);
   delete reverse_mode;
   (*_tear_down)();
+  cp_trace.end_reverse();
   return tensor;
 }
 

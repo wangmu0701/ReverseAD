@@ -3,6 +3,8 @@
 
 #include <cmath>
 
+#include "reversead/common/reversead_const.hpp"
+
 namespace ReverseAD {
 
 template <size_t DIM>
@@ -215,6 +217,12 @@ class MultiForward {
     MultiForward ret(rhs);
     ret._val = std::atan(rhs._val);
     return ret.scale_der(1.0 / (1.0 + rhs._val * rhs._val));
+  }
+
+  friend MultiForward erf(const MultiForward& rhs) {
+    MultiForward ret(rhs);
+    ret._val = std::erf(rhs._val);
+    return ret.scale_der(2.0 / std::sqrt(PI) * std::sqrt(-rhs._val*rhs._val));
   }
 
   friend MultiForward fabs(const MultiForward& rhs) {

@@ -31,6 +31,7 @@ test_identity
 test_square
 test_quad
 test_highorder
+test_specialfunc
 test_param
 test_preacc
 test_checkpointing

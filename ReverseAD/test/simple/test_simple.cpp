@@ -20,14 +20,14 @@ int main() {
   for (int i=0; i<N; i++) {
     xad[i] <<= x[i];
   }
-  yad = atan(xad[0]);
+  yad = erf(xad[0]);
   yad >>= y;
   std::cout << "y = " << y << std::endl;
   std::shared_ptr<TrivialTrace<double>> trace =
       ReverseAD::trace_off<double>();
-
   size_t order = 6;
-  ReverseAD::BaseReverseTensor<double> reverse_tensor(trace, order);
+  ReverseAD::BaseReverseGeneric<double> reverse_tensor(trace, order);
+//  ReverseAD::BaseReverseThird<double> reverse_tensor(trace);
   std::shared_ptr<DerivativeTensor<size_t, double>> tensor =
       reverse_tensor.compute(N, 1);
   reverse_tensor.clear();

@@ -179,6 +179,12 @@ std::shared_ptr<TrivialTrace<T>> foo(T a, T b, T c) {
   af <<= a;
   bf <<= b;
   cf <<= c;
+  af = 20 * asin(sin(af/20));
+  bf = 20 * acos(cos(bf/20));
+  cf = 20 * atan(tan(cf/20));
+  af--;
+  bf++;
+  cf *= erf(--af) * sqrt(pow(++bf, 2.0));
   yf = af * bf * cf;
   yf >>= y;
   return ReverseAD::trace_off<T>();

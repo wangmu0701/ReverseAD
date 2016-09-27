@@ -50,6 +50,7 @@ class BaseReverseTensor : public BaseReverseMode<Base> {
       [REVERSEAD_MAX_TENSOR_ORDER + 1][REVERSEAD_MAX_TENSOR_ORDER + 1];
   double c_asin[REVERSEAD_MAX_TENSOR_ORDER + 1]
       [REVERSEAD_MAX_TENSOR_ORDER + 1][REVERSEAD_MAX_TENSOR_ORDER + 1];
+  double c_erf[REVERSEAD_MAX_TENSOR_ORDER+1][REVERSEAD_MAX_TENSOR_ORDER+1];
   void special_derivative_coeff();
 
   // make these private for some efficiency
@@ -92,6 +93,7 @@ void BaseReverseTensor<Base>::special_derivative_coeff() {
       for (size_t k=0;k<=REVERSEAD_MAX_TENSOR_ORDER; k++) {
         c_atan[i][j][k] = c_asin[i][j][k] =  0.0;
       }
+      c_erf[i][j] = 0.0;
     }
   }
   c_atan[1][1][0] = c_asin[1][1][0] = 1.0;
@@ -107,6 +109,13 @@ void BaseReverseTensor<Base>::special_derivative_coeff() {
       }
     }
   }
+  c_erf[1][0] = 1.0;
+  for (size_t i = 2; i <= REVERSEAD_MAX_TENSOR_ORDER; i++) {
+    for (size_t j = 0; j < i; j++) {
+      c_erf[i][j] += (j+1.0) * c_erf[i-1][j+1];
+      c_erf[i][j+1] += -2.0 * c_erf[i-1][j];
+    }
+  }  
 }
 
 template <typename Base>
@@ -338,6 +347,17 @@ void BaseReverseTensor<Base>::fill_in_ginfo(
         case pow_a_d:
           ginfo.pxxxxxx = (dinfo.coval - 3.0) * (dinfo.coval - 4.0) * (dinfo.coval - 5.0) * dinfo.pxxx / (dinfo.vx * dinfo.vx * dinfo.vx);
           break;
+        case erf_a:
+          {
+            Base sw = 0;
+            Base w = 1.0;
+            for (size_t i = 0; i < 6; i++) {
+              sw += c_erf[6][i] * w * dinfo.dx;
+              w = w * dinfo.vx;
+            }
+            ginfo.pxxxxxx = sw;
+          }
+          break;
       }
     case 5:
       switch (dinfo.opcode) {
@@ -407,6 +427,17 @@ void BaseReverseTensor<Base>::fill_in_ginfo(
         case pow_a_d:
           ginfo.pxxxxx = (dinfo.coval - 3.0) * (dinfo.coval - 4.0) * dinfo.pxxx / (dinfo.vx * dinfo.vx);
           break;
+        case erf_a:
+          {
+            Base sw = 0;
+            Base w = 1.0;
+            for (size_t i = 0; i < 5; i++) {
+              sw += c_erf[5][i] * w * dinfo.dx;
+              w = w * dinfo.vx;
+            }
+            ginfo.pxxxxx = sw;
+          }
+          break;
       }
     case 4:
       switch (dinfo.opcode) {
@@ -475,6 +506,17 @@ void BaseReverseTensor<Base>::fill_in_ginfo(
           break;
         case pow_a_d:
           ginfo.pxxxx = (dinfo.coval - 3.0) * dinfo.pxxx / dinfo.vx;
+          break;
+        case erf_a:
+          {
+            Base sw = 0;
+            Base w = 1.0;
+            for (size_t i = 0; i < 4; i++) {
+              sw += c_erf[4][i] * w * dinfo.dx;
+              w = w * dinfo.vx;
+            }
+            ginfo.pxxxx = sw;
+          }
           break;
       }
     default:

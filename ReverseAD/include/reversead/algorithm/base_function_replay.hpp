@@ -177,6 +177,7 @@ template <typename OldBase, typename NewBase>
   using std::log;
   using std::exp;
   using std::fabs; 
+  using std::erf;
 
   std::map<locint, NewBase> val_map;
   trace->init_forward();
@@ -445,6 +446,14 @@ template <typename OldBase, typename NewBase>
         res = trace->get_next_loc_f();
         val1 = val_map[arg1];
         val_map[res] = pow(coval, val1);
+        val_tape->put(val1);
+        break;
+      case erf_a:
+        arg1 = trace->get_next_loc_f();
+        res = trace->get_next_loc_f();
+        trace->get_next_val_f();
+        val1 = val_map[arg1];
+        val_map[res] = erf(val1);
         val_tape->put(val1);
         break;
       case fabs_a:

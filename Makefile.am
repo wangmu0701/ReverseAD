@@ -7,6 +7,7 @@ TESTS= ReverseAD/test/regression/test_identity\
        ReverseAD/test/regression/test_highorder\
        ReverseAD/test/regression/test_param\
        ReverseAD/test/regression/test_preacc\
+       ReverseAD/test/regression/test_specialfunc\
        ReverseAD/test/regression/test_checkpointing\
        ReverseAD/test/regression/test_single_forward\
        ReverseAD/test/regression/test_multi_forward
