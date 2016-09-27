@@ -88,6 +88,21 @@ int run_function() {
       y *= asin(sin(x/20))*acos(cos(x/20)); //y*=x^2/400  -> x^7
       testLine = "y=sqrt(x*x)*x;y*=(x+2)*(x-2)+4;y/=20/atan(tan(x/20));y*=asin(sin(x/20))*acos(cos(x/20))";
       break;
+    case 4:
+      {
+        adouble tx = x;
+        adouble ix = 1.0 / x; 
+        y = (tx / ix); // x^2
+        y *= (tx / ix); // x^4
+        y *= (tx / ix); // x^6
+        y *= (tx / ix); // x^8
+        y *= (tx / ix); // x^10
+        y *= (tx / ix); // x^12
+        y *= ix * ix * ix; // x^9
+        y /= tx * tx; // x^7
+      }
+      testLine = "tx=x;ix=1/x;y=(tx/ix)^6;y*=ix^3;y/=tx;";
+      break;
     default:
       done = true;
       break;
