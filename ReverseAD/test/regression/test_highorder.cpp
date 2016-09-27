@@ -92,14 +92,15 @@ int run_function() {
       {
         adouble tx = x;
         adouble ix = 1.0 / x; 
+        adouble x2 = tx / ix;
         y = (tx / ix); // x^2
-        y *= (tx / ix); // x^4
+        y *= x2; // x^4
         y *= (tx / ix); // x^6
-        y *= (tx / ix); // x^8
+        y *= x2; // x^8
         y *= (tx / ix); // x^10
-        y *= (tx / ix); // x^12
-        y *= ix * ix * ix; // x^9
-        y /= tx * tx; // x^7
+        y *= x2; // x^12
+        y *= ix * ix; // x^10
+        y /= tx * x2; // x^7
       }
       testLine = "tx=x;ix=1/x;y=(tx/ix)^6;y*=ix^3;y/=tx;";
       break;
