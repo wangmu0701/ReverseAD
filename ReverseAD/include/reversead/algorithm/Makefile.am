@@ -19,4 +19,5 @@ libalgorithminclude_HEADERS = base_function_replay.hpp\
                               tensor_index.hpp\
                               tensor_derivative_info.hpp\
                               tensor_deriv.hpp\
-                              tensor.ipp
+                              tensor.ipp\
+                              tensor2.ipp
