@@ -10,7 +10,8 @@
 
 namespace ReverseAD {
   
-#include "tensor.ipp"
+//#include "tensor.ipp"
+#include "tensor2.ipp"
   
 //#include "generator/generator.ipp"
 static const size_t kOrderShift = 1000000;
