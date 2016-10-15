@@ -1,0 +1,39 @@
+REVERSEADPATH=$(HOME)/packages/reversead
+CXX=g++
+CXXFLAGS=-O0 -g --std=c++11
+
+
+all : test_identity test_square test_highorder\
+      test_param test_preacc test_specialfunc\
+      test_checkpointing\
+      test_single_forward test_multi_forward
+
+test_identity : test_identity.o test_main.o
+	$(CXX) $(CXXFLAGS) -o $@ $^ -I$(REVERSEADPATH)/include -L$(REVERSEADPATH)/lib -lreversead
+
+test_square : test_square.o test_main.o
+	$(CXX) $(CXXFLAGS) -o $@ $^ -I$(REVERSEADPATH)/include -L$(REVERSEADPATH)/lib -lreversead
+
+test_highorder : test_highorder.o test_main.o
+	$(CXX) $(CXXFLAGS) -o $@ $^ -I$(REVERSEADPATH)/include -L$(REVERSEADPATH)/lib -lreversead
+
+test_param : test_param.o test_main.o
+	$(CXX) $(CXXFLAGS) -o $@ $^ -I$(REVERSEADPATH)/include -L$(REVERSEADPATH)/lib -lreversead
+
+test_preacc : test_preacc.o test_main.o
+	$(CXX) $(CXXFLAGS) -o $@ $^ -I$(REVERSEADPATH)/include -L$(REVERSEADPATH)/lib -lreversead
+
+test_specialfunc : test_specialfunc.o test_main.o
+	$(CXX) $(CXXFLAGS) -o $@ $^ -I$(REVERSEADPATH)/include -L$(REVERSEADPATH)/lib -lreversead
+
+test_checkpointing : test_checkpointing.o
+	$(CXX) $(CXXFLAGS) -o $@ $^ -I$(REVERSEADPATH)/include -L$(REVERSEADPATH)/lib -lreversead
+
+test_single_forward : test_single_forward.o test_util.o
+	$(CXX) $(CXXFLAGS) -o $@ $^ -I$(REVERSEADPATH)/include -L$(REVERSEADPATH)/lib -lreversead
+
+test_multi_forward : test_multi_forward.o test_util.o
+	$(CXX) $(CXXFLAGS) -o $@ $^ -I$(REVERSEADPATH)/include -L$(REVERSEADPATH)/lib -lreversead
+
+%.o : %.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $^ -I$(REVERSEADPATH)/include

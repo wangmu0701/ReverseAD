@@ -1,0 +1,6 @@
+include ./../Makefile.example
+
+all: forward_over_reverse
+
+forward_over_reverse : forward_over_reverse.cpp
+	$(CXX) $(CXXFLAGS) -o $@ $^ -I$(REVERSEADPATH)/include -L$(REVERSEADPATH)/lib -lreversead 

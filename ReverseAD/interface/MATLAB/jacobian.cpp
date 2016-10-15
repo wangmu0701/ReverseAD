@@ -68,11 +68,11 @@ void jacobian(double* x, mwSize x_num, double *y, mwSize y_num, double* J)
     }
     std::shared_ptr<TrivialTrace<double>> trace = trace_off<double>();
     BaseReverseAdjoint<double> adjoint(trace);
-    std::shared_ptr<DerivativeTensor<int, double>> tensor =
-      adjoint.compute(x_num, y_num).get_tensor();
+    std::shared_ptr<DerivativeTensor<size_t, double>> tensor =
+      adjoint.compute(x_num, y_num);
     adjoint.clear();
-    int size;
-    int** tind;
+    size_t size;
+    size_t** tind;
     double* values;
     for (i = 0; i < y_num; i++) {
       tensor->get_internal_coordinate_list(i, 1, &size, &tind, &values);

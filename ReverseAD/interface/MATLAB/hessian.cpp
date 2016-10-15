@@ -61,11 +61,11 @@ void hessian(double* x, mwSize x_num, double *y, double* H)
     yad >>= y[0];
     std::shared_ptr<TrivialTrace<double>> trace = trace_off<double>();
     BaseReverseHessian<double> hessian(trace);
-    std::shared_ptr<DerivativeTensor<int, double>> tensor =
-      hessian.compute(x_num, 1).get_tensor();
+    std::shared_ptr<DerivativeTensor<size_t, double>> tensor =
+      hessian.compute(x_num, 1);
     hessian.clear();
-    int size;
-    int** tind;
+    size_t size;
+    size_t** tind;
     double* values;
     tensor->get_internal_coordinate_list(0, 2, &size, &tind, &values);
     for (i = 0; i < size; i++) {

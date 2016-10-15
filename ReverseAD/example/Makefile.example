@@ -1,0 +1,3 @@
+REVERSEADPATH=$(HOME)/packages/reversead
+CXX=g++
+CXXFLAGS=-O3 --std=c++11 

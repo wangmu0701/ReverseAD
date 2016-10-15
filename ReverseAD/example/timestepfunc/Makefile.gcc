@@ -1,0 +1,6 @@
+include ./../Makefile.example
+
+all: timestep_func
+
+timestep_func : timestep_func.cpp
+	$(CXX) $(CXXFLAGS) -o $@ $^ -I$(REVERSEADPATH)/include -L$(REVERSEADPATH)/lib -lreversead 

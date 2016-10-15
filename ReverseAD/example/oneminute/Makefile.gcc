@@ -1,0 +1,6 @@
+include ./../Makefile.example
+
+all: oneminute
+
+oneminute : one_minute.cpp
+	$(CXX) $(CXXFLAGS) -o $@ $^ -I$(REVERSEADPATH)/include -L$(REVERSEADPATH)/lib -lreversead 

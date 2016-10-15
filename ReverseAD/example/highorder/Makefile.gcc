@@ -1,0 +1,6 @@
+include ./../Makefile.example
+
+all: high_order
+
+high_order : high_order.cpp
+	$(CXX) $(CXXFLAGS) -o $@ $^ -I$(REVERSEADPATH)/include -L$(REVERSEADPATH)/lib -lreversead 
